@@ -12,6 +12,8 @@ import { CreateUserDto } from './dto/create-user.dto';
 import { UpdateUserDto } from './dto/update-user.dto';
 import { Auth } from 'src/iam/authentication/decorators/auth.decorator';
 import { AuthType } from 'src/iam/authentication/enum/auth-type.enum';
+import { ActiveUser } from 'src/iam/decorators/active-user.decorator';
+import { ActiveUserData } from 'src/iam/interface/active-user-data.interface';
 
 @Controller('users')
 export class UsersController {
@@ -24,7 +26,7 @@ export class UsersController {
 
   @Auth(AuthType.Bearer)
   @Get()
-  findAll() {
+  findAll(@ActiveUser() user: ActiveUserData) {
     return this.usersService.findAll();
   }
 
