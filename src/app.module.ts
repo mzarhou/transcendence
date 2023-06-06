@@ -4,7 +4,10 @@ import { TypeOrmModule } from '@nestjs/typeorm';
 import { AppController } from './app.controller';
 import { AppService } from './app.service';
 import { UsersModule } from './users/users.module';
+import { IamModule } from './iam/iam.module';
 import z from 'zod';
+import { APP_PIPE } from '@nestjs/core';
+import { ZodValidationPipe } from 'nestjs-zod';
 
 const dbConfigSchema = z.object({
   DB_TYPE: z.enum(['mysql', 'postgres']),
@@ -38,8 +41,15 @@ const dbConfigSchema = z.object({
         };
       },
     }),
+    IamModule,
   ],
   controllers: [AppController],
-  providers: [AppService],
+  providers: [
+    AppService,
+    {
+      provide: APP_PIPE,
+      useClass: ZodValidationPipe,
+    },
+  ],
 })
 export class AppModule {}
