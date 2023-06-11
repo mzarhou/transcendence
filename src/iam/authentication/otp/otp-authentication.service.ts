@@ -64,6 +64,27 @@ export class OtpAuthenticationService {
     );
   }
 
+  async disableTfaForUser(activeUser: ActiveUserData, code: string) {
+    const { id, tfaSecret, isTfaEnabled } =
+      await this.userRepository.findOneOrFail({
+        where: { id: activeUser.sub },
+      });
+    if (!isTfaEnabled) {
+      throw new UnauthorizedException(undefined, `2FA isn't enabled`);
+    }
+    if (!this.verifyCode(code, tfaSecret)) {
+      throw new UnauthorizedException(`Invalid code: ${code}`);
+    }
+
+    await this.userRepository.update(
+      { id },
+      {
+        tfaSecret: '',
+        isTfaEnabled: false,
+      },
+    );
+  }
+
   async provide2faCode(activeUser: ActiveUserData, code: string) {
     const user = await this.userRepository.findOneBy({ id: activeUser.sub });
     if (!user) {

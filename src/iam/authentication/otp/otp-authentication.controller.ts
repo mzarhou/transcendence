@@ -43,6 +43,18 @@ export class OtpAuthenticationController {
     );
   }
 
+  @HttpCode(HttpStatus.OK)
+  @Post('disable')
+  async disable2FA(
+    @ActiveUser() activeUser: ActiveUserData,
+    @Body() disable2faDto: Enable2faDto,
+  ) {
+    return this.otpAuthService.disableTfaForUser(
+      activeUser,
+      disable2faDto.tfaCode,
+    );
+  }
+
   @Auth(AuthType.BearerWithou2fa)
   @HttpCode(HttpStatus.OK)
   @Post('code')
