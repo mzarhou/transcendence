@@ -16,9 +16,11 @@ import { OtpAuthenticationService } from './authentication/otp/otp-authenticatio
 import { AccessTokenWithout2faGuard } from './authentication/guards/access-token-without-2fa.guard';
 import { OtpAuthenticationController } from './authentication/otp/otp-authentication.controller';
 import { OtpSecretsStorage } from './authentication/otp/otp-secrets.storage';
+import { RedisModule } from 'src/redis/redis.module';
 
 @Module({
   imports: [
+    RedisModule,
     TypeOrmModule.forFeature([User]),
     ConfigModule.forFeature(jwtConfig),
     JwtModule.registerAsync(jwtConfig.asProvider()),

@@ -1,26 +1,9 @@
-import {
-  Injectable,
-  OnApplicationBootstrap,
-  OnApplicationShutdown,
-} from '@nestjs/common';
-import Redis from 'ioredis';
+import { Injectable } from '@nestjs/common';
+import { RedisClient } from 'src/redis/redis.module';
 
 @Injectable()
-export class OtpSecretsStorage
-  implements OnApplicationBootstrap, OnApplicationShutdown
-{
-  private redisClient!: Redis;
-
-  onApplicationBootstrap() {
-    this.redisClient = new Redis({
-      host: 'localhost',
-      port: 6379,
-    });
-  }
-
-  onApplicationShutdown(signal?: string | undefined) {
-    this.redisClient.quit();
-  }
+export class OtpSecretsStorage {
+  constructor(private readonly redisClient: RedisClient) {}
 
   async insert(userId: number, secret: string) {
     await this.redisClient.set(this.getKey(userId), secret);

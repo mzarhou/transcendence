@@ -8,6 +8,7 @@ import { IamModule } from './iam/iam.module';
 import z from 'zod';
 import { APP_PIPE } from '@nestjs/core';
 import { ZodValidationPipe } from 'nestjs-zod';
+import { RedisModule } from './redis/redis.module';
 
 const dbConfigSchema = z.object({
   DB_TYPE: z.enum(['mysql', 'postgres']),
@@ -42,6 +43,7 @@ const dbConfigSchema = z.object({
       },
     }),
     IamModule,
+    RedisModule,
   ],
   controllers: [AppController],
   providers: [

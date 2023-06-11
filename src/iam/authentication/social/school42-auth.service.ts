@@ -58,7 +58,6 @@ export class School42AuthService {
         return this.authService.generateTokens(user);
       }
     } catch (error) {
-      console.log(error);
       const pgUniqueViolationErrorCode = '23505';
       if ((error as any)?.code === pgUniqueViolationErrorCode) {
         throw new ConflictException();

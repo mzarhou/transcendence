@@ -1,28 +1,11 @@
-import {
-  Injectable,
-  OnApplicationBootstrap,
-  OnApplicationShutdown,
-} from '@nestjs/common';
-import Redis from 'ioredis';
+import { Injectable } from '@nestjs/common';
+import { RedisClient } from 'src/redis/redis.module';
 
 export class InvalidateRefreshTokenError extends Error {}
 
 @Injectable()
-export class RefreshTokenIdsStorage
-  implements OnApplicationBootstrap, OnApplicationShutdown
-{
-  private redisClient!: Redis;
-
-  onApplicationBootstrap() {
-    this.redisClient = new Redis({
-      host: 'localhost',
-      port: 6379,
-    });
-  }
-
-  onApplicationShutdown(signal?: string | undefined) {
-    this.redisClient.quit();
-  }
+export class RefreshTokenIdsStorage {
+  constructor(private readonly redisClient: RedisClient) {}
 
   async insert(userId: number, tokenId: string) {
     await this.redisClient.set(this.getKey(userId), tokenId);
