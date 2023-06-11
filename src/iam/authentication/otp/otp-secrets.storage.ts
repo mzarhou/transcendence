@@ -6,7 +6,7 @@ import {
 import Redis from 'ioredis';
 
 @Injectable()
-export class TfaSecretsStorage
+export class OtpSecretsStorage
   implements OnApplicationBootstrap, OnApplicationShutdown
 {
   private redisClient!: Redis;

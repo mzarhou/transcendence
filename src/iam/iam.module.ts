@@ -12,9 +12,10 @@ import { AuthenticationGuard } from './authentication/guards/authentication.guar
 import { AccessTokenGuard } from './authentication/guards/access-token.guard';
 import { AuthenticationController } from './authentication/authentication.controller';
 import { RefreshTokenIdsStorage } from './authentication/refresh-token-ids.storage';
-import { OtpAuthenticationService } from './authentication/tfa/otp-authentication.service';
-import { TfaSecretsStorage } from './authentication/tfa/tfa-secrets.storage';
+import { OtpAuthenticationService } from './authentication/otp/otp-authentication.service';
 import { AccessTokenWithout2faGuard } from './authentication/guards/access-token-without-2fa.guard';
+import { OtpAuthenticationController } from './authentication/otp/otp-authentication.controller';
+import { OtpSecretsStorage } from './authentication/otp/otp-secrets.storage';
 
 @Module({
   imports: [
@@ -33,8 +34,12 @@ import { AccessTokenWithout2faGuard } from './authentication/guards/access-token
     AccessTokenWithout2faGuard,
     RefreshTokenIdsStorage,
     OtpAuthenticationService,
-    TfaSecretsStorage,
+    OtpSecretsStorage,
   ],
-  controllers: [School42AuthController, AuthenticationController],
+  controllers: [
+    School42AuthController,
+    AuthenticationController,
+    OtpAuthenticationController,
+  ],
 })
 export class IamModule {}

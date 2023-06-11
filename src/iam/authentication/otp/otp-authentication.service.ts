@@ -4,7 +4,7 @@ import { InjectRepository } from '@nestjs/typeorm';
 import { User } from 'src/users/entities/user.entity';
 import { Repository } from 'typeorm';
 import { authenticator } from 'otplib';
-import { TfaSecretsStorage } from './tfa-secrets.storage';
+import { OtpSecretsStorage } from './otp-secrets.storage';
 import { ActiveUserData } from 'src/iam/interface/active-user-data.interface';
 import { AuthenticationService } from '../authentication.service';
 
@@ -14,16 +14,19 @@ export class OtpAuthenticationService {
     private readonly configService: ConfigService,
     @InjectRepository(User)
     private readonly userRepository: Repository<User>,
-    private readonly tfaSecretsStorage: TfaSecretsStorage,
+    private readonly otpSecretsStorage: OtpSecretsStorage,
     private readonly authService: AuthenticationService,
   ) {}
 
   async generateSecret(activeUser: ActiveUserData) {
+    if (await this.is2faEnabled(activeUser.sub)) {
+      throw new UnauthorizedException(undefined, '2FA already enabled');
+    }
     // TODO: encrypt secret
     const secret = authenticator.generateSecret();
     const appName = this.configService.getOrThrow('TFA_APP_NAME');
     const uri = authenticator.keyuri(activeUser.email, appName, secret);
-    await this.tfaSecretsStorage.insert(activeUser.sub, secret);
+    await this.otpSecretsStorage.insert(activeUser.sub, secret);
     return { uri, secret };
   }
 
@@ -35,10 +38,7 @@ export class OtpAuthenticationService {
   }
 
   async enableTfaForUser(activeUser: ActiveUserData, code: string) {
-    if (activeUser.isTfaEnabled) {
-      throw new UnauthorizedException(undefined, '2FA already enabled');
-    }
-    const secret = await this.tfaSecretsStorage.get(activeUser.sub);
+    const secret = await this.otpSecretsStorage.get(activeUser.sub);
     if (!secret) {
       throw new UnauthorizedException('You must generate qrcode first');
     }
@@ -46,10 +46,13 @@ export class OtpAuthenticationService {
       throw new UnauthorizedException(`Invalid code: ${code}`);
     }
 
-    const { id } = await this.userRepository.findOneOrFail({
+    const { id, isTfaEnabled } = await this.userRepository.findOneOrFail({
       where: { email: activeUser.email },
-      select: { id: true },
+      select: { id: true, isTfaEnabled: true },
     });
+    if (isTfaEnabled) {
+      throw new UnauthorizedException(undefined, '2FA already enabled');
+    }
 
     // TODO: encrypt the secret
     await this.userRepository.update(
@@ -72,5 +75,12 @@ export class OtpAuthenticationService {
       throw new UnauthorizedException('Invalid Code');
     }
     return this.authService.generateTokens(user, true);
+  }
+
+  private async is2faEnabled(userId: number) {
+    const user = await this.userRepository.findOneByOrFail({
+      id: userId,
+    });
+    return user.isTfaEnabled;
   }
 }
