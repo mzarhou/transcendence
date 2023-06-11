@@ -21,11 +21,11 @@ export class AccessTokenWithout2faGuard implements CanActivate {
   ) {}
 
   async canActivate(context: ExecutionContext): Promise<boolean> {
-    await this.getPayload(context);
+    await this.tryGetPayload(context);
     return true;
   }
 
-  async getPayload(context: ExecutionContext) {
+  async tryGetPayload(context: ExecutionContext) {
     const request: Request = context.switchToHttp().getRequest();
     const token = this.extractTokenFromHeaderOrCookie(request);
     if (!token) {
