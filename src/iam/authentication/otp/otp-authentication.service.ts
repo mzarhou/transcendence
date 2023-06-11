@@ -54,6 +54,8 @@ export class OtpAuthenticationService {
       throw new UnauthorizedException(undefined, '2FA already enabled');
     }
 
+    await this.otpSecretsStorage.invalidate(activeUser.sub);
+
     // TODO: encrypt the secret
     await this.userRepository.update(
       { id },
