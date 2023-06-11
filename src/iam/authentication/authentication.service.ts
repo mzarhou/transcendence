@@ -24,13 +24,18 @@ export class AuthenticationService {
     private readonly userRepository: Repository<User>,
   ) {}
 
-  async generateTokens(user: User) {
+  async generateTokens(user: User, isTfaCodeProvided?: boolean) {
     const refreshTokenId = randomUUID();
 
     const [accessToken, refreshToken] = await Promise.all([
       this.signToken<Omit<ActiveUserData, 'sub'>>(
         user,
         this.jwtConfiguration.accessTokenTtl,
+        {
+          email: user.email,
+          isTfaEnabled: user.isTfaEnabled,
+          isTfaCodeProvided: isTfaCodeProvided ?? false,
+        },
       ),
       this.signToken<Omit<RefreshTokenData, 'sub'>>(
         user,

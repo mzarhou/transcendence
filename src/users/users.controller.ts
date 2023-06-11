@@ -23,8 +23,11 @@ export class UsersController {
   }
 
   @Get('me')
-  me(@ActiveUser('sub') userId: number) {
-    return this.usersService.findOne(userId);
+  async me(@ActiveUser('sub') userId: number) {
+    const { tfaSecret, school42Id, ...rest } = await this.usersService.findOne(
+      userId,
+    );
+    return rest;
   }
 
   @Get()

@@ -12,6 +12,9 @@ import { AuthenticationGuard } from './authentication/guards/authentication.guar
 import { AccessTokenGuard } from './authentication/guards/access-token.guard';
 import { AuthenticationController } from './authentication/authentication.controller';
 import { RefreshTokenIdsStorage } from './authentication/refresh-token-ids.storage';
+import { OtpAuthenticationService } from './authentication/tfa/otp-authentication.service';
+import { TfaSecretsStorage } from './authentication/tfa/tfa-secrets.storage';
+import { AccessTokenWithout2faGuard } from './authentication/guards/access-token-without-2fa.guard';
 
 @Module({
   imports: [
@@ -27,7 +30,10 @@ import { RefreshTokenIdsStorage } from './authentication/refresh-token-ids.stora
       useClass: AuthenticationGuard,
     },
     AccessTokenGuard,
+    AccessTokenWithout2faGuard,
     RefreshTokenIdsStorage,
+    OtpAuthenticationService,
+    TfaSecretsStorage,
   ],
   controllers: [School42AuthController, AuthenticationController],
 })

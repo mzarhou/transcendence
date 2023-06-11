@@ -1,6 +1,6 @@
 import { Body, Controller, HttpCode, HttpStatus, Post } from '@nestjs/common';
 import { Auth } from '../decorators/auth.decorator';
-import { School42TokenDto } from '../dto/school-42-token.dto';
+import { School42AuthDto } from '../dto/school-42-token.dto';
 import { AuthType } from '../enum/auth-type.enum';
 import { School42AuthService } from './school42-auth.service';
 
@@ -11,7 +11,7 @@ export class School42AuthController {
 
   @HttpCode(HttpStatus.OK)
   @Post()
-  authenticate(@Body() tokenDto: School42TokenDto) {
-    return this.school42AuthService.authenticate(tokenDto.accessToken);
+  authenticate(@Body() school42AuthDto: School42AuthDto) {
+    return this.school42AuthService.authenticate(school42AuthDto);
   }
 }

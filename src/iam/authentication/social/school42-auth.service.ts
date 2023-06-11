@@ -9,6 +9,8 @@ import { User } from '../../../users/entities/user.entity';
 import { Repository } from 'typeorm';
 import z from 'zod';
 import { AuthenticationService } from '../authentication.service';
+import { School42AuthDto } from '../dto/school-42-token.dto';
+import { OtpAuthenticationService } from '../tfa/otp-authentication.service';
 
 export const userSchema = z.object({
   id: z.number(),
@@ -33,9 +35,10 @@ export class School42AuthService {
     @InjectRepository(User)
     private readonly userRepository: Repository<User>,
     private readonly authService: AuthenticationService,
+    private readonly otpAuthService: OtpAuthenticationService,
   ) {}
 
-  async authenticate(accessToken: string) {
+  async authenticate({ accessToken }: School42AuthDto) {
     try {
       const school42User = await this.get42User(accessToken);
 

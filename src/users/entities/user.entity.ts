@@ -14,6 +14,12 @@ export class User {
   @Column()
   email!: string;
 
+  @Column({ default: false })
+  isTfaEnabled!: boolean;
+
+  @Column({ nullable: true })
+  tfaSecret!: string;
+
   @Column()
   school42Id!: number;
 }

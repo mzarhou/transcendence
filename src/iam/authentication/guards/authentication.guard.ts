@@ -7,10 +7,17 @@ import {
 import { Reflector } from '@nestjs/core';
 import { AUTH_TYPE_KEY } from '../decorators/auth.decorator';
 import { AuthType } from '../enum/auth-type.enum';
+import { AccessTokenWithout2faGuard } from './access-token-without-2fa.guard';
 import { AccessTokenGuard } from './access-token.guard';
 
 @Injectable()
 export class AuthenticationGuard implements CanActivate {
+  constructor(
+    private readonly reflector: Reflector,
+    private readonly accessTokenGuard: AccessTokenGuard,
+    private readonly accessTokenWithout2faGuard: AccessTokenWithout2faGuard,
+  ) {}
+
   private static readonly defaultAuthType = AuthType.Bearer;
 
   private readonly authTypeGuardMap: Record<
@@ -19,12 +26,8 @@ export class AuthenticationGuard implements CanActivate {
   > = {
     [AuthType.None]: { canActivate: () => true },
     [AuthType.Bearer]: this.accessTokenGuard,
+    [AuthType.BearerWithou2fa]: this.accessTokenWithout2faGuard,
   };
-
-  constructor(
-    private readonly reflector: Reflector,
-    private readonly accessTokenGuard: AccessTokenGuard,
-  ) {}
 
   async canActivate(context: ExecutionContext): Promise<boolean> {
     const authTypes = this.reflector.getAllAndOverride<AuthType[]>(
