@@ -15,6 +15,13 @@ import {
   RefreshTokenKey,
 } from './refresh-token-ids.storage';
 
+type GenerateTokensProps = {
+  user: User;
+  userAgent: string;
+  deviceId?: string;
+  isTfaCodeProvided?: boolean;
+};
+
 @Injectable()
 export class AuthenticationService {
   constructor(
@@ -31,12 +38,7 @@ export class AuthenticationService {
     userAgent,
     deviceId,
     isTfaCodeProvided,
-  }: {
-    user: User;
-    userAgent: string;
-    deviceId?: string;
-    isTfaCodeProvided?: boolean;
-  }) {
+  }: GenerateTokensProps) {
     const refreshTokenId = randomUUID();
 
     const [accessToken, refreshToken] = await Promise.all([
@@ -54,6 +56,7 @@ export class AuthenticationService {
         this.jwtConfiguration.refreshTokenTtl,
         {
           refreshTokenId,
+          isTfaCodeProvided: isTfaCodeProvided ?? false,
         },
       ),
     ]);
@@ -87,7 +90,7 @@ export class AuthenticationService {
 
   async refreshTokens(refreshTokenDto: RefreshTokenDto, userAgent: string) {
     try {
-      const { sub, refreshTokenId } =
+      const { sub, refreshTokenId, isTfaCodeProvided } =
         await this.jwtService.verifyAsync<RefreshTokenData>(
           refreshTokenDto.refreshToken,
           this.jwtConfiguration,
@@ -113,7 +116,12 @@ export class AuthenticationService {
       }
 
       await this.refreshTokenIdsStorage.invalidate(key);
-      return this.generateTokens({ user, userAgent });
+      return this.generateTokens({
+        user,
+        userAgent,
+        deviceId: refreshTokenDto.deviceId,
+        isTfaCodeProvided,
+      });
     } catch (error) {
       if (error instanceof InvalidateRefreshTokenError) {
         throw new UnauthorizedException('your refresh token might be stolen');
