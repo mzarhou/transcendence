@@ -7,10 +7,12 @@ import { Repository } from 'typeorm';
 import { User } from '../../users/entities/user.entity';
 import jwtConfig from '../config/jwt.config';
 import { ActiveUserData } from '../interface/active-user-data.interface';
+import { RefreshTokenDto } from './dto/refresh-token-dto';
 import { RefreshTokenData } from './interface/refresh-token-data.interface';
 import {
   InvalidateRefreshTokenError,
   RefreshTokenIdsStorage,
+  RefreshTokenKey,
 } from './refresh-token-ids.storage';
 
 @Injectable()
@@ -24,7 +26,17 @@ export class AuthenticationService {
     private readonly userRepository: Repository<User>,
   ) {}
 
-  async generateTokens(user: User, isTfaCodeProvided?: boolean) {
+  async generateTokens({
+    user,
+    userAgent,
+    deviceId,
+    isTfaCodeProvided,
+  }: {
+    user: User;
+    userAgent: string;
+    deviceId?: string;
+    isTfaCodeProvided?: boolean;
+  }) {
     const refreshTokenId = randomUUID();
 
     const [accessToken, refreshToken] = await Promise.all([
@@ -45,8 +57,17 @@ export class AuthenticationService {
         },
       ),
     ]);
-    await this.refreshTokenIdsStorage.insert(user.id, refreshTokenId);
-    return { accessToken, refreshToken };
+
+    deviceId ??= randomUUID();
+    await this.refreshTokenIdsStorage.insert(
+      {
+        userId: user.id,
+        userAgent,
+        deviceId,
+      },
+      refreshTokenId,
+    );
+    return { accessToken, refreshToken, deviceId };
   }
 
   private async signToken<T>(user: User, expiresIn: number, payload?: T) {
@@ -64,11 +85,11 @@ export class AuthenticationService {
     );
   }
 
-  async refreshTokens(refreshToken: string) {
+  async refreshTokens(refreshTokenDto: RefreshTokenDto, userAgent: string) {
     try {
       const { sub, refreshTokenId } =
         await this.jwtService.verifyAsync<RefreshTokenData>(
-          refreshToken,
+          refreshTokenDto.refreshToken,
           this.jwtConfiguration,
         );
 
@@ -77,16 +98,22 @@ export class AuthenticationService {
         throw new UnauthorizedException();
       }
 
+      const key: RefreshTokenKey = {
+        userId: user.id,
+        userAgent,
+        deviceId: refreshTokenDto.deviceId,
+      };
+
       const isValid = await this.refreshTokenIdsStorage.validate(
-        user.id,
+        key,
         refreshTokenId,
       );
       if (!isValid) {
         throw new UnauthorizedException();
       }
 
-      await this.refreshTokenIdsStorage.invalidate(user.id);
-      return this.generateTokens(user);
+      await this.refreshTokenIdsStorage.invalidate(key);
+      return this.generateTokens({ user, userAgent });
     } catch (error) {
       if (error instanceof InvalidateRefreshTokenError) {
         throw new UnauthorizedException('your refresh token might be stolen');

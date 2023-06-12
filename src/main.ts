@@ -8,6 +8,7 @@ async function bootstrap() {
     // Todo: use env FRONTEND_URL
     origin: 'http://localhost:3001',
     credentials: true,
+    exposedHeaders: ['WWW-Authenticate'],
   });
   app.use(cookieParser());
   await app.listen(3000);

@@ -38,7 +38,7 @@ export class School42AuthService {
     private readonly otpAuthService: OtpAuthenticationService,
   ) {}
 
-  async authenticate({ accessToken }: School42AuthDto) {
+  async authenticate({ accessToken }: School42AuthDto, userAgent: string) {
     try {
       const school42User = await this.get42User(accessToken);
 
@@ -47,7 +47,7 @@ export class School42AuthService {
       });
 
       if (user) {
-        return this.authService.generateTokens(user);
+        return this.authService.generateTokens({ user, userAgent });
       } else {
         const user = new User();
         user.name = school42User.login;
@@ -55,7 +55,7 @@ export class School42AuthService {
         user.email = school42User.email;
         user.school42Id = school42User.id;
         await this.userRepository.save(user);
-        return this.authService.generateTokens(user);
+        return this.authService.generateTokens({ user, userAgent });
       }
     } catch (error) {
       const pgUniqueViolationErrorCode = '23505';

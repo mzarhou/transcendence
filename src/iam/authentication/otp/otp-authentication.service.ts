@@ -7,6 +7,8 @@ import { authenticator } from 'otplib';
 import { OtpSecretsStorage } from './otp-secrets.storage';
 import { ActiveUserData } from 'src/iam/interface/active-user-data.interface';
 import { AuthenticationService } from '../authentication.service';
+import { Provide2faCodeDto } from '../dto/provide-2fa-code.dto';
+import { RefreshTokenIdsStorage } from '../refresh-token-ids.storage';
 
 @Injectable()
 export class OtpAuthenticationService {
@@ -15,6 +17,7 @@ export class OtpAuthenticationService {
     @InjectRepository(User)
     private readonly userRepository: Repository<User>,
     private readonly otpSecretsStorage: OtpSecretsStorage,
+    private readonly refreshTokenIdsStorage: RefreshTokenIdsStorage,
     private readonly authService: AuthenticationService,
   ) {}
 
@@ -87,17 +90,39 @@ export class OtpAuthenticationService {
     );
   }
 
-  async provide2faCode(activeUser: ActiveUserData, code: string) {
+  async provide2faCode(
+    activeUser: ActiveUserData,
+    provide2faCodeDto: Provide2faCodeDto,
+    userAgent: string,
+  ) {
     const user = await this.userRepository.findOneBy({ id: activeUser.sub });
     if (!user) {
       throw new UnauthorizedException();
     }
 
-    const isValid = await this.verifyCode(code, user.tfaSecret);
+    const isValid = await this.verifyCode(
+      provide2faCodeDto.tfaCode,
+      user.tfaSecret,
+    );
     if (!isValid) {
       throw new UnauthorizedException('Invalid Code');
     }
-    return this.authService.generateTokens(user, true);
+
+    const isValidDeviceId = await this.refreshTokenIdsStorage.get({
+      userId: user.id,
+      userAgent,
+      deviceId: provide2faCodeDto.deviceId,
+    });
+    if (!isValidDeviceId) {
+      throw new UnauthorizedException(undefined, 'Invalid device ID');
+    }
+
+    return this.authService.generateTokens({
+      user,
+      userAgent,
+      deviceId: provide2faCodeDto.deviceId,
+      isTfaCodeProvided: true,
+    });
   }
 
   private async is2faEnabled(userId: number) {

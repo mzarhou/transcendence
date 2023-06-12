@@ -3,27 +3,37 @@ import { RedisClient } from 'src/redis/redis.module';
 
 export class InvalidateRefreshTokenError extends Error {}
 
+export type RefreshTokenKey = {
+  userId: number;
+  userAgent: string;
+  deviceId: string;
+};
+
 @Injectable()
 export class RefreshTokenIdsStorage {
   constructor(private readonly redisClient: RedisClient) {}
 
-  async insert(userId: number, tokenId: string) {
-    await this.redisClient.set(this.getKey(userId), tokenId);
+  async insert(key: RefreshTokenKey, tokenId: string) {
+    await this.redisClient.set(this.getKey(key), tokenId);
   }
 
-  async validate(userId: number, tokenId: string): Promise<boolean> {
-    const storedTokenId = await this.redisClient.get(this.getKey(userId));
+  async get(key: RefreshTokenKey) {
+    return this.redisClient.get(this.getKey(key));
+  }
+
+  async validate(key: RefreshTokenKey, tokenId: string): Promise<boolean> {
+    const storedTokenId = await this.redisClient.get(this.getKey(key));
     if (storedTokenId !== tokenId) {
       throw new InvalidateRefreshTokenError();
     }
     return storedTokenId === tokenId;
   }
 
-  async invalidate(userId: number) {
-    await this.redisClient.del(this.getKey(userId));
+  async invalidate(key: RefreshTokenKey) {
+    await this.redisClient.del(this.getKey(key));
   }
 
-  private getKey(userId: number) {
-    return `user-${userId}`;
+  private getKey({ userId, userAgent, deviceId }: RefreshTokenKey) {
+    return `user-${userId}--${userAgent}--${deviceId}`;
   }
 }
