@@ -12,6 +12,7 @@ import { toFileStream } from 'qrcode';
 import { ActiveUser } from '../../decorators/active-user.decorator';
 import { ActiveUserData } from '../../interface/active-user-data.interface';
 import { Auth } from '../decorators/auth.decorator';
+import { FPHash } from '../decorators/fingerprint-hash.decorator';
 import { UserAgent } from '../decorators/user-agent.decorator';
 import { Enable2faDto } from '../dto/enable-2fa.dto';
 import { Provide2faCodeDto } from '../dto/provide-2fa-code.dto';
@@ -61,14 +62,14 @@ export class OtpAuthenticationController {
   @HttpCode(HttpStatus.OK)
   @Post('code')
   async provide2faCode(
-    @UserAgent() userAgent: string,
+    @FPHash() fingerPrintHash: string,
     @ActiveUser() activeUser: ActiveUserData,
     @Body() provide2faCodeDto: Provide2faCodeDto,
   ) {
     return this.otpAuthService.provide2faCode(
       activeUser,
       provide2faCodeDto,
-      userAgent,
+      fingerPrintHash,
     );
   }
 }

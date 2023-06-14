@@ -7,20 +7,11 @@ import { Repository } from 'typeorm';
 import { User } from '../../users/entities/user.entity';
 import jwtConfig from '../config/jwt.config';
 import { ActiveUserData } from '../interface/active-user-data.interface';
-import { RefreshTokenDto } from './dto/refresh-token-dto';
 import { RefreshTokenData } from './interface/refresh-token-data.interface';
 import {
   InvalidateRefreshTokenError,
   RefreshTokenIdsStorage,
-  RefreshTokenKey,
 } from './refresh-token-ids.storage';
-
-type GenerateTokensProps = {
-  user: User;
-  userAgent: string;
-  deviceId?: string;
-  isTfaCodeProvided?: boolean;
-};
 
 @Injectable()
 export class AuthenticationService {
@@ -33,12 +24,11 @@ export class AuthenticationService {
     private readonly userRepository: Repository<User>,
   ) {}
 
-  async generateTokens({
-    user,
-    userAgent,
-    deviceId,
-    isTfaCodeProvided,
-  }: GenerateTokensProps) {
+  async generateTokens(
+    user: User,
+    fingerprintHash: string,
+    isTfaCodeProvided?: boolean,
+  ) {
     const refreshTokenId = randomUUID();
 
     const [accessToken, refreshToken] = await Promise.all([
@@ -46,7 +36,6 @@ export class AuthenticationService {
         user,
         this.jwtConfiguration.accessTokenTtl,
         {
-          email: user.email,
           isTfaEnabled: user.isTfaEnabled,
           isTfaCodeProvided: isTfaCodeProvided ?? false,
         },
@@ -61,16 +50,12 @@ export class AuthenticationService {
       ),
     ]);
 
-    deviceId ??= randomUUID();
     await this.refreshTokenIdsStorage.insert(
-      {
-        userId: user.id,
-        userAgent,
-        deviceId,
-      },
+      user.id,
+      fingerprintHash,
       refreshTokenId,
     );
-    return { accessToken, refreshToken, deviceId };
+    return { accessToken, refreshToken };
   }
 
   private async signToken<T>(user: User, expiresIn: number, payload?: T) {
@@ -88,11 +73,11 @@ export class AuthenticationService {
     );
   }
 
-  async refreshTokens(refreshTokenDto: RefreshTokenDto, userAgent: string) {
+  async refreshTokens(refreshToken: string, fingerprintHash: string) {
     try {
       const { sub, refreshTokenId, isTfaCodeProvided } =
         await this.jwtService.verifyAsync<RefreshTokenData>(
-          refreshTokenDto.refreshToken,
+          refreshToken,
           this.jwtConfiguration,
         );
 
@@ -101,30 +86,27 @@ export class AuthenticationService {
         throw new UnauthorizedException();
       }
 
-      const key: RefreshTokenKey = {
-        userId: user.id,
-        userAgent,
-        deviceId: refreshTokenDto.deviceId,
-      };
-
       const isValid = await this.refreshTokenIdsStorage.validate(
-        key,
+        user.id,
+        fingerprintHash,
         refreshTokenId,
       );
       if (!isValid) {
-        throw new UnauthorizedException();
+        throw new UnauthorizedException(undefined, 'Invalide refresh token');
       }
 
-      await this.refreshTokenIdsStorage.invalidate(key);
-      return this.generateTokens({
-        user,
-        userAgent,
-        deviceId: refreshTokenDto.deviceId,
-        isTfaCodeProvided,
-      });
+      await this.refreshTokenIdsStorage.invalidate(
+        user.id,
+        fingerprintHash,
+        refreshTokenId,
+      );
+      return this.generateTokens(user, fingerprintHash, isTfaCodeProvided);
     } catch (error) {
       if (error instanceof InvalidateRefreshTokenError) {
-        throw new UnauthorizedException('your refresh token might be stolen');
+        throw new UnauthorizedException(
+          undefined,
+          'your refresh token might be stolen',
+        );
       }
       throw new UnauthorizedException();
     }

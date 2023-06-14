@@ -8,7 +8,6 @@ import { OtpSecretsStorage } from './otp-secrets.storage';
 import { ActiveUserData } from 'src/iam/interface/active-user-data.interface';
 import { AuthenticationService } from '../authentication.service';
 import { Provide2faCodeDto } from '../dto/provide-2fa-code.dto';
-import { RefreshTokenIdsStorage } from '../refresh-token-ids.storage';
 
 @Injectable()
 export class OtpAuthenticationService {
@@ -17,18 +16,20 @@ export class OtpAuthenticationService {
     @InjectRepository(User)
     private readonly userRepository: Repository<User>,
     private readonly otpSecretsStorage: OtpSecretsStorage,
-    private readonly refreshTokenIdsStorage: RefreshTokenIdsStorage,
     private readonly authService: AuthenticationService,
   ) {}
 
   async generateSecret(activeUser: ActiveUserData) {
+    const user = await this.userRepository.findOneByOrFail({
+      id: activeUser.sub,
+    });
     if (await this.is2faEnabled(activeUser.sub)) {
       throw new UnauthorizedException(undefined, '2FA already enabled');
     }
     // TODO: encrypt secret
     const secret = authenticator.generateSecret();
     const appName = this.configService.getOrThrow('TFA_APP_NAME');
-    const uri = authenticator.keyuri(activeUser.email, appName, secret);
+    const uri = authenticator.keyuri(user.email, appName, secret);
     await this.otpSecretsStorage.insert(activeUser.sub, secret);
     return { uri, secret };
   }
@@ -50,7 +51,7 @@ export class OtpAuthenticationService {
     }
 
     const { id, isTfaEnabled } = await this.userRepository.findOneOrFail({
-      where: { email: activeUser.email },
+      where: { id: activeUser.sub },
       select: { id: true, isTfaEnabled: true },
     });
     if (isTfaEnabled) {
@@ -93,7 +94,7 @@ export class OtpAuthenticationService {
   async provide2faCode(
     activeUser: ActiveUserData,
     provide2faCodeDto: Provide2faCodeDto,
-    userAgent: string,
+    fingerprintHash: string,
   ) {
     const user = await this.userRepository.findOneBy({ id: activeUser.sub });
     if (!user) {
@@ -107,22 +108,7 @@ export class OtpAuthenticationService {
     if (!isValid) {
       throw new UnauthorizedException('Invalid Code');
     }
-
-    const isValidDeviceId = await this.refreshTokenIdsStorage.get({
-      userId: user.id,
-      userAgent,
-      deviceId: provide2faCodeDto.deviceId,
-    });
-    if (!isValidDeviceId) {
-      throw new UnauthorizedException(undefined, 'Invalid device ID');
-    }
-
-    return this.authService.generateTokens({
-      user,
-      userAgent,
-      deviceId: provide2faCodeDto.deviceId,
-      isTfaCodeProvided: true,
-    });
+    return this.authService.generateTokens(user, fingerprintHash, true);
   }
 
   private async is2faEnabled(userId: number) {

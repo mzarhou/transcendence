@@ -1,7 +1,15 @@
-import { Body, Controller, HttpCode, HttpStatus, Post } from '@nestjs/common';
+import {
+  Body,
+  Controller,
+  Get,
+  HttpCode,
+  HttpStatus,
+  Post,
+  Req,
+} from '@nestjs/common';
 import { AuthenticationService } from './authentication.service';
 import { Auth } from './decorators/auth.decorator';
-import { UserAgent } from './decorators/user-agent.decorator';
+import { FPHash } from './decorators/fingerprint-hash.decorator';
 import { RefreshTokenDto } from './dto/refresh-token-dto';
 import { AuthType } from './enum/auth-type.enum';
 
@@ -13,9 +21,15 @@ export class AuthenticationController {
   @HttpCode(HttpStatus.OK)
   @Post('refresh-tokens')
   refreshTokens(
-    @UserAgent() userAgent: string,
+    @FPHash() fpHash: string,
     @Body() refreshTokenDto: RefreshTokenDto,
   ) {
-    return this.authService.refreshTokens(refreshTokenDto, userAgent);
+    return this.authService.refreshTokens(refreshTokenDto.refreshToken, fpHash);
+  }
+
+  @Get('/fp')
+  getFingerprint(@FPHash() fpHash: string) {
+    return fpHash;
+    1;
   }
 }

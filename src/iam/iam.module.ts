@@ -1,4 +1,4 @@
-import { Module } from '@nestjs/common';
+import { MiddlewareConsumer, Module, NestModule } from '@nestjs/common';
 import { TypeOrmModule } from '@nestjs/typeorm';
 import { User } from '../users/entities/user.entity';
 import { AuthenticationService } from './authentication/authentication.service';
@@ -17,6 +17,8 @@ import { AccessTokenWithout2faGuard } from './authentication/guards/access-token
 import { OtpAuthenticationController } from './authentication/otp/otp-authentication.controller';
 import { OtpSecretsStorage } from './authentication/otp/otp-secrets.storage';
 import { RedisModule } from 'src/redis/redis.module';
+
+const Fingerprint = require('express-fingerprint');
 
 @Module({
   imports: [
@@ -44,4 +46,18 @@ import { RedisModule } from 'src/redis/redis.module';
     OtpAuthenticationController,
   ],
 })
-export class IamModule {}
+export class IamModule implements NestModule {
+  configure(consumer: MiddlewareConsumer) {
+    consumer
+      .apply(
+        Fingerprint({
+          parameters: [
+            Fingerprint.useragent,
+            Fingerprint.acceptHeaders,
+            Fingerprint.geoip,
+          ],
+        }),
+      )
+      .forRoutes('/authentication/*');
+  }
+}

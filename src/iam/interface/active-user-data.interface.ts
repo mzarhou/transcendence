@@ -6,11 +6,6 @@ export interface ActiveUserData {
   sub: number;
 
   /**
-   * user email
-   */
-  email: string;
-
-  /**
    * is 2fa enabled for user
    */
   isTfaEnabled: boolean;

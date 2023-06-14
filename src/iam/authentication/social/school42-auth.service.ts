@@ -10,7 +10,6 @@ import { Repository } from 'typeorm';
 import z from 'zod';
 import { AuthenticationService } from '../authentication.service';
 import { School42AuthDto } from '../dto/school-42-token.dto';
-import { OtpAuthenticationService } from '../otp/otp-authentication.service';
 
 export const userSchema = z.object({
   id: z.number(),
@@ -35,10 +34,12 @@ export class School42AuthService {
     @InjectRepository(User)
     private readonly userRepository: Repository<User>,
     private readonly authService: AuthenticationService,
-    private readonly otpAuthService: OtpAuthenticationService,
   ) {}
 
-  async authenticate({ accessToken }: School42AuthDto, userAgent: string) {
+  async authenticate(
+    { accessToken }: School42AuthDto,
+    fingerprintHash: string,
+  ) {
     try {
       const school42User = await this.get42User(accessToken);
 
@@ -47,7 +48,7 @@ export class School42AuthService {
       });
 
       if (user) {
-        return this.authService.generateTokens({ user, userAgent });
+        return this.authService.generateTokens(user, fingerprintHash);
       } else {
         const user = new User();
         user.name = school42User.login;
@@ -55,7 +56,7 @@ export class School42AuthService {
         user.email = school42User.email;
         user.school42Id = school42User.id;
         await this.userRepository.save(user);
-        return this.authService.generateTokens({ user, userAgent });
+        return this.authService.generateTokens(user, fingerprintHash);
       }
     } catch (error) {
       const pgUniqueViolationErrorCode = '23505';
