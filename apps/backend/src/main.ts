@@ -6,11 +6,11 @@ async function bootstrap() {
   const app = await NestFactory.create(AppModule);
   app.enableCors({
     // Todo: use env FRONTEND_URL
-    origin: 'http://localhost:3001',
+    origin: 'http://localhost:3000',
     credentials: true,
     exposedHeaders: ['WWW-Authenticate'],
   });
   app.use(cookieParser());
-  await app.listen(3000);
+  await app.listen(8080);
 }
 bootstrap();

@@ -1,0 +1,17 @@
+"use client";
+
+import { Button } from "@/components/ui/button";
+import axios from "axios";
+import { useUser } from "./context/user-context";
+
+export default function Home() {
+  const { user } = useUser();
+
+  return (
+    <main className="mt-4 p-10">
+      <div className="overflow-x-auto mt-10">
+        <pre className="max-w-lg  whitespace-pre">{JSON.stringify(user)}</pre>
+      </div>
+    </main>
+  );
+}
