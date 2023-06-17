@@ -14,7 +14,7 @@ import { useRef } from "react";
 
 export function NavBar() {
   return (
-    <div className="max-w-container mx-auto min-h-header flex justify-between">
+    <div className="max-w-container mx-auto min-h-header flex justify-between items-center">
       <div></div>
       <Auth>
         <NavUserPopup />
@@ -51,7 +51,7 @@ function NavUserPopup() {
 
   return (
     <Popover>
-      <PopoverTrigger ref={poppupTriggerRef}>
+      <PopoverTrigger ref={poppupTriggerRef} asChild>
         <Button variant="link" className="flex">
           <span
             className="inline-block rounded-full overflow-hidden"
@@ -73,7 +73,7 @@ function NavUserPopup() {
         </Button>
       </PopoverTrigger>
       <PopoverContent align="end" className="mr-3 p-4 max-w-xs rounded-xl">
-        <Link href="/profile" onClick={closePoppup}>
+        <Link href="/profile/general" onClick={closePoppup}>
           <div className="flex flex-col items-center justify-center mt-8">
             <img src={user?.avatar} className="rounded-full w-20 h-20" />
             <div className="mt-1 font-semibold">{user?.name}</div>

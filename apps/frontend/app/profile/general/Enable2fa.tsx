@@ -4,7 +4,6 @@ import { Button } from "@/components/ui/button";
 import { useToast } from "@/components/ui/use-toast";
 import { api } from "@/lib/api";
 import { AxiosError } from "axios";
-import { FormEvent } from "react";
 import useSWRMutation from "swr/mutation";
 import { useSWRConfig } from "swr";
 import z from "zod";
@@ -18,80 +17,42 @@ import {
   FormControl,
   FormField,
   FormItem,
-  FormLabel,
   FormMessage,
 } from "@/components/ui/form";
 
 export default function Enable2fa() {
   return (
-    <div className="mt-4">
-      <div className="space-y-12">
-        <h2 className="text-h2 font-normal">Security</h2>
-        <h4 className="bg-gray-100 border-t"></h4>
-        <div className="flex flex-col space-y-12">
-          <div className="flex flex-col space-y-8">
-            <div className="flex flex-col space-y-3">
-              <h2 className="text-h4 font-semibold">
-                Two-factor authentication
-              </h2>
-              <p className="text-base text-gray-600">
-                Use an authentication app to get a verification code to log into
-                your Transcendence account safely.
-              </p>
+    <div className="flex flex-col space-y-8">
+      <div className="flex flex-col space-y-3">
+        <h2 className="text-h4 font-semibold">Two-factor authentication</h2>
+        <p className="text-base text-gray-600">
+          Use an authentication app to get a verification code to log into your
+          Transcendence account safely.
+        </p>
+      </div>
+      <div className="flex flex-col">
+        <hr className="my-4 w-full border-t border-gray-100 mt-0" />
+        <div className="flex justify-between items-center">
+          <div className="flex space-x-3 items-center">
+            <div
+              className="icon-container icon-md text-gray-500"
+              aria-hidden="true"
+            >
+              {/* prettier-ignore */}
+              <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="feather feather-smartphone"><rect x="5" y="2" width="14" height="20" rx="2" ry="2"></rect><path d="M12 18h.01"></path></svg>
             </div>
-            <div className="flex flex-col">
-              <hr className="my-4 w-full border-t border-gray-100 mt-0" />
-              <div className="flex justify-between items-center">
-                <div className="flex space-x-3 items-center">
-                  <div
-                    className="icon-container icon-md text-gray-500"
-                    aria-hidden="true"
-                  >
-                    {/* prettier-ignore */}
-                    <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="feather feather-smartphone"><rect x="5" y="2" width="14" height="20" rx="2" ry="2"></rect><path d="M12 18h.01"></path></svg>
-                  </div>
-                  <p className="text-base">Authenticator App</p>
-                </div>
-                <Dialog>
-                  <DialogTrigger asChild>
-                    <Button variant={"outline"}>
-                      Set up two-factor authentication
-                    </Button>
-                  </DialogTrigger>
-                  <Enable2faPoppupContent />
-                </Dialog>
-              </div>
-            </div>
+            <p className="text-base">Authenticator App</p>
           </div>
+          <Dialog>
+            <DialogTrigger asChild>
+              <Button variant={"outline"}>
+                Set up two-factor authentication
+              </Button>
+            </DialogTrigger>
+            <Enable2faPoppupContent />
+          </Dialog>
         </div>
       </div>
-      {/* {qrcode.length ? (
-        <div>
-          <img
-            src={`data:image/png;base64,${qrcode}`}
-            className="border mt-2"
-          />
-          <form
-            onSubmit={(e) => enable2FA(e).catch((_err) => {})}
-            className="mt-2"
-          >
-            <input
-              name="code"
-              className="border px-4 py-2 rounded-sm"
-              placeholder="2fa code"
-            />
-            <Button type="submit" disabled={isMutating} className="ml-2">
-              {isMutating ? (
-                <Loader2 className="animate-spin" />
-              ) : (
-                <span>Enable</span>
-              )}
-            </Button>
-          </form>
-        </div>
-      ) : (
-        <></>
-      )} */}
     </div>
   );
 }

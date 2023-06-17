@@ -1,7 +1,6 @@
 "use client";
 
 import { useUser } from "@/app/context/user-context";
-import { Loader2 } from "lucide-react";
 import { ReactNode } from "react";
 
 /**
