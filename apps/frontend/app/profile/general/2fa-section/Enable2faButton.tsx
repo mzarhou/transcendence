@@ -17,6 +17,7 @@ import {
 } from "@/components/ui/form";
 import { useEnable2fa } from "@/api-hooks/use-enable-2fa";
 import { AxiosError } from "axios";
+import { Close } from "@radix-ui/react-dialog";
 
 export default function Enable2faButton() {
   return (
@@ -136,7 +137,9 @@ function Enable2faForm() {
           )}
         />
         <div className="flex justify-end space-x-4">
-          <Button variant="outline">Cancel</Button>
+          <Close asChild>
+            <Button variant="outline">Cancel</Button>
+          </Close>
           <Button type="submit" disabled={isMutating}>
             {isMutating ? (
               <Loader2 className="animate-spin" />
