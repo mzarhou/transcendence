@@ -17,36 +17,16 @@ import { ActiveUserData } from 'src/iam/interface/active-user-data.interface';
 export class UsersController {
   constructor(private readonly usersService: UsersService) {}
 
-  @Post()
-  create(@Body() createUserDto: CreateUserDto) {
-    return this.usersService.create(createUserDto);
-  }
-
   @Get('me')
   async me(@ActiveUser('sub') userId: number) {
-    const { tfaSecret, school42Id, ...rest } = await this.usersService.findOne(
-      userId,
-    );
-    return rest;
+    return this.usersService.findOne(userId);
   }
 
-  @Get()
-  findAll(@ActiveUser() user: ActiveUserData) {
-    return this.usersService.findAll();
-  }
-
-  @Get(':id')
-  findOne(@Param('id') id: string) {
-    return this.usersService.findOne(+id);
-  }
-
-  @Patch(':id')
-  update(@Param('id') id: string, @Body() updateUserDto: UpdateUserDto) {
-    return this.usersService.update(+id, updateUserDto);
-  }
-
-  @Delete(':id')
-  remove(@Param('id') id: string) {
-    return this.usersService.remove(+id);
+  @Patch('me')
+  async updateProfile(
+    @ActiveUser() currentUser: ActiveUserData,
+    @Body() updateUserDto: UpdateUserDto,
+  ) {
+    return this.usersService.updateProfile(currentUser, updateUserDto);
   }
 }

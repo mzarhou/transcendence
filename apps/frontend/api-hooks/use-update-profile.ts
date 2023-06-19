@@ -12,10 +12,10 @@ export const useUpdateProfile = () => {
   const { user } = useUser();
 
   const { trigger, ...rest } = useSWRMutation(
-    `/users/${user!.id}`,
-    async (_url, { arg }: { arg: UpdateUserType }) => {
+    `/users/me`,
+    async (url, { arg }: { arg: UpdateUserType }) => {
       if (!user) return;
-      return api.patch(`/users/${user.id}`, arg).catch((err) => {
+      return api.patch(url, arg).catch((err) => {
         if (err instanceof AxiosError) {
           throw err.message;
         }
