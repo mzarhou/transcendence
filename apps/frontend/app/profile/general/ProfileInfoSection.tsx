@@ -70,7 +70,7 @@ export default function ProfileInfo() {
                 <span>Update Profile</span>
               </LoaderButton>
             </div>
-            <div className="w-1/2 flex justify-center items-center">
+            <div className="flex w-1/2 items-center justify-center">
               <img src={user?.avatar} className="h-24 w-24 rounded-full" />
             </div>
           </div>

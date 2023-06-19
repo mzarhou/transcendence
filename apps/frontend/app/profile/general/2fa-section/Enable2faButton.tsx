@@ -1,11 +1,7 @@
 "use client";
 
 import { Button } from "@/components/ui/button";
-import { useToast } from "@/components/ui/use-toast";
 import { api } from "@/lib/api";
-import { AxiosError } from "axios";
-import useSWRMutation from "swr/mutation";
-import { useSWRConfig } from "swr";
 import z from "zod";
 import { Dialog, DialogContent, DialogTrigger } from "@/components/ui/dialog";
 import useSWR from "swr";
@@ -19,41 +15,17 @@ import {
   FormItem,
   FormMessage,
 } from "@/components/ui/form";
+import { useEnable2fa } from "@/api-hooks/use-enable-2fa";
+import { AxiosError } from "axios";
 
-export default function Enable2fa() {
+export default function Enable2faButton() {
   return (
-    <div className="flex flex-col space-y-8">
-      <div className="flex flex-col space-y-3">
-        <h2 className="text-h4 font-semibold">Two-factor authentication</h2>
-        <p className="text-base text-gray-600">
-          Use an authentication app to get a verification code to log into your
-          Transcendence account safely.
-        </p>
-      </div>
-      <div className="flex flex-col">
-        <hr className="my-4 w-full border-t border-gray-100 mt-0" />
-        <div className="flex justify-between items-center">
-          <div className="flex space-x-3 items-center">
-            <div
-              className="icon-container icon-md text-gray-500"
-              aria-hidden="true"
-            >
-              {/* prettier-ignore */}
-              <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="feather feather-smartphone"><rect x="5" y="2" width="14" height="20" rx="2" ry="2"></rect><path d="M12 18h.01"></path></svg>
-            </div>
-            <p className="text-base">Authenticator App</p>
-          </div>
-          <Dialog>
-            <DialogTrigger asChild>
-              <Button variant={"outline"}>
-                Set up two-factor authentication
-              </Button>
-            </DialogTrigger>
-            <Enable2faPoppupContent />
-          </Dialog>
-        </div>
-      </div>
-    </div>
+    <Dialog>
+      <DialogTrigger asChild>
+        <Button variant={"outline"}>Set up two-factor authentication</Button>
+      </DialogTrigger>
+      <Enable2faPoppupContent />
+    </Dialog>
   );
 }
 
@@ -77,18 +49,18 @@ function Enable2faPoppupContent() {
   );
 
   return (
-    <DialogContent className="sm:max-w-[425px] max-w-[375px]">
+    <DialogContent className="max-w-[375px] sm:max-w-[425px]">
       <div className="space-y-3 overflow-y-auto">
         <h2 className="text-h2">Setup 2FA</h2>
         <div className="space-y-8">
           <div className="flex flex-col items-center">
             <p className="text-h4">Scan QR Code</p>
-            <p className="mt-1 text-sm text-center text-gray-600">
+            <p className="mt-1 text-center text-sm text-gray-600">
               Scan the image below with the 2FA authenticator app on your phone.
             </p>
             <div className="mt-4">
               {isLoadingImage || errorLoadingImage ? (
-                <Loader2 className="block my-8 animate-spin" />
+                <Loader2 className="my-8 block animate-spin" />
               ) : (
                 <img
                   src={`data:image/png;base64,${qrcode}`}
@@ -131,37 +103,14 @@ function Enable2faForm() {
     },
   });
 
-  const { toast } = useToast();
-  const { mutate } = useSWRConfig();
-  const { trigger: enable2FA, isMutating } = useSWRMutation(
-    "/authentication/2fa/enable",
-    async (url, { arg: tfaCode }: { arg: string }) => {
-      return api.post(url, {
-        tfaCode,
-      });
-    },
-    {
-      onError: (error) => {
-        let message = "Failed to enable 2FA";
-        if (error instanceof AxiosError) {
-          message = error.message;
-        }
-        toast({
-          description: message,
-          className: "bg-red-200",
-        });
-      },
-      onSuccess: () => {
-        toast({
-          description: "2FA is enabled",
-          className: "bg-green-200",
-        });
-        mutate("/users/me");
-      },
-    }
-  );
+  const { enable2FA, isMutating } = useEnable2fa();
+
   function onSubmit(values: FormData) {
-    enable2FA(values.code).catch((_err) => {});
+    enable2FA(values.code).catch((err) => {
+      if (!(err instanceof AxiosError)) return;
+      const message = err.response?.data?.message;
+      form.setError("code", { message });
+    });
   }
 
   return (
@@ -177,7 +126,7 @@ function Enable2faForm() {
             <FormItem>
               <FormControl>
                 <input
-                  className="px-4 py-2 rounded-md border w-full"
+                  className="w-full rounded-md border px-4 py-2"
                   placeholder="123456"
                   {...field}
                 />
@@ -192,7 +141,7 @@ function Enable2faForm() {
             {isMutating ? (
               <Loader2 className="animate-spin" />
             ) : (
-              <span> Enable</span>
+              <span>Enable</span>
             )}
           </Button>
         </div>
