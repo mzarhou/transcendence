@@ -9,7 +9,7 @@ type ProfileLayoutProps = {
 };
 export default function ProfileLayout({ children }: ProfileLayoutProps) {
   return (
-    <div className="mt-4 flex md:space-x-12">
+    <div className="mt-4 space-y-12 md:flex md:space-x-12 md:space-y-0">
       <Auth>
         <ProfileSideBar />
         {children}
@@ -20,7 +20,7 @@ export default function ProfileLayout({ children }: ProfileLayoutProps) {
 
 function ProfileSideBar() {
   return (
-    <div className="sticky top-28 w-full max-w-[200px]">
+    <div className="w-full max-w-[200px]">
       <ul>
         <li>
           <ProfileSideBarItem text="general" selected>
