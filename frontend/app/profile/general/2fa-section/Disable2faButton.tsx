@@ -11,7 +11,7 @@ import {
   FormLabel,
   FormMessage,
 } from "@/components/ui/form";
-import { Enable2faType, enable2faSchema } from "@transcendence/types";
+import { Enable2faType, enable2faSchema } from "@transcendence/common";
 import { Input } from "@/components/ui/input";
 import { useForm } from "react-hook-form";
 import { Close } from "@radix-ui/react-dialog";

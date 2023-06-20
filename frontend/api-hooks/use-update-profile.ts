@@ -1,7 +1,7 @@
 import { useUser } from "@/app/context/user-context";
 import { useToast } from "@/components/ui/use-toast";
 import { api } from "@/lib/api";
-import { UpdateUserType } from "@transcendence/types";
+import { UpdateUserType } from "@transcendence/common";
 import { AxiosError } from "axios";
 import { useSWRConfig } from "swr";
 import useSWRMutation from "swr/mutation";

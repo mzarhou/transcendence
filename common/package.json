@@ -1,5 +1,6 @@
 {
-  "name": "@transcendence/types",
+  "name": "@transcendence/common",
+  "version": "0.0.1",
   "main": "./dist/index",
   "types": "./dist/index",
   "scripts": {
@@ -7,7 +8,6 @@
   },
   "dependencies": {
     "tsup": "^7.0.0",
-    "typescript": "latest",
     "zod": "^3.21.4"
   }
 }

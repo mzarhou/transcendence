@@ -13,7 +13,7 @@ import {
 import { Input } from "@/components/ui/input";
 import { LoaderButton } from "@/components/ui/loader-button";
 import { zodResolver } from "@hookform/resolvers/zod";
-import { UpdateUserType, updateUserSchema } from "@transcendence/types";
+import { UpdateUserType, updateUserSchema } from "@transcendence/common";
 import { useForm } from "react-hook-form";
 
 export default function ProfileInfo() {
