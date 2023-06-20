@@ -1,0 +1,13 @@
+{
+  "name": "@transcendence/common",
+  "version": "0.0.1",
+  "main": "./dist/index",
+  "types": "./dist/index",
+  "scripts": {
+    "build": "tsup"
+  },
+  "dependencies": {
+    "tsup": "^7.0.0",
+    "zod": "^3.21.4"
+  }
+}

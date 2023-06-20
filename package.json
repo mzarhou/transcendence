@@ -1,24 +1,9 @@
 {
-  "private": true,
-  "scripts": {
-    "build": "turbo run build",
-    "dev": "turbo run dev",
-    "dev:frontend": "turbo run dev --filter=frontend",
-    "dev:backend": "turbo run dev --filter=backend",
-    "lint": "turbo run lint",
-    "format": "prettier --write \"**/*.{ts,tsx,md}\""
-  },
-  "devDependencies": {
-    "@turbo/gen": "^1.9.7",
-    "eslint": "^7.32.0",
-    "eslint-config-custom": "*",
-    "prettier": "^2.5.1",
-    "turbo": "latest"
-  },
   "name": "transcendence",
-  "packageManager": "npm@9.5.0",
+  "private": true,
   "workspaces": [
-    "apps/*",
-    "packages/*"
+    "api",
+    "frontend",
+    "common"
   ]
 }
