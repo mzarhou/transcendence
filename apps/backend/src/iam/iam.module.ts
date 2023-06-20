@@ -17,6 +17,7 @@ import { AccessTokenWithout2faGuard } from './authentication/guards/access-token
 import { OtpAuthenticationController } from './authentication/otp/otp-authentication.controller';
 import { OtpSecretsStorage } from './authentication/otp/otp-secrets.storage';
 import { RedisModule } from 'src/redis/redis.module';
+import { CryptoService } from './authentication/otp/crypto.service';
 
 const Fingerprint = require('express-fingerprint');
 
@@ -39,6 +40,7 @@ const Fingerprint = require('express-fingerprint');
     RefreshTokenIdsStorage,
     OtpAuthenticationService,
     OtpSecretsStorage,
+    CryptoService,
   ],
   controllers: [
     School42AuthController,

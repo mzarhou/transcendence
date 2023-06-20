@@ -3,6 +3,7 @@ const nextConfig = {
   experimental: {
     serverActions: true,
   },
+  // transpilePackages: ["@transcendence/types"],
 };
 
 module.exports = nextConfig;

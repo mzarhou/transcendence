@@ -52,7 +52,7 @@ export default function () {
   };
 
   return (
-    <form className="max-w-md mx-auto w-full mt-16" onSubmit={submit}>
+    <form className="mx-auto mt-16 w-full max-w-md" onSubmit={submit}>
       <div className="text-center text-xl font-semibold">
         Two-Factor Authentication
       </div>
@@ -60,7 +60,7 @@ export default function () {
         <span>Verification Code</span>
         <input
           name="code"
-          className="mt-2 border px-4 py-2 rounded-sm text-xl"
+          className="mt-2 rounded-sm border px-4 py-2 text-xl"
         />
       </div>
       <div className="mt-4 flex flex-col">

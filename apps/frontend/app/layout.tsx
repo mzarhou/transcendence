@@ -23,8 +23,8 @@ export default async function RootLayout({
           <div className="px-5 md:px-8 ">
             <NavBar />
           </div>
-          <div className="px-5 md:px-8 mt-12 mb-24">
-            <main className="max-w-container mx-auto">{children}</main>
+          <div className="mb-24 mt-12 px-5 md:px-8">
+            <main className="mx-auto max-w-container">{children}</main>
           </div>
         </UserProvider>
         <Toaster />

@@ -14,14 +14,14 @@ import { useRef } from "react";
 
 export function NavBar() {
   return (
-    <div className="max-w-container mx-auto min-h-header flex justify-between">
+    <div className="mx-auto flex min-h-header max-w-container items-center justify-between">
       <div></div>
       <Auth>
         <NavUserPopup />
       </Auth>
       <Guest
         Loader={
-          <div className="flex justify-center items-center w-16">
+          <div className="flex w-16 items-center justify-center">
             <Loader2 className="animate-spin" />
           </div>
         }
@@ -51,10 +51,10 @@ function NavUserPopup() {
 
   return (
     <Popover>
-      <PopoverTrigger ref={poppupTriggerRef}>
+      <PopoverTrigger ref={poppupTriggerRef} asChild>
         <Button variant="link" className="flex">
           <span
-            className="inline-block rounded-full overflow-hidden"
+            className="inline-block overflow-hidden rounded-full"
             style={{
               minWidth: "24px",
               minHeight: "24px",
@@ -63,19 +63,19 @@ function NavUserPopup() {
             }}
           >
             <div
-              className="w-full h-full rounded-full bg-cover bg-no-repeat bg-center"
+              className="h-full w-full rounded-full bg-cover bg-center bg-no-repeat"
               style={{ backgroundImage: `url("${user?.avatar}")` }}
             ></div>
           </span>
           <div className="icon-container icon-md ml-2 text-gray-500">
-            <LucideChevronDown className="w-full h-full" />
+            <LucideChevronDown className="h-full w-full" />
           </div>
         </Button>
       </PopoverTrigger>
-      <PopoverContent align="end" className="mr-3 p-4 max-w-xs rounded-xl">
-        <Link href="/profile" onClick={closePoppup}>
-          <div className="flex flex-col items-center justify-center mt-8">
-            <img src={user?.avatar} className="rounded-full w-20 h-20" />
+      <PopoverContent align="end" className="mr-3 max-w-xs rounded-xl p-4">
+        <Link href="/profile/general" onClick={closePoppup}>
+          <div className="mt-8 flex flex-col items-center justify-center">
+            <img src={user?.avatar} className="h-20 w-20 rounded-full" />
             <div className="mt-1 font-semibold">{user?.name}</div>
           </div>
         </Link>

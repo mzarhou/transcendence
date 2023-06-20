@@ -4,6 +4,7 @@ import { Repository } from 'typeorm';
 import { CreateUserDto } from './dto/create-user.dto';
 import { UpdateUserDto } from './dto/update-user.dto';
 import { User } from './entities/user.entity';
+import { ActiveUserData } from 'src/iam/interface/active-user-data.interface';
 
 @Injectable()
 export class UsersService {
@@ -12,12 +13,22 @@ export class UsersService {
     private readonly userRepository: Repository<User>,
   ) {}
 
-  create(createUserDto: CreateUserDto) {
-    return 'This action adds a new user';
-  }
-
-  findAll() {
-    return `This action returns all users`;
+  async updateProfile(
+    activeUser: ActiveUserData,
+    updateUserDto: UpdateUserDto,
+  ) {
+    const noUpdate = Object.keys(updateUserDto).every((k) => !updateUserDto[k]);
+    if (noUpdate) {
+      return this.findOne(activeUser.sub);
+    }
+    await this.userRepository.update(
+      { id: activeUser.sub },
+      {
+        name: updateUserDto.name,
+        avatar: updateUserDto.avatar,
+      },
+    );
+    return this.findOne(activeUser.sub);
   }
 
   async findOne(id: number) {
@@ -25,14 +36,7 @@ export class UsersService {
     if (!user) {
       throw new NotFoundException();
     }
-    return user;
-  }
-
-  update(id: number, updateUserDto: UpdateUserDto) {
-    return `This action updates a #${id} user`;
-  }
-
-  remove(id: number) {
-    return `This action removes a #${id} user`;
+    const { tfaSecret, school42Id, ...rest } = user;
+    return rest;
   }
 }

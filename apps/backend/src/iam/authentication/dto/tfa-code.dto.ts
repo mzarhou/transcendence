@@ -1,4 +1,4 @@
 import { createZodDto } from 'nestjs-zod';
-import { enable2faDtoSchema } from './enable-2fa.dto';
+import { enable2faSchema } from '@transcendence/types';
 
-export class TfaCodeDto extends createZodDto(enable2faDtoSchema) {}
+export class TfaCodeDto extends createZodDto(enable2faSchema) {}

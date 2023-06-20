@@ -8,6 +8,7 @@ import { OtpSecretsStorage } from './otp-secrets.storage';
 import { ActiveUserData } from 'src/iam/interface/active-user-data.interface';
 import { AuthenticationService } from '../authentication.service';
 import { Provide2faCodeDto } from '../dto/provide-2fa-code.dto';
+import { CryptoService } from './crypto.service';
 
 @Injectable()
 export class OtpAuthenticationService {
@@ -17,6 +18,7 @@ export class OtpAuthenticationService {
     private readonly userRepository: Repository<User>,
     private readonly otpSecretsStorage: OtpSecretsStorage,
     private readonly authService: AuthenticationService,
+    private readonly cryptoService: CryptoService,
   ) {}
 
   async generateSecret(activeUser: ActiveUserData) {
@@ -26,27 +28,21 @@ export class OtpAuthenticationService {
     if (await this.is2faEnabled(activeUser.sub)) {
       throw new UnauthorizedException(undefined, '2FA already enabled');
     }
-    // TODO: encrypt secret
     const secret = authenticator.generateSecret();
     const appName = this.configService.getOrThrow('TFA_APP_NAME');
     const uri = authenticator.keyuri(user.email, appName, secret);
-    await this.otpSecretsStorage.insert(activeUser.sub, secret);
+
+    const encryptedSecret = this.cryptoService.encrypt(secret);
+    await this.otpSecretsStorage.insert(activeUser.sub, encryptedSecret);
     return { uri, secret };
   }
 
-  verifyCode(code: string, secret: string) {
-    return authenticator.verify({
-      token: code,
-      secret,
-    });
-  }
-
   async enableTfaForUser(activeUser: ActiveUserData, code: string) {
-    const secret = await this.otpSecretsStorage.get(activeUser.sub);
-    if (!secret) {
+    const encryptedSecret = await this.otpSecretsStorage.get(activeUser.sub);
+    if (!encryptedSecret) {
       throw new UnauthorizedException('You must generate qrcode first');
     }
-    if (!this.verifyCode(code, secret)) {
+    if (!this.verifyCode(code, encryptedSecret)) {
       throw new UnauthorizedException(`Invalid code: ${code}`);
     }
 
@@ -59,12 +55,10 @@ export class OtpAuthenticationService {
     }
 
     await this.otpSecretsStorage.invalidate(activeUser.sub);
-
-    // TODO: encrypt the secret
     await this.userRepository.update(
       { id },
       {
-        tfaSecret: secret,
+        tfaSecret: encryptedSecret,
         isTfaEnabled: true,
       },
     );
@@ -109,6 +103,14 @@ export class OtpAuthenticationService {
       throw new UnauthorizedException('Invalid Code');
     }
     return this.authService.generateTokens(user, fingerprintHash, true);
+  }
+
+  private verifyCode(code: string, encryptedSecret: string) {
+    const secret = this.cryptoService.decrypt(encryptedSecret);
+    return authenticator.verify({
+      token: code,
+      secret,
+    });
   }
 
   private async is2faEnabled(userId: number) {
