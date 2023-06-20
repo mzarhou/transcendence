@@ -1,10 +1,8 @@
 "use client";
 
 import { Button } from "@/components/ui/button";
-import { api } from "@/lib/api";
 import z from "zod";
 import { Dialog, DialogContent, DialogTrigger } from "@/components/ui/dialog";
-import useSWR from "swr";
 import { Loader2 } from "lucide-react";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
@@ -18,6 +16,7 @@ import {
 import { useEnable2fa } from "@/api-hooks/use-enable-2fa";
 import { AxiosError } from "axios";
 import { Close } from "@radix-ui/react-dialog";
+import { useGenerateQrcode } from "@/api-hooks/use-generate-qrcode";
 
 export default function Enable2faButton() {
   return (
@@ -31,24 +30,7 @@ export default function Enable2faButton() {
 }
 
 function Enable2faPoppupContent() {
-  const {
-    data: qrcode,
-    isLoading: isLoadingImage,
-    error: errorLoadingImage,
-  } = useSWR(
-    "/authentication/2fa/generate",
-    (url) => {
-      return api.get(url, { responseType: "arraybuffer" }).then((res) => {
-        const base64Image = Buffer.from(res.data, "binary").toString("base64");
-        return base64Image;
-      });
-    },
-    {
-      revalidateOnFocus: false,
-      revalidateIfStale: false,
-    }
-  );
-
+  const { qrcode, isLoadingImage, errorLoadingImage } = useGenerateQrcode();
   return (
     <DialogContent className="max-w-[375px] sm:max-w-[425px]">
       <div className="space-y-3 overflow-y-auto">
