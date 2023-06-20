@@ -43,7 +43,7 @@ type ProfileSideBarItemProps = {
   children: ReactNode;
   selected?: boolean;
 };
-export function ProfileSideBarItem({
+function ProfileSideBarItem({
   text,
   children,
   selected,
