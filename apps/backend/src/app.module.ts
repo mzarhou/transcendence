@@ -10,7 +10,7 @@ import { APP_PIPE } from '@nestjs/core';
 import { ZodValidationPipe } from 'nestjs-zod';
 import { RedisModule } from './redis/redis.module';
 
-const dbConfigSchema = z.object({
+export const dbConfigSchema = z.object({
   DB_TYPE: z.enum(['mysql', 'postgres']),
   DB_HOST: z.string(),
   DB_PORT: z.number(),
