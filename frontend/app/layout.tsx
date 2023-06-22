@@ -1,7 +1,6 @@
 import "./globals.css";
 import { Inter } from "next/font/google";
-import { UserProvider } from "./context/user-context";
-import { NavBar } from "@/components/navbar";
+import { UserProvider } from "@/context/user-context";
 import { Toaster } from "@/components/ui/toaster";
 
 const inter = Inter({ subsets: ["latin"] });
@@ -19,14 +18,7 @@ export default async function RootLayout({
   return (
     <html lang="en">
       <body className={`${inter.className}`}>
-        <UserProvider>
-          <div className="px-5 md:px-8 ">
-            <NavBar />
-          </div>
-          <div className="mb-24 mt-12 px-5 md:px-8">
-            <main className="mx-auto max-w-container">{children}</main>
-          </div>
-        </UserProvider>
+        {children}
         <Toaster />
       </body>
     </html>

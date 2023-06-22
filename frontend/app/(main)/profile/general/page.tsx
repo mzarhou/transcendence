@@ -1,6 +1,6 @@
 "use client";
 
-import { useUser } from "app/context/user-context";
+import { useUser } from "@/context/user-context";
 import { Loader2 } from "lucide-react";
 import ProfileInfo from "./ProfileInfoSection";
 import TfaSection from "./2fa-section";

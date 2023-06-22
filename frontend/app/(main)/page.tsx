@@ -1,8 +1,6 @@
 "use client";
 
-import { Button } from "@/components/ui/button";
-import axios from "axios";
-import { useUser } from "./context/user-context";
+import { useUser } from "@/context/user-context";
 
 export default function Home() {
   const { user } = useUser();

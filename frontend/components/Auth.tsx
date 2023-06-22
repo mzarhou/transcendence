@@ -1,6 +1,6 @@
 "use client";
 
-import { useUser } from "@/app/context/user-context";
+import { useUser } from "@/context/user-context";
 import { ReactNode } from "react";
 
 /**

@@ -1,4 +1,4 @@
-import { useUser } from "@/app/context/user-context";
+import { useUser } from "@/context/user-context";
 import { useToast } from "@/components/ui/use-toast";
 import { api } from "@/lib/api";
 import { UpdateUserType } from "@transcendence/common";

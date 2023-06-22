@@ -1,6 +1,6 @@
 "use client";
 
-import { useUser } from "@/app/context/user-context";
+import { useUser } from "@/context/user-context";
 import axios from "axios";
 import { Loader2, LucideChevronDown } from "lucide-react";
 import Link from "next/link";
