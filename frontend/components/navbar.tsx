@@ -5,11 +5,10 @@ import axios from "axios";
 import { Loader2, LucideChevronDown } from "lucide-react";
 import Link from "next/link";
 import { useSWRConfig } from "swr";
-import Auth from "../Auth";
-import Guest from "../Guest";
-import { Button } from "../ui/button";
-import { Popover, PopoverContent, PopoverTrigger } from "../ui/popover";
-import { login } from "./auth";
+import Auth from "./Auth";
+import Guest from "./Guest";
+import { Button, buttonVariants } from "./ui/button";
+import { Popover, PopoverContent, PopoverTrigger } from "./ui/popover";
 import { useRef } from "react";
 
 export function NavBar() {
@@ -26,9 +25,14 @@ export function NavBar() {
           </div>
         }
       >
-        <form action={login}>
-          <Button>Login</Button>
-        </form>
+        <Link
+          href="/login"
+          className={buttonVariants({
+            variant: "default",
+          })}
+        >
+          Login
+        </Link>
       </Guest>
     </div>
   );

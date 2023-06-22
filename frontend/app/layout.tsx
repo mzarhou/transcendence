@@ -1,7 +1,7 @@
 import "./globals.css";
 import { Inter } from "next/font/google";
-import { UserProvider } from "@/context/user-context";
 import { Toaster } from "@/components/ui/toaster";
+import { UserProvider } from "@/context/user-context";
 
 const inter = Inter({ subsets: ["latin"] });
 
@@ -18,7 +18,7 @@ export default async function RootLayout({
   return (
     <html lang="en">
       <body className={`${inter.className}`}>
-        {children}
+        <UserProvider>{children}</UserProvider>
         <Toaster />
       </body>
     </html>

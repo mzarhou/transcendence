@@ -79,6 +79,7 @@ export const UserProvider: FC<UserProviderProps> = ({ children }) => {
 
   const userData = useSWR("/users/me", fetcher, {
     shouldRetryOnError: false,
+    revalidateOnFocus: false,
   });
 
   return (

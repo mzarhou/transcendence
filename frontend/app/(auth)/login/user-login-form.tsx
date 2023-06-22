@@ -7,7 +7,6 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Loader2 } from "lucide-react";
 import { useForm } from "react-hook-form";
-import { SignUpType, signupSchema } from "@transcendence/common";
 import {
   Form,
   FormControl,
@@ -17,47 +16,34 @@ import {
   FormMessage,
 } from "@/components/ui/form";
 import { zodResolver } from "@hookform/resolvers/zod";
-import { useSignUp } from "@/api-hooks/use-signup";
+import { SignInType, signinSchema } from "@transcendence/common";
+import { useSignIn } from "@/api-hooks/use-signin";
+import { School42LoginBtn } from "../components/School42LoginBtn";
 
-interface UserAuthFormProps extends React.HTMLAttributes<HTMLDivElement> {}
+interface UserLoginFormProps extends React.HTMLAttributes<HTMLDivElement> {}
 
-export function UserAuthForm({ className, ...props }: UserAuthFormProps) {
-  const { isMutating: isLoading, signup } = useSignUp();
+export function UserLoginForm({ className, ...props }: UserLoginFormProps) {
+  const { isMutating: isLoading, signin } = useSignIn();
 
-  const form = useForm<SignUpType>({
-    resolver: zodResolver(signupSchema),
+  const form = useForm<SignInType>({
+    resolver: zodResolver(signinSchema),
     defaultValues: {
       email: "",
-      name: "",
       password: "",
     },
   });
 
-  function submit(data: SignUpType) {
-    signup(data).catch((err) => {
+  function submit(data: SignInType) {
+    signin(data).catch((err) => {
       // Todo: handle error
     });
   }
 
   return (
     <div className={cn("grid gap-6", className)} {...props}>
-      {/* {keys.map(k => {})} */}
       <Form {...form}>
         <form onSubmit={form.handleSubmit(submit)}>
           <div className="grid gap-4">
-            <FormField
-              control={form.control}
-              name="name"
-              render={({ field }) => (
-                <FormItem>
-                  <FormLabel>Name</FormLabel>
-                  <FormControl>
-                    <Input placeholder="Your name" {...field} />
-                  </FormControl>
-                  <FormMessage />
-                </FormItem>
-              )}
-            />
             <FormField
               control={form.control}
               name="email"
@@ -82,7 +68,7 @@ export function UserAuthForm({ className, ...props }: UserAuthFormProps) {
                 <FormItem>
                   <FormLabel>Password</FormLabel>
                   <FormControl>
-                    <Input placeholder="********" {...field} />
+                    <Input placeholder="********" type="password" {...field} />
                   </FormControl>
                   <FormMessage />
                 </FormItem>
@@ -95,7 +81,6 @@ export function UserAuthForm({ className, ...props }: UserAuthFormProps) {
           </div>
         </form>
       </Form>
-
       <div className="relative">
         <div className="absolute inset-0 flex items-center">
           <span className="w-full border-t" />
@@ -106,13 +91,7 @@ export function UserAuthForm({ className, ...props }: UserAuthFormProps) {
           </span>
         </div>
       </div>
-      <Button variant="outline" type="button" disabled={isLoading}>
-        {isLoading ? (
-          <Loader2 className="mr-2 h-4 w-4 animate-spin" />
-        ) : (
-          <span>42 School</span>
-        )}
-      </Button>
+      <School42LoginBtn />
     </div>
   );
 }

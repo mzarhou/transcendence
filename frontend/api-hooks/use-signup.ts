@@ -1,9 +1,7 @@
 import { useToast } from "@/components/ui/use-toast";
 import { api } from "@/lib/api";
 import { SignUpType } from "@transcendence/common";
-import { AxiosError } from "axios";
 import { useRouter } from "next/navigation";
-import { useSWRConfig } from "swr";
 import useSWRMutation from "swr/mutation";
 
 export const useSignUp = () => {
@@ -13,12 +11,7 @@ export const useSignUp = () => {
   const { trigger, ...rest } = useSWRMutation(
     `/authentication/sign-up`,
     async (url, { arg }: { arg: SignUpType }) => {
-      return api.post(url, arg).catch((err) => {
-        if (err instanceof AxiosError) {
-          throw err.message;
-        }
-        throw "Unkown error";
-      });
+      return api.post(url, arg);
     },
     {
       onSuccess: () => {
