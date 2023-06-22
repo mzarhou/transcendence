@@ -2,7 +2,6 @@ import { api } from "@/lib/api";
 import useSWR from "swr";
 
 export const useGenerateQrcode = () => {
-  console.log("run useGenerateQrcode");
   const {
     data: qrcode,
     isLoading: isLoadingImage,

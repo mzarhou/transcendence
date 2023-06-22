@@ -4,6 +4,7 @@
   "main": "./dist/index",
   "types": "./dist/index",
   "scripts": {
+   "dev": "tsup --watch",
     "build": "tsup"
   },
   "dependencies": {

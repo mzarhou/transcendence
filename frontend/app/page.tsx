@@ -1,17 +1,17 @@
 "use client";
 
-import { Button } from "@/components/ui/button";
-import axios from "axios";
-import { useUser } from "./context/user-context";
+import { NavBar } from "@/components/navbar";
+import { UserProvider } from "@/context/user-context";
 
 export default function Home() {
-  const { user } = useUser();
-
   return (
-    <main className="mt-4 p-10">
-      <div className="mt-10 overflow-x-auto">
-        <pre className="max-w-lg  whitespace-pre">{JSON.stringify(user)}</pre>
+    <UserProvider>
+      <div className="px-5 md:px-8 ">
+        <NavBar />
       </div>
-    </main>
+      <div className="mb-24 mt-12 px-5 md:px-8">
+        <main className="mx-auto max-w-container"></main>
+      </div>
+    </UserProvider>
   );
 }

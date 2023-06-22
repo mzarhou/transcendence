@@ -19,10 +19,6 @@ export async function POST(req: NextRequest) {
     const tokens = tokensResponseSchema.parse(data);
     console.log("refreshing tokens...");
     return setCookies(response, tokens);
-  } catch (error) {
-    if (error instanceof AxiosError) {
-      console.error(JSON.stringify(error.response?.data));
-    }
-  }
+  } catch (error) {}
   return response;
 }

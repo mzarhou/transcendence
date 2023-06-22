@@ -18,6 +18,8 @@ import { OtpAuthenticationController } from './authentication/otp/otp-authentica
 import { OtpSecretsStorage } from './authentication/otp/otp-secrets.storage';
 import { RedisModule } from 'src/redis/redis.module';
 import { CryptoService } from './authentication/otp/crypto.service';
+import { BcryptService } from './hashing/bcrypt.service';
+import { HashingService } from './hashing/hashing.service';
 
 const Fingerprint = require('express-fingerprint');
 
@@ -41,6 +43,10 @@ const Fingerprint = require('express-fingerprint');
     OtpAuthenticationService,
     OtpSecretsStorage,
     CryptoService,
+    {
+      provide: HashingService,
+      useClass: BcryptService,
+    },
   ],
   controllers: [
     School42AuthController,
