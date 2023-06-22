@@ -1,7 +1,7 @@
 "use client";
 
 import Enable2faButton from "./Enable2faButton";
-import { useUser } from "@/app/context/user-context";
+import { useUser } from "@/context/user-context";
 import Disable2faButton from "./Disable2faButton";
 
 export default function TfaSection() {

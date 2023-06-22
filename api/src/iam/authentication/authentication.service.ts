@@ -1,4 +1,9 @@
-import { Inject, Injectable, UnauthorizedException } from '@nestjs/common';
+import {
+  ConflictException,
+  Inject,
+  Injectable,
+  UnauthorizedException,
+} from '@nestjs/common';
 import { ConfigType } from '@nestjs/config';
 import { JwtService } from '@nestjs/jwt';
 import { InjectRepository } from '@nestjs/typeorm';
@@ -12,6 +17,9 @@ import {
   InvalidateRefreshTokenError,
   RefreshTokenIdsStorage,
 } from './refresh-token-ids.storage';
+import { SignInDto } from './dto/sign-in.dto';
+import { SignUpDto } from './dto/sign-up.dto';
+import { HashingService } from '../hashing/hashing.service';
 
 @Injectable()
 export class AuthenticationService {
@@ -22,7 +30,43 @@ export class AuthenticationService {
     private readonly refreshTokenIdsStorage: RefreshTokenIdsStorage,
     @InjectRepository(User)
     private readonly userRepository: Repository<User>,
+    private readonly hashingService: HashingService,
   ) {}
+
+  async signIn(signInDto: SignInDto, fingerprintHash: string) {
+    const user = await this.userRepository.findOneBy({
+      email: signInDto.email,
+    });
+    if (!user) {
+      throw new UnauthorizedException(undefined, "User doesn't exists");
+    }
+    const isEqual = await this.hashingService.compare(
+      signInDto.password,
+      user.password,
+    );
+    if (!isEqual) {
+      throw new UnauthorizedException(undefined, "Password doesn't match");
+    }
+    return this.generateTokens(user, fingerprintHash);
+  }
+
+  async signUp(signUpDto: SignUpDto) {
+    try {
+      const user = new User();
+      user.email = signUpDto.email;
+      user.password = await this.hashingService.hash(signUpDto.password);
+      user.avatar = `https://avatars.dicebear.com/api/avataaars/${signUpDto.email}.svg`;
+      user.name = signUpDto.name;
+      await this.userRepository.save(user);
+    } catch (error) {
+      const pgUniqueViolationErrorCode = '23505';
+
+      if ((error as { code?: string })?.code === pgUniqueViolationErrorCode) {
+        throw new ConflictException();
+      }
+      throw error;
+    }
+  }
 
   async generateTokens(
     user: User,

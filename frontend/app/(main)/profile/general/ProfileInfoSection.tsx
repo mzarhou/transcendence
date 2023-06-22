@@ -1,7 +1,7 @@
 "use client";
 
 import { useUpdateProfile } from "@/api-hooks/use-update-profile";
-import { useUser } from "@/app/context/user-context";
+import { useUser } from "@/context/user-context";
 import {
   FormControl,
   FormField,

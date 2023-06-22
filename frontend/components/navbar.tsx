@@ -1,16 +1,16 @@
 "use client";
 
-import { useUser } from "@/app/context/user-context";
+import { useUser } from "@/context/user-context";
 import axios from "axios";
 import { Loader2, LucideChevronDown } from "lucide-react";
 import Link from "next/link";
 import { useSWRConfig } from "swr";
-import Auth from "../Auth";
-import Guest from "../Guest";
-import { Button } from "../ui/button";
-import { Popover, PopoverContent, PopoverTrigger } from "../ui/popover";
-import { login } from "./auth";
+import Auth from "./Auth";
+import Guest from "./Guest";
+import { Button, buttonVariants } from "./ui/button";
+import { Popover, PopoverContent, PopoverTrigger } from "./ui/popover";
 import { useRef } from "react";
+import { useRouter } from "next/navigation";
 
 export function NavBar() {
   return (
@@ -26,9 +26,14 @@ export function NavBar() {
           </div>
         }
       >
-        <form action={login}>
-          <Button>Login</Button>
-        </form>
+        <Link
+          href="/login"
+          className={buttonVariants({
+            variant: "default",
+          })}
+        >
+          Login
+        </Link>
       </Guest>
     </div>
   );
@@ -38,6 +43,7 @@ function NavUserPopup() {
   const poppupTriggerRef = useRef<HTMLButtonElement>(null);
   const { user } = useUser();
   const { mutate } = useSWRConfig();
+  const router = useRouter();
 
   const closePoppup = () => {
     poppupTriggerRef.current?.click();
@@ -46,6 +52,7 @@ function NavUserPopup() {
   const logout = async () => {
     await axios.post("/api/auth/logout");
     closePoppup();
+    router.replace("/login");
     mutate("/users/me");
   };
 
