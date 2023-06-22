@@ -29,7 +29,6 @@ export default function Disable2faButton() {
   function submit(data: Enable2faType) {
     disable2FA(data.tfaCode).catch((e) => {
       if (!(e instanceof AxiosError)) return;
-      console.log(e);
       const message = e.response?.data?.message;
       if (message) {
         form.setError("tfaCode", { message });

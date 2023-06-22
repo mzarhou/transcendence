@@ -91,7 +91,7 @@ export function UserSignUpForm({ className, ...props }: UserSignUpFormProps) {
             />
             <Button disabled={isLoading} type="submit">
               {isLoading && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
-              Sign In with Email
+              Sign Up with Email
             </Button>
           </div>
         </form>

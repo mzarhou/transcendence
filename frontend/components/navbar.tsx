@@ -10,6 +10,7 @@ import Guest from "./Guest";
 import { Button, buttonVariants } from "./ui/button";
 import { Popover, PopoverContent, PopoverTrigger } from "./ui/popover";
 import { useRef } from "react";
+import { useRouter } from "next/navigation";
 
 export function NavBar() {
   return (
@@ -42,6 +43,7 @@ function NavUserPopup() {
   const poppupTriggerRef = useRef<HTMLButtonElement>(null);
   const { user } = useUser();
   const { mutate } = useSWRConfig();
+  const router = useRouter();
 
   const closePoppup = () => {
     poppupTriggerRef.current?.click();
@@ -50,6 +52,7 @@ function NavUserPopup() {
   const logout = async () => {
     await axios.post("/api/auth/logout");
     closePoppup();
+    router.replace("/login");
     mutate("/users/me");
   };
 
