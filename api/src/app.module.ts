@@ -1,6 +1,5 @@
 import { Module } from '@nestjs/common';
 import { ConfigModule } from '@nestjs/config';
-import { TypeOrmModule } from '@nestjs/typeorm';
 import { AppController } from './app.controller';
 import { AppService } from './app.service';
 import { UsersModule } from './users/users.module';
@@ -9,6 +8,7 @@ import z from 'zod';
 import { APP_PIPE } from '@nestjs/core';
 import { ZodValidationPipe } from 'nestjs-zod';
 import { RedisModule } from './redis/redis.module';
+import { PrismaModule } from './prisma/prisma.module';
 
 export const dbConfigSchema = z.object({
   DB_TYPE: z.enum(['mysql', 'postgres']),
@@ -23,27 +23,9 @@ export const dbConfigSchema = z.object({
   imports: [
     UsersModule,
     ConfigModule.forRoot(),
-    TypeOrmModule.forRootAsync({
-      useFactory: async () => {
-        await ConfigModule.envVariablesLoaded;
-        const dbConfig = dbConfigSchema.parse({
-          ...process.env,
-          DB_PORT: parseInt(process.env.DB_PORT ?? 'not found'),
-        });
-        return {
-          type: dbConfig.DB_TYPE,
-          host: dbConfig.DB_HOST,
-          port: dbConfig.DB_PORT,
-          username: dbConfig.DB_USERNAME,
-          password: dbConfig.DB_PASSWORD,
-          database: dbConfig.DB_DATABASE,
-          autoLoadEntities: true,
-          synchronize: true,
-        };
-      },
-    }),
     IamModule,
     RedisModule,
+    PrismaModule,
   ],
   controllers: [AppController],
   providers: [

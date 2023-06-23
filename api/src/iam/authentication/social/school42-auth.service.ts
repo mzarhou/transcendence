@@ -3,15 +3,13 @@ import {
   Injectable,
   UnauthorizedException,
 } from '@nestjs/common';
-import { InjectRepository } from '@nestjs/typeorm';
 import axios from 'axios';
-import { User } from '../../../users/entities/user.entity';
-import { Repository } from 'typeorm';
 import z from 'zod';
 import { AuthenticationService } from '../authentication.service';
 import { School42AuthDto } from '../dto/school-42-token.dto';
+import { PrismaService } from 'src/prisma/prisma.service';
 
-export const userSchema = z.object({
+export const user42Schema = z.object({
   id: z.number(),
   email: z.string().min(1),
   login: z.string(),
@@ -31,9 +29,8 @@ export const userSchema = z.object({
 @Injectable()
 export class School42AuthService {
   constructor(
-    @InjectRepository(User)
-    private readonly userRepository: Repository<User>,
     private readonly authService: AuthenticationService,
+    private readonly prisma: PrismaService,
   ) {}
 
   async authenticate(
@@ -43,26 +40,29 @@ export class School42AuthService {
     try {
       const school42User = await this.get42User(accessToken);
 
-      const user = await this.userRepository.findOneBy({
-        school42Id: school42User.id,
+      const user = await this.prisma.user.findFirst({
+        where: { school42Id: school42User.id },
       });
 
       if (user) {
         return this.authService.generateTokens(user, fingerprintHash);
       } else {
-        const user = new User();
-        user.name = school42User.login;
-        user.avatar = school42User.image.link;
-        user.email = school42User.email;
-        user.school42Id = school42User.id;
-        await this.userRepository.save(user);
+        const user = await this.prisma.user.create({
+          data: {
+            name: school42User.login,
+            avatar: school42User.image.link,
+            email: school42User.email,
+            school42Id: school42User.id,
+          },
+        });
         return this.authService.generateTokens(user, fingerprintHash);
       }
     } catch (error) {
-      const pgUniqueViolationErrorCode = '23505';
-      if ((error as any)?.code === pgUniqueViolationErrorCode) {
-        throw new ConflictException();
-      }
+      // TODO: handle UniqueViolationError
+      // const pgUniqueViolationErrorCode = '23505';
+      // if ((error as any)?.code === pgUniqueViolationErrorCode) {
+      //   throw new ConflictException();
+      // }
       throw new UnauthorizedException();
     }
   }
@@ -73,6 +73,6 @@ export class School42AuthService {
         Authorization: `Bearer ${accessToken}`,
       },
     });
-    return userSchema.parse(user);
+    return user42Schema.parse(user);
   }
 }

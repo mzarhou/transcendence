@@ -1,15 +1,7 @@
-import {
-  ConflictException,
-  Inject,
-  Injectable,
-  UnauthorizedException,
-} from '@nestjs/common';
+import { Inject, Injectable, UnauthorizedException } from '@nestjs/common';
 import { ConfigType } from '@nestjs/config';
 import { JwtService } from '@nestjs/jwt';
-import { InjectRepository } from '@nestjs/typeorm';
 import { randomUUID } from 'crypto';
-import { Repository } from 'typeorm';
-import { User } from '../../users/entities/user.entity';
 import jwtConfig from '../config/jwt.config';
 import { ActiveUserData } from '../interface/active-user-data.interface';
 import { RefreshTokenData } from './interface/refresh-token-data.interface';
@@ -20,6 +12,8 @@ import {
 import { SignInDto } from './dto/sign-in.dto';
 import { SignUpDto } from './dto/sign-up.dto';
 import { HashingService } from '../hashing/hashing.service';
+import { PrismaService } from '../../prisma/prisma.service';
+import { User } from '@prisma/client';
 
 @Injectable()
 export class AuthenticationService {
@@ -28,21 +22,20 @@ export class AuthenticationService {
     private readonly jwtConfiguration: ConfigType<typeof jwtConfig>,
     private readonly jwtService: JwtService,
     private readonly refreshTokenIdsStorage: RefreshTokenIdsStorage,
-    @InjectRepository(User)
-    private readonly userRepository: Repository<User>,
+    private readonly prisma: PrismaService,
     private readonly hashingService: HashingService,
   ) {}
 
   async signIn(signInDto: SignInDto, fingerprintHash: string) {
-    const user = await this.userRepository.findOneBy({
-      email: signInDto.email,
+    const user = await this.prisma.user.findFirst({
+      where: { email: signInDto.email },
     });
     if (!user) {
       throw new UnauthorizedException(undefined, "User doesn't exists");
     }
     const isEqual = await this.hashingService.compare(
       signInDto.password,
-      user.password,
+      user.password ?? '',
     );
     if (!isEqual) {
       throw new UnauthorizedException(undefined, "Password doesn't match");
@@ -52,18 +45,21 @@ export class AuthenticationService {
 
   async signUp(signUpDto: SignUpDto) {
     try {
-      const user = new User();
-      user.email = signUpDto.email;
-      user.password = await this.hashingService.hash(signUpDto.password);
-      user.avatar = `https://avatars.dicebear.com/api/avataaars/${signUpDto.email}.svg`;
-      user.name = signUpDto.name;
-      await this.userRepository.save(user);
+      await this.prisma.user.create({
+        data: {
+          email: signUpDto.email,
+          password: await this.hashingService.hash(signUpDto.password),
+          avatar: `https://avatars.dicebear.com/api/avataaars/${signUpDto.email}.svg`,
+          name: signUpDto.name,
+        },
+      });
     } catch (error) {
-      const pgUniqueViolationErrorCode = '23505';
+      // TODO: handle unique voilation error
+      // const pgUniqueViolationErrorCode = '23505';
 
-      if ((error as { code?: string })?.code === pgUniqueViolationErrorCode) {
-        throw new ConflictException();
-      }
+      // if ((error as { code?: string })?.code === pgUniqueViolationErrorCode) {
+      //   throw new ConflictException();
+      // }
       throw error;
     }
   }
@@ -125,7 +121,7 @@ export class AuthenticationService {
           this.jwtConfiguration,
         );
 
-      const user = await this.userRepository.findOneBy({ id: sub });
+      const user = await this.prisma.user.findFirst({ where: { id: sub } });
       if (!user) {
         throw new UnauthorizedException();
       }
