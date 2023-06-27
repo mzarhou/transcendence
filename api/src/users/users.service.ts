@@ -30,6 +30,7 @@ export class UsersService {
     if (!user) {
       throw new NotFoundException();
     }
-    return user;
+    const { secretsId, ...rest } = user;
+    return rest;
   }
 }
