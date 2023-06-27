@@ -29,13 +29,16 @@ export class AuthenticationService {
   async signIn(signInDto: SignInDto, fingerprintHash: string) {
     const user = await this.prisma.user.findFirst({
       where: { email: signInDto.email },
+      include: {
+        secrets: true,
+      },
     });
     if (!user) {
       throw new UnauthorizedException(undefined, "User doesn't exists");
     }
     const isEqual = await this.hashingService.compare(
       signInDto.password,
-      user.password ?? '',
+      user.secrets.password ?? '',
     );
     if (!isEqual) {
       throw new UnauthorizedException(undefined, "Password doesn't match");
@@ -48,9 +51,13 @@ export class AuthenticationService {
       await this.prisma.user.create({
         data: {
           email: signUpDto.email,
-          password: await this.hashingService.hash(signUpDto.password),
           avatar: `https://avatars.dicebear.com/api/avataaars/${signUpDto.email}.svg`,
           name: signUpDto.name,
+          secrets: {
+            create: {
+              password: await this.hashingService.hash(signUpDto.password),
+            },
+          },
         },
       });
     } catch (error) {

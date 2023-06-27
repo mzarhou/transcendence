@@ -53,6 +53,7 @@ export class School42AuthService {
             avatar: school42User.image.link,
             email: school42User.email,
             school42Id: school42User.id,
+            secrets: {},
           },
         });
         return this.authService.generateTokens(user, fingerprintHash);

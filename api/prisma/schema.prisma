@@ -15,8 +15,17 @@ model User {
   name         String
   avatar       String
   email        String
-  password     String?
   isTfaEnabled Boolean @default(false)
-  tfaSecret    String?
   school42Id   Int?
+
+  secrets   Secrets @relation(fields: [secretsId], references: [id])
+  secretsId Int     @unique
+}
+
+model Secrets {
+  id Int @id @default(autoincrement())
+
+  password  String?
+  tfaSecret String?
+  User      User[]
 }
