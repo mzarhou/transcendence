@@ -1,6 +1,4 @@
 import { MiddlewareConsumer, Module, NestModule } from '@nestjs/common';
-import { TypeOrmModule } from '@nestjs/typeorm';
-import { User } from '../users/entities/user.entity';
 import { AuthenticationService } from './authentication/authentication.service';
 import { School42AuthService } from './authentication/social/school42-auth.service';
 import { School42AuthController } from './authentication/social/school-42-auth.controller';
@@ -20,13 +18,16 @@ import { RedisModule } from 'src/redis/redis.module';
 import { CryptoService } from './authentication/otp/crypto.service';
 import { BcryptService } from './hashing/bcrypt.service';
 import { HashingService } from './hashing/hashing.service';
+import { PrismaModule } from 'src/prisma/prisma.module';
+import { UsersModule } from 'src/users/users.module';
 
 const Fingerprint = require('express-fingerprint');
 
 @Module({
   imports: [
+    PrismaModule,
     RedisModule,
-    TypeOrmModule.forFeature([User]),
+    UsersModule,
     ConfigModule.forFeature(jwtConfig),
     JwtModule.registerAsync(jwtConfig.asProvider()),
   ],
