@@ -8,6 +8,7 @@ import z from 'zod';
 import { AuthenticationService } from '../authentication.service';
 import { School42AuthDto } from '../dto/school-42-token.dto';
 import { PrismaService } from 'src/prisma/prisma.service';
+import { Prisma } from '@prisma/client';
 
 export const user42Schema = z.object({
   id: z.number(),
@@ -59,11 +60,7 @@ export class School42AuthService {
         return this.authService.generateTokens(user, fingerprintHash);
       }
     } catch (error) {
-      // TODO: handle UniqueViolationError
-      // const pgUniqueViolationErrorCode = '23505';
-      // if ((error as any)?.code === pgUniqueViolationErrorCode) {
-      //   throw new ConflictException();
-      // }
+      if (error instanceof Prisma.PrismaClientKnownRequestError) throw error;
       throw new UnauthorizedException();
     }
   }

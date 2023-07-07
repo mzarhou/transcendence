@@ -14,7 +14,7 @@ model User {
   id           Int     @id @default(autoincrement())
   name         String
   avatar       String
-  email        String
+  email        String  @unique
   isTfaEnabled Boolean @default(false)
   school42Id   Int?
 

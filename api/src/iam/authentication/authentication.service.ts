@@ -1,4 +1,9 @@
-import { Inject, Injectable, UnauthorizedException } from '@nestjs/common';
+import {
+  ConflictException,
+  Inject,
+  Injectable,
+  UnauthorizedException,
+} from '@nestjs/common';
 import { ConfigType } from '@nestjs/config';
 import { JwtService } from '@nestjs/jwt';
 import { randomUUID } from 'crypto';
@@ -47,28 +52,18 @@ export class AuthenticationService {
   }
 
   async signUp(signUpDto: SignUpDto) {
-    try {
-      await this.prisma.user.create({
-        data: {
-          email: signUpDto.email,
-          avatar: `https://avatars.dicebear.com/api/avataaars/${signUpDto.email}.svg`,
-          name: signUpDto.name,
-          secrets: {
-            create: {
-              password: await this.hashingService.hash(signUpDto.password),
-            },
+    await this.prisma.user.create({
+      data: {
+        email: signUpDto.email,
+        avatar: `https://avatars.dicebear.com/api/avataaars/${signUpDto.email}.svg`,
+        name: signUpDto.name,
+        secrets: {
+          create: {
+            password: await this.hashingService.hash(signUpDto.password),
           },
         },
-      });
-    } catch (error) {
-      // TODO: handle unique voilation error
-      // const pgUniqueViolationErrorCode = '23505';
-
-      // if ((error as { code?: string })?.code === pgUniqueViolationErrorCode) {
-      //   throw new ConflictException();
-      // }
-      throw error;
-    }
+      },
+    });
   }
 
   async generateTokens(
