@@ -21,6 +21,14 @@ export class PrismaClientExceptionFilter implements ExceptionFilter {
       });
     }
 
+    if (exception.code === 'P2003') {
+      return response.status(HttpStatusCode.BadRequest).json({
+        statusCode: HttpStatusCode.BadRequest,
+        message: 'Bad request',
+      });
+    }
+
+    console.log(exception.code, exception.message);
     return response.status(HttpStatusCode.InternalServerError).json({
       statusCode: HttpStatusCode.InternalServerError,
       message: 'Unknown Error',

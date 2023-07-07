@@ -20,6 +20,9 @@ model User {
 
   secrets   Secrets @relation(fields: [secretsId], references: [id])
   secretsId Int     @unique
+
+  SentFriendRequests     FriendRequest[] @relation("User_HasMany_SentFriendRequests")
+  RecievedFriendRequests FriendRequest[] @relation("User_HasMany_RecievedFriendRequests")
 }
 
 model Secrets {
@@ -28,4 +31,16 @@ model Secrets {
   password  String?
   tfaSecret String?
   User      User[]
+}
+
+model FriendRequest {
+  id Int @id @default(autoincrement())
+
+  requester   User @relation("User_HasMany_SentFriendRequests", fields: [requesterId], references: [id])
+  requesterId Int
+
+  recipient   User @relation("User_HasMany_RecievedFriendRequests", fields: [recipientId], references: [id])
+  recipientId Int
+
+  @@unique([requesterId, recipientId])
 }
