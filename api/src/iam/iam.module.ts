@@ -1,13 +1,11 @@
 import { MiddlewareConsumer, Module, NestModule } from '@nestjs/common';
-import { TypeOrmModule } from '@nestjs/typeorm';
-import { User } from '../users/entities/user.entity';
 import { AuthenticationService } from './authentication/authentication.service';
 import { School42AuthService } from './authentication/social/school42-auth.service';
 import { School42AuthController } from './authentication/social/school-42-auth.controller';
 import { ConfigModule } from '@nestjs/config';
 import jwtConfig from './config/jwt.config';
 import { JwtModule } from '@nestjs/jwt';
-import { APP_GUARD } from '@nestjs/core';
+import { APP_FILTER, APP_GUARD } from '@nestjs/core';
 import { AuthenticationGuard } from './authentication/guards/authentication.guard';
 import { AccessTokenGuard } from './authentication/guards/access-token.guard';
 import { AuthenticationController } from './authentication/authentication.controller';
@@ -20,13 +18,18 @@ import { RedisModule } from 'src/redis/redis.module';
 import { CryptoService } from './authentication/otp/crypto.service';
 import { BcryptService } from './hashing/bcrypt.service';
 import { HashingService } from './hashing/hashing.service';
+import { PrismaModule } from 'src/prisma/prisma.module';
+import { UsersModule } from 'src/users/users.module';
+import { CaslExceptionFilter } from './authorization/casl-exception.filter';
+import { AbilityFactory } from './authorization/ability.factory';
 
 const Fingerprint = require('express-fingerprint');
 
 @Module({
   imports: [
+    PrismaModule,
     RedisModule,
-    TypeOrmModule.forFeature([User]),
+    UsersModule,
     ConfigModule.forFeature(jwtConfig),
     JwtModule.registerAsync(jwtConfig.asProvider()),
   ],
@@ -46,6 +49,11 @@ const Fingerprint = require('express-fingerprint');
     {
       provide: HashingService,
       useClass: BcryptService,
+    },
+    AbilityFactory,
+    {
+      provide: APP_FILTER,
+      useClass: CaslExceptionFilter,
     },
   ],
   controllers: [

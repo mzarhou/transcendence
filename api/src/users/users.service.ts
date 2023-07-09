@@ -1,17 +1,11 @@
 import { Injectable, NotFoundException } from '@nestjs/common';
-import { InjectRepository } from '@nestjs/typeorm';
-import { Repository } from 'typeorm';
-import { CreateUserDto } from './dto/create-user.dto';
 import { UpdateUserDto } from './dto/update-user.dto';
-import { User } from './entities/user.entity';
 import { ActiveUserData } from 'src/iam/interface/active-user-data.interface';
+import { PrismaService } from 'src/prisma/prisma.service';
 
 @Injectable()
 export class UsersService {
-  constructor(
-    @InjectRepository(User)
-    private readonly userRepository: Repository<User>,
-  ) {}
+  constructor(private readonly prisma: PrismaService) {}
 
   async updateProfile(
     activeUser: ActiveUserData,
@@ -21,22 +15,22 @@ export class UsersService {
     if (noUpdate) {
       return this.findOne(activeUser.sub);
     }
-    await this.userRepository.update(
-      { id: activeUser.sub },
-      {
+    await this.prisma.user.update({
+      where: { id: activeUser.sub },
+      data: {
         name: updateUserDto.name,
         avatar: updateUserDto.avatar,
       },
-    );
+    });
     return this.findOne(activeUser.sub);
   }
 
   async findOne(id: number) {
-    const user = await this.userRepository.findOneBy({ id });
+    const user = await this.prisma.user.findFirst({ where: { id } });
     if (!user) {
       throw new NotFoundException();
     }
-    const { tfaSecret, school42Id, ...rest } = user;
+    const { secretsId, ...rest } = user;
     return rest;
   }
 }
