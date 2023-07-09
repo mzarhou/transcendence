@@ -9,6 +9,7 @@ import { APP_PIPE } from '@nestjs/core';
 import { ZodValidationPipe } from 'nestjs-zod';
 import { RedisModule } from './redis/redis.module';
 import { PrismaModule } from './prisma/prisma.module';
+import { ChatModule } from './chat/chat.module';
 
 export const dbConfigSchema = z.object({
   DB_TYPE: z.enum(['mysql', 'postgres']),
@@ -26,6 +27,7 @@ export const dbConfigSchema = z.object({
     IamModule,
     RedisModule,
     PrismaModule,
+    ChatModule,
   ],
   controllers: [AppController],
   providers: [

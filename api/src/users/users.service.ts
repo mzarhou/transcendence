@@ -33,4 +33,46 @@ export class UsersService {
     const { secretsId, ...rest } = user;
     return rest;
   }
+
+  async findFriends(activeUser: ActiveUserData) {
+    const currentUser = await this.prisma.user.findFirstOrThrow({
+      where: { id: activeUser.sub },
+      include: {
+        friends: true,
+      },
+    });
+    return currentUser.friends;
+  }
+
+  async blockUser(user: ActiveUserData, targetUserId: number) {
+    await this.prisma.user.update({
+      where: { id: user.sub },
+      data: {
+        blockedUsers: {
+          connect: { id: targetUserId },
+        },
+      },
+    });
+  }
+
+  async unblockUser(user: ActiveUserData, targetUserId: number) {
+    await this.prisma.user.update({
+      where: { id: user.sub },
+      data: {
+        blockedUsers: {
+          disconnect: { id: targetUserId },
+        },
+      },
+    });
+  }
+
+  async findBlockedUsers(activeUser: ActiveUserData) {
+    const currentUser = await this.prisma.user.findFirstOrThrow({
+      where: { id: activeUser.sub },
+      include: {
+        blockedUsers: true,
+      },
+    });
+    return currentUser.blockedUsers;
+  }
 }
