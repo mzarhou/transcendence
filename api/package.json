@@ -22,6 +22,8 @@
     "build:common": "yarn workspace @transcendence/common build"
   },
   "dependencies": {
+    "@casl/ability": "^6.5.0",
+    "@casl/prisma": "^1.4.0",
     "@nestjs/common": "^9.0.0",
     "@nestjs/config": "^2.3.2",
     "@nestjs/core": "^9.0.0",
