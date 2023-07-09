@@ -121,4 +121,25 @@ export class FriendRequestService {
       throw error;
     }
   }
+
+  async unfriend(targetUserId: number, user: ActiveUserData) {
+    await this.prisma.$transaction([
+      this.prisma.user.update({
+        where: { id: user.sub },
+        data: {
+          friends: {
+            disconnect: { id: targetUserId },
+          },
+        },
+      }),
+      this.prisma.user.update({
+        where: { id: targetUserId },
+        data: {
+          friends: {
+            disconnect: { id: user.sub },
+          },
+        },
+      }),
+    ]);
+  }
 }
