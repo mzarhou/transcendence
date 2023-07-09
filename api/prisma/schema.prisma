@@ -23,6 +23,9 @@ model User {
 
   SentFriendRequests     FriendRequest[] @relation("User_HasMany_SentFriendRequests")
   RecievedFriendRequests FriendRequest[] @relation("User_HasMany_RecievedFriendRequests")
+
+  friends         User[] @relation("friends")
+  friendsRelation User[] @relation("friends")
 }
 
 model Secrets {

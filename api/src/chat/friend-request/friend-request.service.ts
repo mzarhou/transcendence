@@ -7,6 +7,7 @@ import {
 import { CreateFriendRequestDto } from './dto/create-friend-request.dto';
 import { PrismaService } from 'src/prisma/prisma.service';
 import { ActiveUserData } from 'src/iam/interface/active-user-data.interface';
+import { Prisma } from '@prisma/client';
 
 @Injectable()
 export class FriendRequestService {
@@ -77,5 +78,47 @@ export class FriendRequestService {
         id,
       },
     });
+  }
+
+  async accept(id: number, user: ActiveUserData) {
+    try {
+      const {
+        id: friendRequestId,
+        requesterId,
+        recipientId,
+      } = await this.prisma.friendRequest.findFirstOrThrow({ where: { id } });
+
+      if (recipientId !== user.sub) {
+        throw new UnauthorizedException();
+      }
+
+      // add user as friend
+      await this.prisma.$transaction([
+        this.prisma.user.update({
+          where: { id: requesterId },
+          data: {
+            friends: {
+              connect: { id: recipientId },
+            },
+          },
+        }),
+        this.prisma.user.update({
+          where: { id: recipientId },
+          data: {
+            friends: {
+              connect: { id: requesterId },
+            },
+          },
+        }),
+        this.prisma.friendRequest.delete({
+          where: { id: friendRequestId },
+        }),
+      ]);
+    } catch (error) {
+      if (error instanceof Prisma.PrismaClientKnownRequestError) {
+        throw new NotFoundException('invalid friend request');
+      }
+      throw error;
+    }
   }
 }

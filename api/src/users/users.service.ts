@@ -33,4 +33,14 @@ export class UsersService {
     const { secretsId, ...rest } = user;
     return rest;
   }
+
+  async findFriends(activeUser: ActiveUserData) {
+    const currentUser = await this.prisma.user.findFirstOrThrow({
+      where: { id: activeUser.sub },
+      include: {
+        friends: true,
+      },
+    });
+    return currentUser.friends;
+  }
 }
