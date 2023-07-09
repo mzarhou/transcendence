@@ -2,15 +2,16 @@ import { AbilityBuilder, PureAbility } from '@casl/ability';
 import { Injectable } from '@nestjs/common';
 import { ActiveUserData } from '../interface/active-user-data.interface';
 import { PrismaQuery, Subjects, createPrismaAbility } from '@casl/prisma';
-import { User } from '@prisma/client';
+import { User, FriendRequest } from '@prisma/client';
 
-type Action = 'create' | 'read' | 'update' | 'delete';
+type Action = 'create' | 'read' | 'update' | 'delete' | 'accept';
 
 export type AppAbility = PureAbility<
   [
     Action,
     Subjects<{
       User: User;
+      FriendRequest: FriendRequest;
     }>,
   ],
   PrismaQuery
@@ -18,15 +19,23 @@ export type AppAbility = PureAbility<
 
 @Injectable()
 export class AbilityFactory {
-  defineForUser(user: Omit<ActiveUserData, 'allow'>) {
+  defineForUser({ sub: userId }: Omit<ActiveUserData, 'allow'>) {
     const { can, cannot, build } = new AbilityBuilder<AppAbility>(
       createPrismaAbility,
     );
 
     /**
-     * user can read his profile
+     * friend request
      */
-    can('read', 'User', { id: user.sub });
+    can('create', 'FriendRequest');
+    can('read', 'FriendRequest', {
+      OR: [{ requesterId: userId }, { recipientId: userId }],
+    });
+    can('delete', 'FriendRequest', {
+      OR: [{ requesterId: userId }, { recipientId: userId }],
+    });
+    can('accept', 'FriendRequest', { recipientId: userId });
+
     return build();
   }
 }

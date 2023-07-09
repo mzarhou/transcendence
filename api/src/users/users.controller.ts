@@ -11,10 +11,8 @@ export class UsersController {
   constructor(private readonly usersService: UsersService) {}
 
   @Get('me')
-  async me(@ActiveUser() user: ActiveUserData) {
-    const userProfile = await this.usersService.findOne(user.sub);
-    user.allow('read', subject('User', { ...userProfile, secretsId: 10 }));
-    return userProfile;
+  me(@ActiveUser() user: ActiveUserData) {
+    return this.usersService.findOne(user.sub);
   }
 
   @Patch('me')

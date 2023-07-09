@@ -13,6 +13,7 @@ import { CreateFriendRequestDto } from './dto/create-friend-request.dto';
 import { ActiveUser } from 'src/iam/decorators/active-user.decorator';
 import { ActiveUserData } from 'src/iam/interface/active-user-data.interface';
 import { IdDto } from 'src/common/dto/id-param.dto';
+import { subject } from '@casl/ability';
 
 @Controller('chat/friend-request')
 export class FriendRequestController {
@@ -23,19 +24,12 @@ export class FriendRequestController {
     @ActiveUser() user: ActiveUserData,
     @Body() createFriendRequestDto: CreateFriendRequestDto,
   ) {
-    // TODO: check if user authorized to send this request
+    user.allow('create', 'FriendRequest');
     return this.friendRequestService.create(user, createFriendRequestDto);
-  }
-
-  @Get()
-  findAll() {
-    // TODO: check if user authorized to send this request
-    return this.friendRequestService.findAll();
   }
 
   @Get('sent')
   findSent(@ActiveUser() user: ActiveUserData) {
-    // TODO: check if user authorized to send this request
     return this.friendRequestService.findSent(user);
   }
 
@@ -45,20 +39,24 @@ export class FriendRequestController {
   }
 
   @Get(':id')
-  findOne(@Param() { id }: IdDto) {
-    // TODO: check if user authorized to send this request
-    return this.friendRequestService.findOne(id);
+  async findOne(@Param() { id }: IdDto, @ActiveUser() user: ActiveUserData) {
+    const friendRequest = await this.friendRequestService.findOne(id);
+    user.allow('read', subject('FriendRequest', friendRequest));
+    return friendRequest;
   }
 
   @Delete(':id')
-  remove(@Param() { id }: IdDto, @ActiveUser() user: ActiveUserData) {
-    // TODO: check if user authorized to send this request
-    return this.friendRequestService.remove(id, user);
+  async remove(@Param() { id }: IdDto, @ActiveUser() user: ActiveUserData) {
+    const friendRequest = await this.friendRequestService.findOne(id);
+    user.allow('delete', subject('FriendRequest', friendRequest));
+    return this.friendRequestService.remove(id);
   }
 
   @HttpCode(HttpStatus.OK)
   @Post(':id/accept')
-  accept(@Param() { id }: IdDto, @ActiveUser() user: ActiveUserData) {
+  async accept(@Param() { id }: IdDto, @ActiveUser() user: ActiveUserData) {
+    const friendRequest = await this.friendRequestService.findOne(id);
+    user.allow('accept', subject('FriendRequest', friendRequest));
     return this.friendRequestService.accept(id, user);
   }
 

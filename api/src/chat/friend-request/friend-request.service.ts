@@ -51,10 +51,6 @@ export class FriendRequestService {
     });
   }
 
-  findAll() {
-    return `This action returns all friendRequest`;
-  }
-
   async findOne(id: number) {
     const targetFriendRequest = await this.prisma.friendRequest.findFirst({
       where: {
@@ -68,11 +64,7 @@ export class FriendRequestService {
     return targetFriendRequest;
   }
 
-  async remove(id: number, user: ActiveUserData) {
-    const targetFriendRequest = await this.findOne(id);
-    if (targetFriendRequest.requesterId !== user.sub) {
-      throw new UnauthorizedException();
-    }
+  async remove(id: number) {
     await this.prisma.friendRequest.delete({
       where: {
         id,
