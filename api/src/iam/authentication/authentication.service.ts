@@ -74,7 +74,7 @@ export class AuthenticationService {
     const refreshTokenId = randomUUID();
 
     const [accessToken, refreshToken] = await Promise.all([
-      this.signToken<Omit<ActiveUserData, 'sub'>>(
+      this.signToken<Omit<ActiveUserData, 'sub' | 'allow'>>(
         user,
         this.jwtConfiguration.accessTokenTtl,
         {
