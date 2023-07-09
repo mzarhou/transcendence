@@ -28,10 +28,9 @@ export class PrismaClientExceptionFilter implements ExceptionFilter {
       });
     }
 
-    console.log(exception.code, exception.message);
-    return response.status(HttpStatusCode.InternalServerError).json({
-      statusCode: HttpStatusCode.InternalServerError,
-      message: 'Unknown Error',
+    return response.status(HttpStatusCode.BadRequest).json({
+      statusCode: HttpStatusCode.BadRequest,
+      message: 'Error: ' + exception.code,
     });
   }
 }

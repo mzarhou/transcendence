@@ -26,6 +26,9 @@ model User {
 
   friends         User[] @relation("friends")
   friendsRelation User[] @relation("friends")
+
+  blockedUsers         User[] @relation("blockedUsers")
+  blockedUsersRelation User[] @relation("blockedUsers")
 }
 
 model Secrets {
