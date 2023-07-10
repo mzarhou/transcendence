@@ -11,30 +11,34 @@ import { Button, buttonVariants } from "./ui/button";
 import { Popover, PopoverContent, PopoverTrigger } from "./ui/popover";
 import { useRef } from "react";
 import { useRouter } from "next/navigation";
+import { ModeToggle } from "./mode-toggle";
 
 export function NavBar() {
   return (
-    <div className="mx-auto flex min-h-header max-w-container items-center justify-between">
+    <div className="min-h-header max-w-container mx-auto flex items-center justify-between py-2">
       <div></div>
-      <Auth>
-        <NavUserPopup />
-      </Auth>
-      <Guest
-        Loader={
-          <div className="flex w-16 items-center justify-center">
-            <Loader2 className="animate-spin" />
-          </div>
-        }
-      >
-        <Link
-          href="/login"
-          className={buttonVariants({
-            variant: "default",
-          })}
+      <div className="flex items-center">
+        <ModeToggle className="mr-1" />
+        <Auth>
+          <NavUserPopup />
+        </Auth>
+        <Guest
+          Loader={
+            <div className="flex w-16 items-center justify-center">
+              <Loader2 className="animate-spin" />
+            </div>
+          }
         >
-          Login
-        </Link>
-      </Guest>
+          <Link
+            href="/login"
+            className={buttonVariants({
+              variant: "default",
+            })}
+          >
+            Login
+          </Link>
+        </Guest>
+      </div>
     </div>
   );
 }
