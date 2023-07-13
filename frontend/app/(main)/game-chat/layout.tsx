@@ -1,16 +1,20 @@
 import { Button } from "@/components/ui/button";
 import { Dialog, DialogContent, DialogTrigger } from "@/components/ui/dialog";
-import { MessageCircle, MessageSquare, MessagesSquare } from "lucide-react";
+import { MessagesSquare } from "lucide-react";
 import { ReactNode } from "react";
+import GoBackBtn from "./components/chat-go-back";
 
 type Props = {
   children: ReactNode;
 };
 export default function GameLayout({ children }: Props) {
   const chatPopup = (
-    <div className="flex h-full w-full flex-col space-y-10 rounded-md bg-chat p-4 pt-10 text-chat-foreground/70 md:shadow-sm">
-      {children}
-    </div>
+    <>
+      <div className="flex h-full w-full flex-col rounded-md bg-chat text-chat-foreground/70 md:shadow-sm">
+        <GoBackBtn className="md:ml-4 md:py-5" />
+        {children}
+      </div>
+    </>
   );
 
   return (
@@ -29,7 +33,7 @@ export default function GameLayout({ children }: Props) {
         <div className="flex h-full flex-grow items-center justify-center rounded-md bg-chat text-3xl font-light text-chat-foreground/40">
           Game
         </div>
-        <div className="hidden h-full w-full overflow-y-hidden md:block md:max-w-sm">
+        <div className="relative hidden h-full w-full overflow-y-hidden md:block md:max-w-sm">
           {chatPopup}
         </div>
       </div>
