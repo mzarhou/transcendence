@@ -34,16 +34,6 @@ export class UsersService {
     return rest;
   }
 
-  async findFriends(activeUser: ActiveUserData) {
-    const currentUser = await this.prisma.user.findFirstOrThrow({
-      where: { id: activeUser.sub },
-      include: {
-        friends: true,
-      },
-    });
-    return currentUser.friends;
-  }
-
   async blockUser(user: ActiveUserData, targetUserId: number) {
     await this.prisma.user.update({
       where: { id: user.sub },
