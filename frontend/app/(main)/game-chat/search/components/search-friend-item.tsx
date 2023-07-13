@@ -6,20 +6,22 @@ import {
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
 import { DropdownMenuItem } from "@radix-ui/react-dropdown-menu";
+import { User } from "@transcendence/common";
 import { MoreVertical } from "lucide-react";
 
 type SearchFriendItemProps = {
-  id: number;
+  user: User;
 };
-export default function SearchFriendItem({ id }: SearchFriendItemProps) {
+export default function SearchFriendItem({ user }: SearchFriendItemProps) {
   return (
     <div className="flex justify-between">
       <div className="flex space-x-4">
         <div className="relative flex aspect-square h-[72px] items-center justify-center rounded-full bg-gray-200 text-lg">
-          <span className="text-gray-500">{id}</span>
+          <span className="text-gray-500">{user.id}</span>
         </div>
         <div className="mt-0.5">
-          <p>Mohamed ZARHOU</p>
+          <p>{user.name}</p>
+          {/* TODO: update with real data */}
           <p className="text-sm text-chat-foreground/60">In game</p>
           <p className="text-sm text-chat-foreground/60">#55</p>
         </div>

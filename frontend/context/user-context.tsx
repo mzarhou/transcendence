@@ -1,19 +1,11 @@
 "use client";
 
 import { api } from "@/lib/api";
+import { User } from "@transcendence/common";
 import axios, { AxiosError } from "axios";
 import { usePathname, useRouter } from "next/navigation";
 import { createContext, FC, useContext, useEffect, useState } from "react";
 import useSWR, { SWRResponse } from "swr";
-
-export interface User {
-  id: number;
-  name: string;
-  avatar: string;
-  email: string;
-  school42Id: number;
-  isTfaEnabled: boolean;
-}
 
 type UserContextType = Pick<
   SWRResponse<User, any, any>,

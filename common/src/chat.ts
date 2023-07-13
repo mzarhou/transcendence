@@ -6,6 +6,6 @@ export const createFriendRequestSchema = z.object({
 export type CreateFriendRequestType = z.infer<typeof createFriendRequestSchema>;
 
 export const searchSchema = z.object({
-  term: z.string().min(3),
+  term: z.string(),
 });
 export type SearchType = z.infer<typeof searchSchema>;
