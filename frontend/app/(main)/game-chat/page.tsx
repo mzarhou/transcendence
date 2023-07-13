@@ -1,8 +1,13 @@
-import { MoreVertical } from "lucide-react";
+"use client";
+
+import { Loader2, MoreVertical } from "lucide-react";
 import FriendItem from "./components/friend-item";
 import FakeChatSearch from "./components/fake-chat-search";
+import { useFriends } from "@/api-hooks/use-friends";
 
 export default function Game() {
+  const { data: friends, isLoading } = useFriends();
+
   return (
     <div className="mt-9 flex h-0 flex-grow flex-col space-y-10 p-4">
       <FakeChatSearch />
@@ -24,11 +29,17 @@ export default function Game() {
           <h3 className="text-sm">Friends</h3>
         </div>
         <div className="h-0 flex-grow space-y-4 overflow-y-auto pr-2">
-          {Array(100)
-            .fill(null)
-            .map((_, index) => (
-              <FriendItem id={index + 1} showOnlineStatus />
-            ))}
+          {isLoading ? (
+            <div className="h-full pt-4 text-chat-foreground/30">
+              <Loader2 className="mx-auto h-8 w-8 animate-spin" />
+            </div>
+          ) : friends && friends.length ? (
+            friends.map((frd) => <FriendItem friend={frd} />)
+          ) : (
+            <div className="flex h-full items-center justify-center text-2xl text-chat-foreground/30">
+              No friend found
+            </div>
+          )}
         </div>
       </div>
     </div>

@@ -10,6 +10,7 @@ import { LoaderButton } from "@/components/ui/loader-button";
 import { DropdownMenuItem } from "@radix-ui/react-dropdown-menu";
 import { SearchUser } from "@transcendence/common";
 import { MoreVertical } from "lucide-react";
+import Image from "next/image";
 
 type SearchFriendItemProps = {
   user: SearchUser;
@@ -18,8 +19,14 @@ export default function SearchFriendItem({ user }: SearchFriendItemProps) {
   return (
     <div className="relative flex justify-between">
       <div className="flex flex-grow space-x-4">
-        <div className="relative flex aspect-square h-[72px] items-center justify-center rounded-full bg-gray-200 text-lg">
-          <span className="text-gray-500">{user.id}</span>
+        <div className="relative flex aspect-square h-[72px] items-center justify-center rounded-full bg-gray-100/10 text-lg">
+          <Image
+            src={user.avatar}
+            width={72}
+            height={72}
+            alt=""
+            className="rounded-full"
+          />
         </div>
         <div className="mt-0.5">
           <p>{user.name}</p>

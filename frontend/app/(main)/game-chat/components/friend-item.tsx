@@ -6,24 +6,29 @@ import {
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
 import { DropdownMenuItem } from "@radix-ui/react-dropdown-menu";
+import { User } from "@transcendence/common";
 import { MoreVertical } from "lucide-react";
+import Image from "next/image";
 
 type FriendItemProps = {
-  id: number;
-  showOnlineStatus?: boolean;
+  friend: User;
 };
-export default function FriendItem({ id, showOnlineStatus }: FriendItemProps) {
+export default function FriendItem({ friend }: FriendItemProps) {
   return (
     <div className="flex justify-between">
       <div className="flex space-x-4">
-        <div className="relative flex aspect-square h-[72px] items-center justify-center rounded-full bg-gray-200 text-lg">
-          <span className="text-gray-500">{id}</span>
-          {showOnlineStatus && (
-            <div className="absolute bottom-1.5 right-0.5 h-4 w-4 rounded-full border-2 border-chat bg-green-400"></div>
-          )}
+        <div className="relative flex aspect-square h-[72px] items-center justify-center rounded-full bg-gray-100/10 text-lg">
+          <Image
+            src={friend.avatar}
+            width={72}
+            height={72}
+            alt=""
+            className="rounded-full"
+          />
+          <div className="absolute bottom-1.5 right-0.5 h-4 w-4 rounded-full border-2 border-chat bg-green-400"></div>
         </div>
         <div className="mt-0.5">
-          <p>Farouk Ech</p>
+          <p>{friend.name}</p>
           <p className="text-sm text-chat-foreground/60">In game</p>
           <p className="text-sm text-chat-foreground/60">#60</p>
         </div>
