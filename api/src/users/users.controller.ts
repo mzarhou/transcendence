@@ -3,7 +3,6 @@ import { UsersService } from './users.service';
 import { UpdateUserDto } from './dto/update-user.dto';
 import { ActiveUser } from 'src/iam/decorators/active-user.decorator';
 import { ActiveUserData } from 'src/iam/interface/active-user-data.interface';
-import { subject } from '@casl/ability';
 import { IdDto } from 'src/common/dto/id-param.dto';
 
 @Controller('users')
@@ -21,11 +20,6 @@ export class UsersController {
     @Body() updateUserDto: UpdateUserDto,
   ) {
     return this.usersService.updateProfile(currentUser, updateUserDto);
-  }
-
-  @Get('friends')
-  async findFriends(@ActiveUser() user: ActiveUserData) {
-    return this.usersService.findFriends(user);
   }
 
   @Get('blocked')

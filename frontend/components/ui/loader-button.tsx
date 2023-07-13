@@ -14,7 +14,7 @@ export const LoaderButton: FC<LoaderButtonProps> = ({
   ...props
 }) => {
   return (
-    <Button type="submit" {...props}>
+    <Button type="submit" disabled={isLoading} {...props}>
       {isLoading ? (
         <Loader2 className={cn("animate-spin", iconClassName)} />
       ) : (

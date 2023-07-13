@@ -1,27 +1,23 @@
-import { Body, Controller, Post } from '@nestjs/common';
+import { Body, Controller, Get, Post } from '@nestjs/common';
 import { SearchUsersDto } from './dto/search-users.dto';
-import { PrismaService } from 'src/prisma/prisma.service';
 import { ActiveUser } from 'src/iam/decorators/active-user.decorator';
 import { ActiveUserData } from 'src/iam/interface/active-user-data.interface';
+import { ChatService } from './chat.service';
 
 @Controller('chat')
 export class ChatController {
-  constructor(private readonly prisma: PrismaService) {}
+  constructor(private readonly chatService: ChatService) {}
 
   @Post('search')
-  search(@ActiveUser() user: ActiveUserData, @Body() { term }: SearchUsersDto) {
-    if (term.length === 0) {
-      return [];
-    }
-    return this.prisma.user.findMany({
-      where: {
-        id: {
-          notIn: [user.sub],
-        },
-        name: {
-          contains: term,
-        },
-      },
-    });
+  async search(
+    @ActiveUser() user: ActiveUserData,
+    @Body() { term }: SearchUsersDto,
+  ) {
+    return this.chatService.search(user, term);
+  }
+
+  @Get('friends')
+  async findFriends(@ActiveUser() user: ActiveUserData) {
+    return this.chatService.findFriends(user);
   }
 }
