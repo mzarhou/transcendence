@@ -9,7 +9,7 @@ import {
 import { LoaderButton } from "@/components/ui/loader-button";
 import { DropdownMenuItem } from "@radix-ui/react-dropdown-menu";
 import { SearchUser } from "@transcendence/common";
-import { MoreVertical } from "lucide-react";
+import { MoreVertical, Plus } from "lucide-react";
 import Image from "next/image";
 
 type SearchFriendItemProps = {
@@ -68,7 +68,7 @@ function AddFriendBtn({ user }: SearchFriendItemProps) {
   return (
     <LoaderButton
       size="sm"
-      className="h-8 w-24"
+      className="h-8 space-x-0.5 font-semibold"
       isLoading={isMutating}
       onClick={() => {
         trigger({
@@ -76,7 +76,8 @@ function AddFriendBtn({ user }: SearchFriendItemProps) {
         });
       }}
     >
-      add friend
+      <span>Add</span>
+      <Plus className="h-5 w-5" />
     </LoaderButton>
   );
 }
