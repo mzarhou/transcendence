@@ -59,10 +59,4 @@ export class FriendRequestController {
     user.allow('accept', subject('FriendRequest', friendRequest));
     return this.friendRequestService.accept(id, user);
   }
-
-  @HttpCode(HttpStatus.OK)
-  @Post('/unfriend/:id')
-  unfriend(@Param() { id }: IdDto, @ActiveUser() activeUser: ActiveUserData) {
-    return this.friendRequestService.unfriend(id, activeUser);
-  }
 }

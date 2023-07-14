@@ -21,6 +21,16 @@ export class FriendRequestService {
     if (targetUserId === user.sub) {
       throw new BadRequestException();
     }
+
+    const receivedFriendRequests = await this.findRecieved(user);
+    const pendingFriendRequest =
+      receivedFriendRequests.findIndex(
+        (rfr) => rfr.requesterId === targetUserId,
+      ) > -1;
+    if (pendingFriendRequest) {
+      throw new BadRequestException();
+    }
+
     await this.prisma.friendRequest.create({
       data: {
         recipientId: targetUserId,
@@ -29,24 +39,24 @@ export class FriendRequestService {
     });
   }
 
-  findSent(user: ActiveUserData) {
+  findSent(user: ActiveUserData, includeRecipient: boolean = true) {
     return this.prisma.friendRequest.findMany({
       where: {
         requesterId: user.sub,
       },
       include: {
-        recipient: true,
+        recipient: includeRecipient,
       },
     });
   }
 
-  findRecieved(user: ActiveUserData) {
+  findRecieved(user: ActiveUserData, includeRequester: boolean = true) {
     return this.prisma.friendRequest.findMany({
       where: {
         recipientId: user.sub,
       },
       include: {
-        requester: true,
+        requester: includeRequester,
       },
     });
   }
@@ -112,26 +122,5 @@ export class FriendRequestService {
       }
       throw error;
     }
-  }
-
-  async unfriend(targetUserId: number, user: ActiveUserData) {
-    await this.prisma.$transaction([
-      this.prisma.user.update({
-        where: { id: user.sub },
-        data: {
-          friends: {
-            disconnect: { id: targetUserId },
-          },
-        },
-      }),
-      this.prisma.user.update({
-        where: { id: targetUserId },
-        data: {
-          friends: {
-            disconnect: { id: user.sub },
-          },
-        },
-      }),
-    ]);
   }
 }

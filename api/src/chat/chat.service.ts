@@ -1,10 +1,14 @@
 import { Injectable } from '@nestjs/common';
 import { ActiveUserData } from 'src/iam/interface/active-user-data.interface';
 import { PrismaService } from 'src/prisma/prisma.service';
+import { FriendRequestService } from './friend-request/friend-request.service';
 
 @Injectable()
 export class ChatService {
-  constructor(private readonly prisma: PrismaService) {}
+  constructor(
+    private readonly prisma: PrismaService,
+    private readonly friendRequestService: FriendRequestService,
+  ) {}
 
   async findFriends(activeUser: ActiveUserData) {
     const currentUser = await this.prisma.user.findFirstOrThrow({
@@ -22,6 +26,14 @@ export class ChatService {
     }
 
     const friends = await this.findFriends(user);
+    const sentFriendRequests = await this.friendRequestService.findSent(
+      user,
+      false,
+    );
+    const receivedFriendRequests = await this.friendRequestService.findRecieved(
+      user,
+      false,
+    );
 
     const users = await this.prisma.user.findMany({
       where: {
@@ -36,7 +48,41 @@ export class ChatService {
 
     return users.map((u) => {
       const isFriend = friends.findIndex((frd) => frd.id === u.id) > -1;
-      return { ...u, isFriend };
+      const sentFrIndex = sentFriendRequests.findIndex(
+        (fr) => fr.recipientId === u.id,
+      );
+      const receivedFrIndex = receivedFriendRequests.findIndex(
+        (fr) => fr.requesterId === u.id,
+      );
+      const sentFrId =
+        sentFrIndex > -1 ? sentFriendRequests[sentFrIndex].id : null;
+      const receivedFrId =
+        receivedFrIndex > -1
+          ? receivedFriendRequests[receivedFrIndex].id
+          : null;
+
+      return { ...u, isFriend, sentFrId, receivedFrId };
     });
+  }
+
+  async unfriend(targetUserId: number, user: ActiveUserData) {
+    await this.prisma.$transaction([
+      this.prisma.user.update({
+        where: { id: user.sub },
+        data: {
+          friends: {
+            disconnect: { id: targetUserId },
+          },
+        },
+      }),
+      this.prisma.user.update({
+        where: { id: targetUserId },
+        data: {
+          friends: {
+            disconnect: { id: user.sub },
+          },
+        },
+      }),
+    ]);
   }
 }
