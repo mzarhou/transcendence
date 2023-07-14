@@ -1,5 +1,4 @@
 import {
-  Body,
   Controller,
   Get,
   HttpCode,
@@ -19,10 +18,10 @@ export class ChatController {
   constructor(private readonly chatService: ChatService) {}
 
   @HttpCode(HttpStatus.OK)
-  @Post('search')
-  async search(
+  @Get('search')
+  async search2(
     @ActiveUser() user: ActiveUserData,
-    @Body() { term }: SearchUsersDto,
+    @Query() { term }: SearchUsersDto,
   ) {
     return this.chatService.search(user, term);
   }

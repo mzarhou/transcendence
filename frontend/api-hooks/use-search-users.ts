@@ -1,20 +1,18 @@
 import { api } from "@/lib/api";
-import { SearchType, SearchUser } from "@transcendence/common";
+import { SearchUser } from "@transcendence/common";
 import { AxiosError } from "axios";
-import useSWRMutation from "swr/mutation";
+import useSWR from "swr";
 
-export const useSearchUsers = () => {
-  const { trigger, ...rest } = useSWRMutation(
-    `/chat/search`,
-    async (url, { arg }: { arg: SearchType }) => {
-      const { data } = await api.post<SearchUser[]>(url, arg).catch((err) => {
+export const useSearchUsers = (query: string) => {
+  return useSWR([`/chat/search`, query], async ([url, query]) => {
+    const { data } = await api
+      .get<SearchUser[]>(url + `?term=${query}`)
+      .catch((err) => {
         if (err instanceof AxiosError) {
           throw err.message;
         }
         throw "Unkown error";
       });
-      return data;
-    }
-  );
-  return { trigger: (arg: SearchType) => trigger(arg).catch(), ...rest };
+    return data;
+  });
 };

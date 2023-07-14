@@ -4,10 +4,12 @@ import { CreateFriendRequestType } from "@transcendence/common";
 import { AxiosError } from "axios";
 // import { useSWRConfig } from "swr";
 import useSWRMutation from "swr/mutation";
+import { useRevalidateSearch } from "@/hooks/use-revalidate-search";
 
 export const usePostFriendRequest = () => {
   const { toast } = useToast();
-  // const { mutate } = useSWRConfig();
+  const { revalidateSearch } = useRevalidateSearch();
+
   const { trigger, ...rest } = useSWRMutation(
     "/chat/friend-request",
     async (url, { arg }: { arg: CreateFriendRequestType }) => {
@@ -29,6 +31,7 @@ export const usePostFriendRequest = () => {
           description: "friend request sent",
           className: "bg-green-200",
         });
+        revalidateSearch();
       },
     }
   );

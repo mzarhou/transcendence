@@ -1,6 +1,6 @@
 import { useToast } from "@/components/ui/use-toast";
+import { useRevalidateSearch } from "@/hooks/use-revalidate-search";
 import { api } from "@/lib/api";
-import { CreateFriendRequestType } from "@transcendence/common";
 import { AxiosError } from "axios";
 import { useSWRConfig } from "swr";
 import useSWRMutation from "swr/mutation";
@@ -8,6 +8,8 @@ import useSWRMutation from "swr/mutation";
 export const useAcceptFriendRequest = (friendRequestId: number) => {
   const { toast } = useToast();
   const { mutate } = useSWRConfig();
+  const { revalidateSearch } = useRevalidateSearch();
+
   const { trigger, ...rest } = useSWRMutation(
     `/chat/friend-request/${friendRequestId}/accept`,
     async (url) => api.post(url),
@@ -29,6 +31,7 @@ export const useAcceptFriendRequest = (friendRequestId: number) => {
         });
         mutate("/chat/friends");
         mutate("/chat/friend-request/received");
+        revalidateSearch();
       },
     }
   );
