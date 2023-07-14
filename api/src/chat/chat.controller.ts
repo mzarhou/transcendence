@@ -37,4 +37,22 @@ export class ChatController {
   unfriend(@Param() { id }: IdDto, @ActiveUser() activeUser: ActiveUserData) {
     return this.chatService.unfriend(id, activeUser);
   }
+
+  @Get('blocked')
+  async findBlockedUsers(@ActiveUser() user: ActiveUserData) {
+    return this.chatService.findBlockedUsers(user);
+  }
+
+  @Post('/block/:id')
+  blockUser(@Param() { id }: IdDto, @ActiveUser() activeUser: ActiveUserData) {
+    return this.chatService.blockUser(activeUser, id);
+  }
+
+  @Post('/unblock/:id')
+  unblockUser(
+    @Param() { id }: IdDto,
+    @ActiveUser() activeUser: ActiveUserData,
+  ) {
+    return this.chatService.unblockUser(activeUser, id);
+  }
 }
