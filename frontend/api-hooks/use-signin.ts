@@ -16,10 +16,7 @@ export const useSignIn = () => {
     {
       onSuccess: async () => {
         await mutate("/users/me");
-        toast({
-          description: "You are logged in",
-          className: "bg-green-200",
-        });
+        toast({ description: "You are logged in" });
         router.replace("/");
       },
       onError: (error) => {
@@ -29,7 +26,7 @@ export const useSignIn = () => {
         }
         toast({
           description: message,
-          className: "bg-red-200",
+          variant: "destructive",
         });
       },
     }

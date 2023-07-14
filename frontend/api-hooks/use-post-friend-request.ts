@@ -23,14 +23,11 @@ export const usePostFriendRequest = () => {
         }
         toast({
           description: message,
-          className: "bg-red-200 text-red-900",
+          variant: "destructive",
         });
       },
       onSuccess: () => {
-        toast({
-          description: "friend request sent",
-          className: "bg-green-200",
-        });
+        toast({ description: "Friend request sent" });
         revalidateSearch();
       },
     }

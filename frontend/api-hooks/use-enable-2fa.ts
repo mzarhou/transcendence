@@ -22,14 +22,11 @@ export const useEnable2fa = () => {
         }
         toast({
           description: message,
-          className: "bg-red-200",
+          variant: "destructive",
         });
       },
       onSuccess: () => {
-        toast({
-          description: "2FA is enabled",
-          className: "bg-green-200",
-        });
+        toast({ description: "2FA is enabled" });
         mutate("/users/me");
       },
     }

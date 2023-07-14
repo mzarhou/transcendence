@@ -24,16 +24,13 @@ export const useUpdateProfile = () => {
     },
     {
       onSuccess: () => {
-        toast({
-          description: "Profile Updated",
-          className: "bg-green-200",
-        });
+        toast({ description: "Profile Updated" });
         mutate("/users/me");
       },
       onError: (_error) => {
         toast({
           description: "Failed to update profile",
-          className: "bg-red-200",
+          variant: "destructive",
         });
       },
     }

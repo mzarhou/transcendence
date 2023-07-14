@@ -15,14 +15,11 @@ export const useDisable2fa = () => {
       onError: (_error) => {
         toast({
           description: "Failed to disable 2FA",
-          className: "bg-red-200",
+          variant: "destructive",
         });
       },
       onSuccess: () => {
-        toast({
-          description: "2FA is disabled",
-          className: "bg-green-200",
-        });
+        toast({ description: "2FA is disabled" });
         mutate("/users/me");
       },
     }

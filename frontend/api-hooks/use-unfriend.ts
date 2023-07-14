@@ -19,14 +19,11 @@ export const useUnfriend = ({ targetUserId }: useUnfriendProps) => {
       onError: (_error) => {
         toast({
           description: "Request failed",
-          className: "bg-red-200",
+          variant: "destructive",
         });
       },
       onSuccess: () => {
-        toast({
-          description: "unfriended successfully",
-          className: "bg-green-200",
-        });
+        toast({ description: "unfriended successfully" });
         mutate("/chat/friends");
         revalidateSearch();
       },

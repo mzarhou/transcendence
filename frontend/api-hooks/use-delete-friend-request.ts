@@ -16,7 +16,7 @@ export const useDeleteFriendRequest = (friendRequestId: number) => {
       onError: (_error) => {
         toast({
           description: "Failed to delete friend request",
-          className: "bg-red-200 text-red-900",
+          variant: "destructive",
         });
       },
       onSuccess: () => {

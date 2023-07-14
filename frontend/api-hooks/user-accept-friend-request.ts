@@ -21,14 +21,11 @@ export const useAcceptFriendRequest = (friendRequestId: number) => {
         }
         toast({
           description: message,
-          className: "bg-red-200 text-red-900",
+          variant: "destructive",
         });
       },
       onSuccess: () => {
-        toast({
-          description: "Friend request accepted",
-          className: "bg-green-200",
-        });
+        toast({ description: "Friend request accepted" });
         mutate("/chat/friends");
         mutate("/chat/friend-request/received");
         revalidateSearch();

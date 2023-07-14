@@ -15,16 +15,13 @@ export const useSignUp = () => {
     },
     {
       onSuccess: () => {
-        toast({
-          description: "Account Created successfully",
-          className: "bg-green-200",
-        });
+        toast({ description: "Account Created successfully" });
         router.replace("/login");
       },
       onError: (_error) => {
         toast({
           description: "Failed to signup",
-          className: "bg-red-200",
+          variant: "destructive",
         });
       },
     }

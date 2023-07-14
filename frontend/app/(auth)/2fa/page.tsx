@@ -28,9 +28,7 @@ export default function () {
     },
     {
       onSuccess: () => {
-        toast({
-          description: "You are logged in",
-        });
+        toast({ description: "You are logged in" });
         mutate("/users/me");
         router.replace("/");
       },
@@ -41,7 +39,7 @@ export default function () {
         }
         toast({
           description: message,
-          className: "bg-red-200",
+          variant: "destructive",
         });
       },
     }
