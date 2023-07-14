@@ -1,9 +1,11 @@
 "use client";
 
-import { Loader2, MoreVertical } from "lucide-react";
+import { Loader2, MoreVertical, UserPlus } from "lucide-react";
 import FriendItem from "./components/friend-item";
 import FakeChatSearch from "./components/fake-chat-search";
 import { useFriends } from "@/api-hooks/use-friends";
+import Link from "next/link";
+import FriendRequestsLink from "./components/friend-requests-link";
 
 export default function Game() {
   const { data: friends, isLoading } = useFriends();
@@ -19,14 +21,15 @@ export default function Game() {
         <div className="mt-4 flex space-x-4 overflow-x-auto">
           {Array(5)
             .fill(null)
-            .map(() => (
-              <GroupItem />
+            .map((_, index) => (
+              <GroupItem key={index} />
             ))}
         </div>
       </div>
       <div className="flex h-0 flex-grow flex-col space-y-4">
-        <div>
+        <div className="flex items-center justify-between">
           <h3 className="text-sm">Friends</h3>
+          <FriendRequestsLink />
         </div>
         <div className="h-0 flex-grow space-y-4 overflow-y-auto pr-2">
           {isLoading ? (
@@ -34,7 +37,7 @@ export default function Game() {
               <Loader2 className="mx-auto h-8 w-8 animate-spin" />
             </div>
           ) : friends && friends.length ? (
-            friends.map((frd) => <FriendItem friend={frd} />)
+            friends.map((frd) => <FriendItem key={frd.id} friend={frd} />)
           ) : (
             <div className="flex h-full items-center justify-center text-2xl text-chat-foreground/30">
               No friend found

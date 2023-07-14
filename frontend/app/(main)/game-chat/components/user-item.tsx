@@ -1,6 +1,5 @@
 "use client";
 
-import { useUnfriend } from "@/api-hooks/use-unfriend";
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -10,29 +9,32 @@ import { DropdownMenuItem } from "@radix-ui/react-dropdown-menu";
 import { User } from "@transcendence/common";
 import { MoreVertical } from "lucide-react";
 import Image from "next/image";
+import { ReactNode } from "react";
 
-type FriendItemProps = {
-  friend: User;
+type UserItemProps = {
+  user: User;
+  children?: ReactNode;
 };
-export default function FriendItem({ friend }: FriendItemProps) {
+export default function UserItem({ user, children }: UserItemProps) {
   return (
-    <div className="flex justify-between">
-      <div className="flex space-x-4">
+    <div className="relative flex justify-between">
+      <div className="flex flex-grow space-x-4">
         <div className="relative flex aspect-square h-[72px] items-center justify-center rounded-full bg-gray-100/10 text-lg">
           <Image
-            src={friend.avatar}
+            src={user.avatar}
             width={72}
             height={72}
             alt=""
             className="rounded-full"
           />
-          <div className="absolute bottom-1.5 right-0.5 h-4 w-4 rounded-full border-2 border-chat bg-green-400"></div>
         </div>
         <div className="mt-0.5">
-          <p>{friend.name}</p>
+          <p>{user.name}</p>
+          {/* TODO: update with real data */}
           <p className="text-sm text-chat-foreground/60">In game</p>
-          <p className="text-sm text-chat-foreground/60">#60</p>
+          <p className="text-sm text-chat-foreground/60">#55</p>
         </div>
+        <div className="absolute bottom-0 right-2">{children}</div>
       </div>
       <div className="">
         <DropdownMenu>
@@ -49,24 +51,9 @@ export default function FriendItem({ friend }: FriendItemProps) {
             <DropdownMenuItem className="cursor-pointer hover:bg-chat/90">
               Block
             </DropdownMenuItem>
-            <UnfriendDropdownMenuItem friendId={friend.id} />
           </DropdownMenuContent>
         </DropdownMenu>
       </div>
     </div>
-  );
-}
-
-export function UnfriendDropdownMenuItem({ friendId }: { friendId: number }) {
-  const { trigger: unfriend } = useUnfriend({
-    targetUserId: friendId,
-  });
-  return (
-    <DropdownMenuItem
-      className="cursor-pointer hover:bg-chat/90"
-      onClick={unfriend}
-    >
-      Unfriend
-    </DropdownMenuItem>
   );
 }

@@ -1,6 +1,7 @@
 "use client";
 
 import { usePostFriendRequest } from "@/api-hooks/use-post-friend-request";
+import { useAcceptFriendRequest } from "@/api-hooks/user-accept-friend-request";
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -9,8 +10,14 @@ import {
 import { LoaderButton } from "@/components/ui/loader-button";
 import { DropdownMenuItem } from "@radix-ui/react-dropdown-menu";
 import { SearchUser } from "@transcendence/common";
-import { MoreVertical, Plus } from "lucide-react";
+import { Check, MoreVertical, Plus, X } from "lucide-react";
 import Image from "next/image";
+import {
+  AcceptFriendRequestBtn,
+  RefuseFriendRequestBtn,
+} from "../../friend-requests/components/friend-request-item";
+import { useDeleteFriendRequest } from "@/api-hooks/use-delete-friend-request";
+import { UnfriendDropdownMenuItem } from "../../components/friend-item";
 
 type SearchFriendItemProps = {
   user: SearchUser;
@@ -34,11 +41,9 @@ export default function SearchFriendItem({ user }: SearchFriendItemProps) {
           <p className="text-sm text-chat-foreground/60">In game</p>
           <p className="text-sm text-chat-foreground/60">#55</p>
         </div>
-        {!user.isFriend && (
-          <div className="absolute bottom-0 right-2">
-            <AddFriendBtn user={user} />
-          </div>
-        )}
+        <div className="absolute bottom-0 right-2">
+          <SearchFrientItemActions user={user} />
+        </div>
       </div>
       <div className="">
         <DropdownMenu>
@@ -55,11 +60,28 @@ export default function SearchFriendItem({ user }: SearchFriendItemProps) {
             <DropdownMenuItem className="cursor-pointer hover:bg-chat/90">
               Block
             </DropdownMenuItem>
+            {user.isFriend && <UnfriendDropdownMenuItem friendId={user.id} />}
           </DropdownMenuContent>
         </DropdownMenu>
       </div>
     </div>
   );
+}
+
+function SearchFrientItemActions({ user }: SearchFriendItemProps) {
+  if (user.isFriend) {
+    return <></>;
+  } else if (user.receivedFrId) {
+    return (
+      <>
+        <AcceptFriendRequestBtn friendRequestId={user.receivedFrId} />
+        <RefuseFriendRequestBtn friendRequestId={user.receivedFrId} />
+      </>
+    );
+  } else if (user.sentFrId) {
+    return <CancelFriendRequest friendRequestId={user.sentFrId} />;
+  }
+  return <AddFriendBtn user={user} />;
 }
 
 function AddFriendBtn({ user }: SearchFriendItemProps) {
@@ -78,6 +100,22 @@ function AddFriendBtn({ user }: SearchFriendItemProps) {
     >
       <span>Add</span>
       <Plus className="h-5 w-5" />
+    </LoaderButton>
+  );
+}
+
+function CancelFriendRequest({ friendRequestId }: { friendRequestId: number }) {
+  const { trigger, isMutating } = useDeleteFriendRequest(friendRequestId);
+  return (
+    <LoaderButton
+      onClick={trigger}
+      isLoading={isMutating}
+      title="Cancel"
+      variant="ghost"
+      className="h-8 px-2"
+    >
+      <p>Pending</p>
+      <X />
     </LoaderButton>
   );
 }

@@ -9,7 +9,11 @@ export interface User {
   isTfaEnabled: boolean;
 }
 
-export type SearchUser = User & { isFriend: boolean };
+export type SearchUser = User & {
+  isFriend: boolean;
+  sentFrId: number | null;
+  receivedFrId: number | null;
+};
 
 export const updateUserSchema = z.object({
   name: z.string().min(4).optional(),
