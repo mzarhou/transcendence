@@ -10,7 +10,7 @@ export default function FriendRequestsPage() {
 
   const friendRequestsCount = data?.length ?? 0;
   return (
-    <div className="flex-grow md:px-6">
+    <div className="flex-grow pt-8 md:px-6 md:pt-0">
       <h3 className="sm">Friend requests</h3>
       <div className="mt-5 h-full space-y-8">
         {friendRequestsCount > 0 ? (
