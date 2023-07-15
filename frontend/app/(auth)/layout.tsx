@@ -1,8 +1,6 @@
 import { Metadata } from "next";
 import Link from "next/link";
-import { redirect } from "next/navigation";
 import { ReactNode } from "react";
-import { getUser } from "@/server-utils/get-user.server";
 
 export const metadata: Metadata = {
   title: "Authentication",
@@ -10,10 +8,6 @@ export const metadata: Metadata = {
 };
 
 export default async function Layout({ children }: { children: ReactNode }) {
-  const user = await getUser();
-  if (user) {
-    redirect("/");
-  }
   return (
     <>
       <div className="container relative grid h-screen flex-col items-center justify-center py-10 lg:max-w-none lg:grid-cols-2 lg:px-0 lg:py-0">

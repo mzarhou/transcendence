@@ -9,7 +9,7 @@ type ProfileLayoutProps = {
 };
 export default function ProfileLayout({ children }: ProfileLayoutProps) {
   return (
-    <div className="mt-4 space-y-12 md:flex md:space-x-12 md:space-y-0">
+    <div className="mt-16 space-y-12 md:flex md:space-x-12 md:space-y-0">
       <Auth>
         <ProfileSideBar />
         {children}
