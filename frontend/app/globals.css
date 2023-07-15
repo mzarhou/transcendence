@@ -32,15 +32,15 @@
     --destructive: 0 84.2% 60.2%;
     --destructive-foreground: 210 40% 98%;
 
-    --ring: 215 20.2% 65.1%;
+    --ring: 182 20.2% 65.1%;
 
     --radius: 0.5rem;
 
-
-    /* --chat: 0 0% 98%; */
-    /* --chat: 150 20% 96%; */
     --chat: 182 30% 97%;
     --chat-foreground: 222.2 84% 4.9%;
+
+    --chat-card: 182 30% 94%;
+    --chat-card-foreground: 182 30% 15%;
   }
 
   .dark {
@@ -75,6 +75,9 @@
 
     --chat: 222.2 40% 10%;
     --chat-foreground: 210 40% 98%;
+
+    --chat-card: 222.2 40% 12%;
+    --chat-card-foreground: 210 40% 72%;
   }
 }
 
