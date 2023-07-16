@@ -4,28 +4,23 @@ import { cn } from "@/lib/utils";
 import { useEffect, useRef, useState } from "react";
 import { useAutoFocus } from "@/hooks/use-auto-focus";
 import FullPlaceHolder from "@/components/ui/full-placeholder";
-import { io, Socket } from "socket.io-client";
 import { MessageType } from "@transcendence/common";
 import { useUser } from "@/context/user-context";
-import { getSocket } from "./get-socket";
+import { useSocket } from "@/context/events-socket-context";
 
-const useSocket = (friendId: number) => {
+const useChat = (friendId: number) => {
   const { user: currentUser } = useUser();
-  const [socket, setSocket] = useState<Socket | null>(null);
   const [messages, setMessages] = useState<MessageType[]>([]);
+  const socket = useSocket();
 
   useEffect(() => {
-    if (!currentUser) {
-      return;
-    }
-    const _socket = getSocket();
-    _socket.on("chat", (data: MessageType) => {
+    if (!socket) return;
+    socket.on("chat", (data: MessageType) => {
       if (data.userId === friendId || data.userId === currentUser!.id) {
         setMessages((msgs) => [...msgs, data]);
       }
     });
-    setSocket(_socket);
-  }, [currentUser]);
+  }, [socket]);
 
   return { socket, messages };
 };
@@ -36,7 +31,7 @@ type ChatBodyProps = {
 export default function ChatBody({ friendId }: ChatBodyProps) {
   const { user } = useUser();
   const [showMessages, setShowMessages] = useState(false);
-  const { socket, messages } = useSocket(friendId);
+  const { socket, messages } = useChat(friendId);
 
   const inputRef = useAutoFocus();
   const wrapper = useRef<HTMLDivElement>(null);
