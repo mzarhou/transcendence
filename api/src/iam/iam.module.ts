@@ -61,6 +61,11 @@ const Fingerprint = require('express-fingerprint');
     AuthenticationController,
     OtpAuthenticationController,
   ],
+  exports: [
+    AuthenticationService,
+    AccessTokenGuard,
+    AccessTokenWithout2faGuard,
+  ],
 })
 export class IamModule implements NestModule {
   configure(consumer: MiddlewareConsumer) {

@@ -33,7 +33,7 @@ export const UserProvider: FC<UserProviderProps> = ({ children }) => {
   const pathname = usePathname();
   const router = useRouter();
 
-  const fetcher = async (endpoint: string) => {
+  const fetcher = async (endpoint: string): Promise<User | undefined> => {
     let error;
     try {
       const user = await fetchUser(endpoint);

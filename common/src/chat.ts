@@ -1,4 +1,4 @@
-import z from "zod";
+import z, { Schema } from "zod";
 import { User } from "./users";
 
 export const searchSchema = z.object({
@@ -15,3 +15,9 @@ export type FriendRequest = {
   id: number;
   requester: User;
 };
+
+export const messageSchema = z.object({
+  userId: z.number().positive(),
+  message: z.string().min(1),
+});
+export type MessageType = z.infer<typeof messageSchema>;

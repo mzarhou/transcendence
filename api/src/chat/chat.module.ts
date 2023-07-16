@@ -4,10 +4,12 @@ import { FriendRequestController } from './friend-request/friend-request.control
 import { PrismaModule } from 'src/prisma/prisma.module';
 import { ChatController } from './chat.controller';
 import { ChatService } from './chat.service';
+import { ChatGateway } from './chat.gateway';
+import { IamModule } from 'src/iam/iam.module';
 
 @Module({
   controllers: [FriendRequestController, ChatController],
-  providers: [FriendRequestService, ChatService],
-  imports: [PrismaModule],
+  providers: [FriendRequestService, ChatService, ChatGateway],
+  imports: [PrismaModule, IamModule],
 })
 export class ChatModule {}

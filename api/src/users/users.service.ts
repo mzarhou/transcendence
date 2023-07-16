@@ -33,4 +33,25 @@ export class UsersService {
     const { secretsId, ...rest } = user;
     return rest;
   }
+
+  async findFriend(user: ActiveUserData, friendId: number) {
+    const friend = await this.prisma.user.findFirst({
+      where: { id: friendId },
+      include: {
+        friends: true,
+      },
+    });
+
+    if (!friend) {
+      throw new NotFoundException();
+    }
+
+    const { id, name, friends } = friend;
+    const isFriend = friends.findIndex((frd) => frd.id === user.sub) > -1;
+    if (!isFriend) {
+      throw new NotFoundException();
+    }
+
+    return { id, name };
+  }
 }
