@@ -29,6 +29,9 @@ model User {
 
   blockedUsers         User[] @relation("blockedUsers")
   blockedUsersRelation User[] @relation("blockedUsers")
+
+  sentMessages     Message[] @relation("User_canSendMany_messages")
+  receivedMessages Message[] @relation("User_canReceiveMany_messages")
 }
 
 model Secrets {
@@ -49,4 +52,15 @@ model FriendRequest {
   recipientId Int
 
   @@unique([requesterId, recipientId])
+}
+
+model Message {
+  id     Int  @id @default(autoincrement())
+  sender User @relation("User_canSendMany_messages", fields: [senderId], references: [id])
+
+  senderId    Int
+  recipient   User @relation("User_canReceiveMany_messages", fields: [recipientId], references: [id])
+  recipientId Int
+
+  message String
 }

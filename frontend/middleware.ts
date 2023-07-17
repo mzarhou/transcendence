@@ -27,7 +27,7 @@ async function fetchUser(accessToken: string) {
 
 async function refreshTokens(request: NextRequest) {
   const refreshToken = request.cookies.get("refreshToken")?.value ?? "";
-
+  console.log("middleware: refreshing tokens... ⏳");
   try {
     const { data } = await api.post(
       `/authentication/refresh-tokens`,
@@ -39,8 +39,11 @@ async function refreshTokens(request: NextRequest) {
       }
     );
     const tokens = tokensResponseSchema.parse(data);
+    console.log("middleware: refreshing tokens... ✅");
     return tokens;
-  } catch (error) {}
+  } catch (error) {
+    console.log("middleware: refreshing tokens... ❌");
+  }
   return null;
 }
 

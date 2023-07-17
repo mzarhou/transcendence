@@ -29,6 +29,10 @@ async function fetchUser(endpoint: string) {
   return data;
 }
 
+const refreshTokens = async () => {
+  await axios.post("/api/auth/refresh-tokens");
+};
+
 export const UserProvider: FC<UserProviderProps> = ({ children }) => {
   const pathname = usePathname();
   const router = useRouter();
@@ -65,8 +69,11 @@ export const UserProvider: FC<UserProviderProps> = ({ children }) => {
     if (error.response?.status !== 401) {
       throw "Unkown error";
     }
-    await axios.post("/api/auth/refresh-tokens");
-    return fetchUser(endpoint);
+    try {
+      await refreshTokens();
+      return fetchUser(endpoint);
+    } catch (error) {}
+    return undefined;
   };
 
   const userData = useSWR("/users/me", fetcher, {

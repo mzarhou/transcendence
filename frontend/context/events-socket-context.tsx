@@ -11,6 +11,9 @@ import {
 import { Socket, io } from "socket.io-client";
 import { useUser } from "./user-context";
 import { User } from "@transcendence/common";
+import { UNAUTHORIZED_EVENT } from "@transcendence/common";
+import { useToast } from "@/components/ui/use-toast";
+import { MESSAGE_ERROR_EVENT } from "@transcendence/common";
 
 const EventsSocketContext = createContext<Socket | null>(null);
 
@@ -20,7 +23,7 @@ export function getSocket(currentUser: User) {
     withCredentials: true,
   });
 
-  socket.on("Unauthorized", async () => {
+  socket.on(UNAUTHORIZED_EVENT, async () => {
     console.log("Unauthorized");
 
     try {
@@ -37,12 +40,19 @@ export function getSocket(currentUser: User) {
 export const EventsSocketProvider = ({ children }: { children: ReactNode }) => {
   const { user: currentUser } = useUser();
   const [socket, setSocket] = useState<Socket | null>(null);
+  const { toast } = useToast();
 
   useEffect(() => {
     if (!currentUser) {
       return;
     }
     const _socket = getSocket(currentUser);
+    _socket.on(MESSAGE_ERROR_EVENT, (message: string) =>
+      toast({
+        variant: "destructive",
+        description: message.length > 0 ? message : "Failed to send message",
+      })
+    );
     setSocket(_socket);
   }, [currentUser]);
 

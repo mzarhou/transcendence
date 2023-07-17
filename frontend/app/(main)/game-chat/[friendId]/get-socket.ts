@@ -1,3 +1,4 @@
+import { UNAUTHORIZED_EVENT } from "@transcendence/common";
 import axios from "axios";
 import { io } from "socket.io-client";
 
@@ -6,7 +7,7 @@ export function getSocket() {
     withCredentials: true,
   });
 
-  socket.on("Unauthorized", async () => {
+  socket.on(UNAUTHORIZED_EVENT, async () => {
     console.log("Unauthorized");
 
     try {
