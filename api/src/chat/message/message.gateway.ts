@@ -51,42 +51,52 @@ export class MessageGateway
     this.connectedClients.set(user.sub, socket);
   }
 
-  handleDisconnect(socket: Socket) {
-    delete this.connectedClients[socket.id];
+  async handleDisconnect(socket: Socket) {
+    const user = await this.chatService.getUserFromSocket(socket);
+    if (!user) {
+      return this.logger.warn(
+        `failed to disconnect user ${socket.id} disconnected`,
+      );
+    }
+    this.connectedClients.delete(user.sub);
     this.logger.log(`user ${socket.id} disconnected`);
   }
 
   @SubscribeMessage(MESSAGE_EVENT)
   async newMessage(
-    @ConnectedSocket() socket: Socket,
+    @ConnectedSocket() senderClient: Socket,
     @MessageBody() { message, recipientId }: MessageDto,
   ) {
     if (message.length === 0) return;
 
-    const sender = await this.chatService.getUserFromSocket(socket);
+    const sender = await this.chatService.getUserFromSocket(senderClient);
     if (!sender) {
-      socket.emit(UNAUTHORIZED_EVENT);
-      return socket.disconnect();
+      senderClient.emit(UNAUTHORIZED_EVENT);
+      return senderClient.disconnect();
     }
+    if (!this.connectedClients.has(sender.sub)) {
+      this.connectedClients.set(sender.sub, senderClient);
+    }
+
     if (!this.chatService.isFriendOf(sender, recipientId)) {
-      return socket.emit(MESSAGE_ERROR_EVENT, 'Invalid friend');
+      return senderClient.emit(MESSAGE_ERROR_EVENT, 'Invalid friend');
     }
 
     const recipientClient = this.connectedClients.get(recipientId);
-    const senderClient = this.connectedClients.get(sender.sub);
-    if (!recipientClient || !senderClient) {
-      return socket.emit(MESSAGE_ERROR_EVENT, 'Invalid user');
-    }
 
     try {
       const createdMessage = await this.messageService.saveMessage(sender, {
         message,
         recipientId,
       });
-      recipientClient.emit(MESSAGE_EVENT, createdMessage);
+
+      /**
+       * send message to recipient if he is connected
+       */
+      recipientClient?.emit(MESSAGE_EVENT, createdMessage);
       senderClient.emit(MESSAGE_EVENT, createdMessage);
     } catch (error) {
-      return socket.emit(MESSAGE_ERROR_EVENT, 'Failed to save message');
+      return senderClient.emit(MESSAGE_ERROR_EVENT, 'Failed to save message');
     }
   }
 }
