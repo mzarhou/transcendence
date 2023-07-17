@@ -1,10 +1,9 @@
-import { NextConfig } from "next";
 import { NextRequest, NextResponse } from "next/server";
-import { api } from "./lib/api";
 import { User } from "@transcendence/common";
 import { getForwardHeaders, setCookies } from "./app/api/auth/auth-utils";
 import { TokensResponse, tokensResponseSchema } from "./schema/auth-schema";
 import { env } from "./env/server.mjs";
+import { log } from "@/lib/utils";
 
 async function fetchUser(accessToken: string) {
   try {
@@ -20,31 +19,45 @@ async function fetchUser(accessToken: string) {
     }
     return data;
   } catch (error) {
-    console.log("error fetching user", error);
+    log("error fetching user", error);
   }
   return null;
 }
 
-async function refreshTokens(request: NextRequest) {
+export async function refreshTokens(request: NextRequest) {
   const refreshToken = request.cookies.get("refreshToken")?.value ?? "";
-  console.log("middleware: refreshing tokens... ⏳");
-  try {
-    const { data } = await api.post(
-      `/authentication/refresh-tokens`,
-      {
+  log("middleware: refreshing tokens... ⏳");
+
+  const headers: HeadersInit = new Headers();
+  headers.set("Content-Type", "application/json");
+  const forwardHeaders: { [key: string]: string | null } =
+    getForwardHeaders(request);
+
+  Object.keys(forwardHeaders).forEach((k) => {
+    if (forwardHeaders[k]) headers.set(k, forwardHeaders[k]!);
+  });
+
+  const response = await fetch(
+    env.NEXT_PUBLIC_API_URL + "/authentication/refresh-tokens",
+    {
+      method: "POST",
+      body: JSON.stringify({
         refreshToken: refreshToken,
-      },
-      {
-        headers: getForwardHeaders(request),
-      }
-    );
-    const tokens = tokensResponseSchema.parse(data);
-    console.log("middleware: refreshing tokens... ✅");
-    return tokens;
-  } catch (error) {
-    console.log("middleware: refreshing tokens... ❌");
+      }),
+      headers,
+    }
+  );
+
+  if (!response.ok) {
+    log("middleware: refreshing tokens... ❌");
+    return null;
   }
-  return null;
+
+  const parseResult = tokensResponseSchema.safeParse(await response.json());
+  if (!parseResult.success) return null;
+
+  log("middleware: refreshing tokens... ✅");
+  return parseResult.data;
 }
 
 type UserAuthData = {
@@ -66,7 +79,6 @@ async function getUserFromRequest(request: NextRequest): Promise<UserAuthData> {
 }
 
 export async function middleware(request: NextRequest) {
-  // const requestHeaders = new Headers(request.headers);
   const pathname = new URL(request.url).pathname;
   const { user, newTokens } = await getUserFromRequest(request);
 
@@ -86,5 +98,8 @@ export async function middleware(request: NextRequest) {
 }
 
 export const config = {
-  matcher: ["/((?!api|auth.jpg|_next/static|_next/image|favicon.ico).*)"],
+  matcher: [
+    "/((?!api|auth.jpg|_next/static|_next/image|favicon.ico).*)",
+    "/api/auth/refresh-tokens",
+  ],
 };

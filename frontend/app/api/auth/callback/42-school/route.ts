@@ -2,10 +2,10 @@ import { env } from "@/env/server.mjs";
 import { $42RedirectUri, $42TokenUrl } from "@/lib/$42";
 import axios, { AxiosError } from "axios";
 import { NextRequest, NextResponse } from "next/server";
-import { z, ZodError } from "zod";
+import { ZodError } from "zod";
 import { tokensResponseSchema } from "@/schema/auth-schema";
-import { api } from "@/lib/api";
 import { getForwardHeaders, setCookies } from "../../auth-utils";
+import { serverApi } from "@/lib/serverApi";
 
 async function getAccessToken(code: string): Promise<string | null> {
   try {
@@ -32,7 +32,7 @@ export async function GET(req: NextRequest) {
 
   try {
     const accessToken = await getAccessToken(code);
-    const { data } = await api.post(
+    const { data } = await serverApi.post(
       `/authentication/school-42`,
       {
         accessToken,

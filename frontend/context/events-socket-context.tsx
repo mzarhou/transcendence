@@ -24,8 +24,6 @@ export function getSocket(currentUser: User) {
   });
 
   socket.on(UNAUTHORIZED_EVENT, async () => {
-    console.log("Unauthorized");
-
     try {
       // try to refresh tokens
       await axios.post("/api/auth/refresh-tokens");

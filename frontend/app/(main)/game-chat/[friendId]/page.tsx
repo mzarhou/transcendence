@@ -1,19 +1,20 @@
-import { api } from "@/lib/api";
 import ChatBody from "./chat-body";
 import { redirect } from "next/navigation";
 import { cookies } from "next/headers";
+import { log } from "@/lib/utils";
+import { serverApi } from "@/lib/serverApi";
 
 async function fetchFriend(friendId: string) {
   const accessToken = cookies().get("accessToken")?.value ?? "";
   try {
-    const { data } = await api.get(`/users/${friendId}`, {
+    const { data } = await serverApi.get(`/users/${friendId}`, {
       headers: {
         Authorization: `Beaer ${accessToken}`,
       },
     });
     return data;
   } catch (error) {
-    console.log(error);
+    log("failed to fetch friend ❌");
   }
   return null;
 }

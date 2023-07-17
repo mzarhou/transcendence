@@ -2,7 +2,6 @@
 
 import { cn } from "@/lib/utils";
 import { useEffect, useRef, useState } from "react";
-import { useAutoFocus } from "@/hooks/use-auto-focus";
 import FullPlaceHolder from "@/components/ui/full-placeholder";
 import {
   MessageType,
