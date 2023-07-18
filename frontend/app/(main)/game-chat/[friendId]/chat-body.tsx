@@ -8,6 +8,8 @@ import { useUser } from "@/context/user-context";
 import { useSocket } from "@/context/events-socket-context";
 import { useMessages } from "@/api-hooks/use-messages";
 
+// TODO: extract input and messages into 2 seperate components
+
 type ChatBodyProps = {
   friendId: number;
 };

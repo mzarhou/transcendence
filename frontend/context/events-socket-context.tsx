@@ -19,60 +19,10 @@ import { getMessagesKey } from "@/api-hooks/use-messages";
 
 const EventsSocketContext = createContext<Socket | null>(null);
 
-export function getSocket(currentUser: User) {
-  // TODO: user NEXT_PUBLIC_API_URL
-  const socket = io("http://localhost:8080", {
-    withCredentials: true,
-  });
-
-  socket.on(ERROR_EVENT, async (data: WsErrorData) => {
-    if (data.statusCode !== 401) return;
-    try {
-      // try to refresh tokens
-      await axios.post("/api/auth/refresh-tokens");
-      setTimeout(() => {
-        socket.connect();
-      }, 200);
-    } catch (error) {}
-  });
-  return socket;
-}
+export const useSocket = () => useContext(EventsSocketContext);
 
 export const EventsSocketProvider = ({ children }: { children: ReactNode }) => {
-  const { user: currentUser } = useUser();
-  const [socket, setSocket] = useState<Socket | null>(null);
-  const { toast } = useToast();
-  const { mutate } = useSWRConfig();
-
-  useEffect(() => {
-    if (!currentUser) {
-      return;
-    }
-    const _socket = getSocket(currentUser);
-    if (!_socket.hasListeners(ERROR_EVENT)) {
-      _socket.on(ERROR_EVENT, (data: WsErrorData) =>
-        toast({
-          variant: "destructive",
-          description: data.message,
-        })
-      );
-    }
-    if (!_socket.hasListeners(MESSAGE_EVENT)) {
-      _socket.on(MESSAGE_EVENT, (data: MessageType) => {
-        const friendId =
-          data.recipientId === currentUser.id
-            ? data.senderId
-            : data.recipientId;
-        mutate(
-          getMessagesKey(friendId),
-          (messages) => [...(messages ?? []), data],
-          { revalidate: false }
-        );
-      });
-    }
-
-    setSocket(_socket);
-  }, [currentUser]);
+  const socket = useSocket_();
 
   return (
     <EventsSocketContext.Provider value={socket}>
@@ -81,4 +31,72 @@ export const EventsSocketProvider = ({ children }: { children: ReactNode }) => {
   );
 };
 
-export const useSocket = () => useContext(EventsSocketContext);
+function useSocket_() {
+  const { user: currentUser } = useUser();
+  const [socket, setSocket] = useState<Socket | null>(null);
+
+  const onMessage = useOnMessage();
+  const onError = useOnError();
+
+  useEffect(() => {
+    if (!currentUser) return;
+
+    // TODO: user NEXT_PUBLIC_API_URL
+    const _socket = io("http://localhost:8080", {
+      withCredentials: true,
+    });
+
+    if (!_socket.hasListeners("connect")) {
+      _socket.on("connect", () => {
+        console.log("error event");
+        _socket.on(ERROR_EVENT, async (data: WsErrorData) =>
+          onError(_socket, data)
+        );
+        console.log("message event");
+        _socket.on(MESSAGE_EVENT, (data: MessageType) => onMessage(data));
+      });
+    }
+
+    setSocket(_socket);
+  }, [currentUser]);
+
+  return socket;
+}
+
+const useOnMessage = () => {
+  const { mutate } = useSWRConfig();
+  const { user: currentUser } = useUser();
+
+  return (data: MessageType) => {
+    if (!currentUser) return;
+
+    const friendId =
+      data.recipientId === currentUser.id ? data.senderId : data.recipientId;
+    mutate(
+      getMessagesKey(friendId),
+      (messages) => [...(messages ?? []), data],
+      { revalidate: false }
+    );
+  };
+};
+
+const useOnError = () => {
+  const { toast } = useToast();
+
+  return async (socket: Socket, data: WsErrorData) => {
+    if (data.statusCode !== 401) {
+      toast({
+        variant: "destructive",
+        description: data.message,
+      });
+      return;
+    }
+    try {
+      // try to refresh tokens
+      await axios.post("/api/auth/refresh-tokens");
+      setTimeout(() => {
+        socket.connect();
+      }, 200);
+    } catch (error) {}
+  };
+};
