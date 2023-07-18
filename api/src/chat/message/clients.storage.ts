@@ -13,7 +13,7 @@ export class ClientsStorage {
   removeClient(userId: number, socket: Socket) {
     const oldSockets = this.connectedClients.get(userId);
     if (!oldSockets) return;
-    const newSockets = oldSockets.filter((s) => s.id === socket.id);
+    const newSockets = oldSockets.filter((s) => s.id !== socket.id);
     this.connectedClients.set(userId, newSockets);
   }
 
@@ -22,6 +22,16 @@ export class ClientsStorage {
     if (!sockets) return false;
     const index = sockets?.findIndex((s) => s.id === socket.id);
     return index > -1;
+  }
+
+  isConnected(userId: number) {
+    const sockets = this.connectedClients.get(userId);
+    return sockets && sockets.length > 0;
+  }
+
+  connectedSoketsCount(userId: number) {
+    const sockets = this.connectedClients.get(userId);
+    return sockets?.length ?? 0;
   }
 
   emit(usersIds: number[], event: string, ...data: any[]) {

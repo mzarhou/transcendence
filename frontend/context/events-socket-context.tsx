@@ -4,18 +4,28 @@ import axios from "axios";
 import {
   ReactNode,
   createContext,
+  useCallback,
   useContext,
   useEffect,
   useState,
 } from "react";
 import { Socket, io } from "socket.io-client";
 import { useUser } from "./user-context";
-import { MESSAGE_EVENT, MessageType, User } from "@transcendence/common";
+import {
+  FRIEND_CONNECTED,
+  FRIEND_DISCONNECTED,
+  FriendConnectedData,
+  FriendDisconnectedData,
+  MESSAGE_EVENT,
+  MessageType,
+} from "@transcendence/common";
 import { useToast } from "@/components/ui/use-toast";
 import { ERROR_EVENT } from "@transcendence/common";
 import { WsErrorData } from "@transcendence/common";
 import { useSWRConfig } from "swr";
 import { getMessagesKey } from "@/api-hooks/use-messages";
+import { useAtom } from "jotai";
+import { connectedFriendsAtom } from "@/stores/connected-users-atom";
 
 const EventsSocketContext = createContext<Socket | null>(null);
 
@@ -37,6 +47,8 @@ function useSocket_() {
 
   const onMessage = useOnMessage();
   const onError = useOnError();
+  const onFriendConnected = useOnFriendConnected();
+  const onFriendDisconnected = useOnFriendDisconnected();
 
   useEffect(() => {
     if (!currentUser) return;
@@ -52,6 +64,12 @@ function useSocket_() {
           onError(_socket, data)
         );
         _socket.on(MESSAGE_EVENT, (data: MessageType) => onMessage(data));
+        _socket.on(FRIEND_CONNECTED, (data: FriendConnectedData) => {
+          onFriendConnected(data);
+        });
+        _socket.on(FRIEND_DISCONNECTED, (data: FriendDisconnectedData) => {
+          onFriendDisconnected(data);
+        });
       });
     }
 
@@ -65,23 +83,27 @@ const useOnMessage = () => {
   const { mutate } = useSWRConfig();
   const { user: currentUser } = useUser();
 
-  return (data: MessageType) => {
-    if (!currentUser) return;
+  const onMessage = useCallback(
+    (data: MessageType) => {
+      if (!currentUser) return;
 
-    const friendId =
-      data.recipientId === currentUser.id ? data.senderId : data.recipientId;
-    mutate(
-      getMessagesKey(friendId),
-      (messages) => [...(messages ?? []), data],
-      { revalidate: false }
-    );
-  };
+      const friendId =
+        data.recipientId === currentUser.id ? data.senderId : data.recipientId;
+      mutate(
+        getMessagesKey(friendId),
+        (messages) => [...(messages ?? []), data],
+        { revalidate: false }
+      );
+    },
+    [currentUser]
+  );
+  return onMessage;
 };
 
 const useOnError = () => {
   const { toast } = useToast();
 
-  return async (socket: Socket, data: WsErrorData) => {
+  const onError = useCallback(async (socket: Socket, data: WsErrorData) => {
     if (data.statusCode !== 401) {
       toast({
         variant: "destructive",
@@ -96,5 +118,33 @@ const useOnError = () => {
         socket.connect();
       }, 200);
     } catch (error) {}
-  };
+  }, []);
+  return onError;
+};
+
+const useOnFriendConnected = () => {
+  const [, setConnectedFriends] = useAtom(connectedFriendsAtom);
+
+  const onFriendConnected = useCallback(({ friendId }: FriendConnectedData) => {
+    setConnectedFriends(
+      (oldFriendsSet) => new Set(oldFriendsSet.add(friendId))
+    );
+  }, []);
+  return onFriendConnected;
+};
+
+const useOnFriendDisconnected = () => {
+  const [, setConnectedFriends] = useAtom(connectedFriendsAtom);
+
+  const onFriendDisconnected = useCallback(
+    ({ friendId }: FriendDisconnectedData) => {
+      setConnectedFriends((oldFriendsSet) => {
+        oldFriendsSet.delete(friendId);
+        return new Set(oldFriendsSet);
+      });
+    },
+    []
+  );
+
+  return onFriendDisconnected;
 };

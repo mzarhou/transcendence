@@ -4,10 +4,11 @@
   "main": "./dist/index",
   "types": "./dist/index",
   "scripts": {
-   "dev": "tsup --watch",
+    "dev": "tsup --watch",
     "build": "tsup"
   },
   "dependencies": {
+    "jotai": "^2.2.2",
     "tsup": "^7.0.0",
     "zod": "^3.21.4"
   }

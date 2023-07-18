@@ -50,6 +50,7 @@ export class MessageGateway
       const user = await this.chatService.getUserFromSocket(socket);
       this.logger.log(`new user connected with id ${socket.id}`);
       this.clientsStorage.addClient(user.sub, socket);
+      this.messageService.sendFriendConnectedEvent(user);
     } catch (error) {
       this.logger.warn(`failed to connect user ${socket.id}`);
       if (error instanceof WebsocketException) {
@@ -67,6 +68,7 @@ export class MessageGateway
       const user = await this.chatService.getUserFromSocket(socket);
       this.clientsStorage.removeClient(user.sub, socket);
       this.logger.log(`user ${socket.id} disconnected`);
+      this.messageService.sendFriendDisconnectedEvent(user);
     } catch (error) {}
   }
 
