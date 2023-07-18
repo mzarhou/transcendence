@@ -8,6 +8,7 @@ import { IamModule } from 'src/iam/iam.module';
 import { MessageService } from './message/message.service';
 import { MessageGateway } from './message/message.gateway';
 import { MessageController } from './message/message.controller';
+import { ClientsStorage } from './message/clients.storage';
 
 @Module({
   controllers: [FriendRequestController, ChatController, MessageController],
@@ -16,6 +17,7 @@ import { MessageController } from './message/message.controller';
     ChatService,
     MessageGateway,
     MessageService,
+    ClientsStorage,
   ],
   imports: [PrismaModule, IamModule],
 })

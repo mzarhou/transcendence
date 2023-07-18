@@ -10,15 +10,17 @@ import {
 import { Server } from 'socket.io';
 import { ChatService } from '../chat.service';
 import { Socket } from 'socket.io';
-import { Logger } from '@nestjs/common';
+import { HttpStatus, Logger, UseFilters, UsePipes } from '@nestjs/common';
 import { MessageDto } from '../dto/message.dto';
 import { MessageService } from './message.service';
-import {
-  MESSAGE_EVENT,
-  UNAUTHORIZED_EVENT,
-  MESSAGE_ERROR_EVENT,
-} from '@transcendence/common';
+import { ERROR_EVENT, MESSAGE_EVENT } from '@transcendence/common';
+import { ZodValidationPipe } from 'nestjs-zod';
+import { WebsocketExceptionFilter } from '../ws-exception.filter';
+import { ClientsStorage } from './clients.storage';
+import { WebsocketException } from '../ws.exception';
 
+@UsePipes(new ZodValidationPipe())
+@UseFilters(new WebsocketExceptionFilter())
 @WebSocketGateway({
   cors: {
     // Todo: use env FRONTEND_URL
@@ -30,36 +32,42 @@ export class MessageGateway
   implements OnGatewayConnection, OnGatewayDisconnect
 {
   private readonly logger = new Logger(MessageGateway.name);
-  private connectedClients: Map<number, Socket> = new Map();
 
   constructor(
     private readonly chatService: ChatService,
     private readonly messageService: MessageService,
+    private readonly clientsStorage: ClientsStorage,
   ) {}
 
   @WebSocketServer()
   server!: Server;
 
   async handleConnection(socket: Socket) {
-    this.logger.log(`new user connected with id ${socket.id}`);
-    const user = await this.chatService.getUserFromSocket(socket);
-    if (!user) {
-      socket.emit(UNAUTHORIZED_EVENT);
-      return socket.disconnect();
+    /**
+     * filters aren't applied to connection handlers (only to @SubscribeMessage())
+     */
+    try {
+      const user = await this.chatService.getUserFromSocket(socket);
+      this.logger.log(`new user connected with id ${socket.id}`);
+      this.clientsStorage.addClient(user.sub, socket);
+    } catch (error) {
+      this.logger.warn(`failed to connect user ${socket.id}`);
+      if (error instanceof WebsocketException) {
+        socket.emit(ERROR_EVENT, error.getError());
+      }
+      socket.disconnect();
     }
-
-    this.connectedClients.set(user.sub, socket);
   }
 
   async handleDisconnect(socket: Socket) {
-    const user = await this.chatService.getUserFromSocket(socket);
-    if (!user) {
-      return this.logger.warn(
-        `failed to disconnect user ${socket.id} disconnected`,
-      );
-    }
-    this.connectedClients.delete(user.sub);
-    this.logger.log(`user ${socket.id} disconnected`);
+    /**
+     * filters aren't applied to connection handlers (only to @SubscribeMessage())
+     */
+    try {
+      const user = await this.chatService.getUserFromSocket(socket);
+      this.clientsStorage.removeClient(user.sub, socket);
+      this.logger.log(`user ${socket.id} disconnected`);
+    } catch (error) {}
   }
 
   @SubscribeMessage(MESSAGE_EVENT)
@@ -67,22 +75,25 @@ export class MessageGateway
     @ConnectedSocket() senderClient: Socket,
     @MessageBody() { message, recipientId }: MessageDto,
   ) {
-    if (message.length === 0) return;
-
     const sender = await this.chatService.getUserFromSocket(senderClient);
     if (!sender) {
-      senderClient.emit(UNAUTHORIZED_EVENT);
-      return senderClient.disconnect();
-    }
-    if (!this.connectedClients.has(sender.sub)) {
-      this.connectedClients.set(sender.sub, senderClient);
-    }
-
-    if (!this.chatService.isFriendOf(sender, recipientId)) {
-      return senderClient.emit(MESSAGE_ERROR_EVENT, 'Invalid friend');
+      throw new WebsocketException({
+        message: 'Sending Messase: Invalid credentials',
+        statusCode: HttpStatus.UNAUTHORIZED,
+      });
     }
 
-    const recipientClient = this.connectedClients.get(recipientId);
+    if (!this.clientsStorage.has(sender.sub, senderClient)) {
+      this.clientsStorage.addClient(sender.sub, senderClient);
+    }
+
+    const isRecipientFriend = await this.chatService.isFriendOf(
+      sender,
+      recipientId,
+    );
+    if (!isRecipientFriend) {
+      throw new WebsocketException('Sending Messase: Invalid user');
+    }
 
     try {
       const createdMessage = await this.messageService.saveMessage(sender, {
@@ -91,12 +102,15 @@ export class MessageGateway
       });
 
       /**
-       * send message to recipient if he is connected
+       * send message to sender/recipient if he is connected
        */
-      recipientClient?.emit(MESSAGE_EVENT, createdMessage);
-      senderClient.emit(MESSAGE_EVENT, createdMessage);
+      this.clientsStorage.emit(
+        [sender.sub, recipientId],
+        MESSAGE_EVENT,
+        createdMessage,
+      );
     } catch (error) {
-      return senderClient.emit(MESSAGE_ERROR_EVENT, 'Failed to save message');
+      throw new WebsocketException('Sending Messase: Something went wrong!');
     }
   }
 }
