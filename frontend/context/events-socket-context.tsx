@@ -48,11 +48,9 @@ function useSocket_() {
 
     if (!_socket.hasListeners("connect")) {
       _socket.on("connect", () => {
-        console.log("error event");
         _socket.on(ERROR_EVENT, async (data: WsErrorData) =>
           onError(_socket, data)
         );
-        console.log("message event");
         _socket.on(MESSAGE_EVENT, (data: MessageType) => onMessage(data));
       });
     }
