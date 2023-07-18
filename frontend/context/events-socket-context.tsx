@@ -10,10 +10,12 @@ import {
 } from "react";
 import { Socket, io } from "socket.io-client";
 import { useUser } from "./user-context";
-import { User } from "@transcendence/common";
-import { UNAUTHORIZED_EVENT } from "@transcendence/common";
+import { MESSAGE_EVENT, MessageType, User } from "@transcendence/common";
 import { useToast } from "@/components/ui/use-toast";
-import { MESSAGE_ERROR_EVENT } from "@transcendence/common";
+import { ERROR_EVENT } from "@transcendence/common";
+import { WsErrorData } from "@transcendence/common";
+import { useSWRConfig } from "swr";
+import { getMessagesKey } from "@/api-hooks/use-messages";
 
 const EventsSocketContext = createContext<Socket | null>(null);
 
@@ -23,7 +25,8 @@ export function getSocket(currentUser: User) {
     withCredentials: true,
   });
 
-  socket.on(UNAUTHORIZED_EVENT, async () => {
+  socket.on(ERROR_EVENT, async (data: WsErrorData) => {
+    if (data.statusCode !== 401) return;
     try {
       // try to refresh tokens
       await axios.post("/api/auth/refresh-tokens");
@@ -39,18 +42,35 @@ export const EventsSocketProvider = ({ children }: { children: ReactNode }) => {
   const { user: currentUser } = useUser();
   const [socket, setSocket] = useState<Socket | null>(null);
   const { toast } = useToast();
+  const { mutate } = useSWRConfig();
 
   useEffect(() => {
     if (!currentUser) {
       return;
     }
     const _socket = getSocket(currentUser);
-    _socket.on(MESSAGE_ERROR_EVENT, (message: string) =>
-      toast({
-        variant: "destructive",
-        description: message.length > 0 ? message : "Failed to send message",
-      })
-    );
+    if (!_socket.hasListeners(ERROR_EVENT)) {
+      _socket.on(ERROR_EVENT, (data: WsErrorData) =>
+        toast({
+          variant: "destructive",
+          description: data.message,
+        })
+      );
+    }
+    if (!_socket.hasListeners(MESSAGE_EVENT)) {
+      _socket.on(MESSAGE_EVENT, (data: MessageType) => {
+        const friendId =
+          data.recipientId === currentUser.id
+            ? data.senderId
+            : data.recipientId;
+        mutate(
+          getMessagesKey(friendId),
+          (messages) => [...(messages ?? []), data],
+          { revalidate: false }
+        );
+      });
+    }
+
     setSocket(_socket);
   }, [currentUser]);
 

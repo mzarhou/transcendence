@@ -3,40 +3,10 @@
 import { cn } from "@/lib/utils";
 import { useEffect, useRef, useState } from "react";
 import FullPlaceHolder from "@/components/ui/full-placeholder";
-import {
-  MessageType,
-  MESSAGE_EVENT,
-  SendMessageType,
-} from "@transcendence/common";
+import { MESSAGE_EVENT, SendMessageType } from "@transcendence/common";
 import { useUser } from "@/context/user-context";
 import { useSocket } from "@/context/events-socket-context";
 import { useMessages } from "@/api-hooks/use-messages";
-
-const useChat = (friendId: number) => {
-  const socket = useSocket();
-  const { user: currentUser } = useUser();
-  const { data, isLoading } = useMessages(friendId);
-  const [messages, setMessages] = useState<MessageType[]>(data ?? []);
-
-  const [isSubscribed, setIsSubscribed] = useState(false);
-
-  useEffect(() => {
-    if (!socket || isSubscribed) return;
-    socket.on(MESSAGE_EVENT, (data: MessageType) => {
-      if (data.senderId === friendId || data.senderId === currentUser!.id) {
-        setMessages((msgs) => [...(msgs ?? []), data]);
-      }
-    });
-    setIsSubscribed(true);
-  }, [socket]);
-
-  useEffect(() => {
-    if (!data) return;
-    setMessages([...data]);
-  }, [data]);
-
-  return { socket, messages, isLoading };
-};
 
 type ChatBodyProps = {
   friendId: number;
@@ -44,7 +14,8 @@ type ChatBodyProps = {
 export default function ChatBody({ friendId }: ChatBodyProps) {
   const { user } = useUser();
   const [showMessages, setShowMessages] = useState(false);
-  const { socket, messages, isLoading } = useChat(friendId);
+  const socket = useSocket();
+  const { data: messages } = useMessages(friendId);
 
   const wrapper = useRef<HTMLDivElement>(null);
   useEffect(() => {
@@ -68,9 +39,9 @@ export default function ChatBody({ friendId }: ChatBodyProps) {
         )}
       >
         {messages.length > 0 ? (
-          messages.map((msg, index) => (
+          messages.map((msg) => (
             <div
-              key={index}
+              key={msg.id}
               className={cn(
                 "w-2/3 rounded-md bg-chat-card px-4 py-4 text-chat-card-foreground",
                 { "self-end": user?.id === msg.senderId }
