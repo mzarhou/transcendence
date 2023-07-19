@@ -5,7 +5,7 @@ export interface User {
   name: string;
   avatar: string;
   email: string;
-  school42Id: number;
+  school42Id: number | null;
   isTfaEnabled: boolean;
 }
 

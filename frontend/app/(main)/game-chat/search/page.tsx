@@ -2,7 +2,7 @@
 
 import { useSearchUsers } from "@/api-hooks/use-search-users";
 import { Input } from "@/components/ui/input";
-import SearchFriendItem from "./components/search-friend-item";
+import SearchFriendItem from "../components/search-friend-item";
 import { useState } from "react";
 import { useDebouncedValue } from "@/hooks/use-debounced-value";
 

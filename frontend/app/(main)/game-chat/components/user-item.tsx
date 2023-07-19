@@ -10,12 +10,23 @@ import { User } from "@transcendence/common";
 import { MoreVertical } from "lucide-react";
 import Image from "next/image";
 import { ReactNode } from "react";
+import { useBlockUser } from "@/api-hooks/use-block-user";
+import { MouseEventHandler } from "react";
 
 type UserItemProps = {
   user: User;
   children?: ReactNode;
+  menuItems?: ReactNode;
+  isBlocked?: boolean;
 };
-export default function UserItem({ user, children }: UserItemProps) {
+export default function UserItem({
+  user,
+  children,
+  menuItems,
+  isBlocked,
+}: UserItemProps) {
+  isBlocked ??= false;
+
   return (
     <div className="relative flex justify-between">
       <div className="flex flex-grow space-x-4">
@@ -36,24 +47,38 @@ export default function UserItem({ user, children }: UserItemProps) {
         </div>
         <div className="absolute bottom-0 right-2">{children}</div>
       </div>
-      <div className="">
-        <DropdownMenu>
-          <DropdownMenuTrigger asChild>
-            <MoreVertical className="h-6 w-6 cursor-pointer" />
-          </DropdownMenuTrigger>
-          <DropdownMenuContent align="end">
-            <DropdownMenuItem className="cursor-pointer hover:bg-chat/90">
-              Play
-            </DropdownMenuItem>
-            <DropdownMenuItem className="cursor-pointer hover:bg-chat/90">
-              Profile
-            </DropdownMenuItem>
-            <DropdownMenuItem className="cursor-pointer hover:bg-chat/90">
-              Block
-            </DropdownMenuItem>
-          </DropdownMenuContent>
-        </DropdownMenu>
-      </div>
+      {!isBlocked && (
+        <div className="">
+          <DropdownMenu>
+            <DropdownMenuTrigger asChild>
+              <MoreVertical className="h-6 w-6 cursor-pointer" />
+            </DropdownMenuTrigger>
+            <DropdownMenuContent align="end">
+              <DropdownMenuItem className="cursor-pointer hover:bg-chat/90">
+                Play
+              </DropdownMenuItem>
+              <DropdownMenuItem className="cursor-pointer hover:bg-chat/90">
+                Profile
+              </DropdownMenuItem>
+              <BlockUserMenuItem userId={user.id} />
+              {menuItems}
+            </DropdownMenuContent>
+          </DropdownMenu>
+        </div>
+      )}
     </div>
+  );
+}
+
+export function BlockUserMenuItem({ userId }: { userId: number }) {
+  const { trigger: blockeUser } = useBlockUser(userId);
+
+  return (
+    <DropdownMenuItem
+      className="cursor-pointer hover:bg-chat/90"
+      onClick={blockeUser}
+    >
+      Block
+    </DropdownMenuItem>
   );
 }

@@ -11,6 +11,7 @@ import { DropdownMenuItem } from "@radix-ui/react-dropdown-menu";
 import { User } from "@transcendence/common";
 import { MoreVertical } from "lucide-react";
 import Image from "next/image";
+import { BlockUserMenuItem } from "./user-item";
 
 type FriendItemProps = {
   friend: User;
@@ -51,9 +52,7 @@ export default function FriendItem({ friend }: FriendItemProps) {
             <DropdownMenuItem className="cursor-pointer hover:bg-chat/90">
               Profile
             </DropdownMenuItem>
-            <DropdownMenuItem className="cursor-pointer hover:bg-chat/90">
-              Block
-            </DropdownMenuItem>
+            <BlockUserMenuItem userId={friend.id} />
             <UnfriendDropdownMenuItem friendId={friend.id} />
           </DropdownMenuContent>
         </DropdownMenu>
@@ -62,7 +61,10 @@ export default function FriendItem({ friend }: FriendItemProps) {
   );
 }
 
-export function UnfriendDropdownMenuItem({ friendId }: { friendId: number }) {
+type FriendIdProp = {
+  friendId: number;
+};
+export function UnfriendDropdownMenuItem({ friendId }: FriendIdProp) {
   const { trigger: unfriend } = useUnfriend({
     targetUserId: friendId,
   });

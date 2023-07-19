@@ -5,8 +5,9 @@ import { FriendRequestService } from './friend-request/friend-request.service';
 import { AuthenticationService } from 'src/iam/authentication/authentication.service';
 import { Socket } from 'socket.io';
 import { parse } from 'cookie';
-import { WsException } from '@nestjs/websockets';
 import { WebsocketException } from './ws.exception';
+import { FriendRequest, User } from '@prisma/client';
+import { SearchUser } from '@transcendence/common';
 
 @Injectable()
 export class ChatService {
@@ -51,25 +52,30 @@ export class ChatService {
     return currentUser.friends;
   }
 
-  async search(user: ActiveUserData, searchTerm: string) {
-    if (searchTerm.length === 0) {
-      return [];
-    }
+  async search(currentUser: ActiveUserData, searchTerm: string) {
+    if (searchTerm.length === 0) return [];
+    const [
+      friends,
+      sentFriendRequests,
+      receivedFriendRequests,
+      blockedUsers,
+      blockingUsers,
+    ] = await Promise.all([
+      this.findFriends(currentUser),
+      this.friendRequestService.findSent(currentUser, false),
+      this.friendRequestService.findRecieved(currentUser, false),
+      this.findBlockedUsers(currentUser),
+      this.findBlockedUsers(currentUser),
+    ]);
 
-    const friends = await this.findFriends(user);
-    const sentFriendRequests = await this.friendRequestService.findSent(
-      user,
-      false,
-    );
-    const receivedFriendRequests = await this.friendRequestService.findRecieved(
-      user,
-      false,
+    const notIncludedIds = new Set(
+      [...blockedUsers, ...blockingUsers].map((u) => u.id),
     );
 
-    const users = await this.prisma.user.findMany({
+    const searchUsers = await this.prisma.user.findMany({
       where: {
         id: {
-          notIn: [user.sub],
+          notIn: [currentUser.sub, ...notIncludedIds],
         },
         name: {
           contains: searchTerm,
@@ -77,27 +83,25 @@ export class ChatService {
       },
     });
 
-    return users.map((u) => {
-      const isFriend = friends.findIndex((frd) => frd.id === u.id) > -1;
-      const sentFrIndex = sentFriendRequests.findIndex(
-        (fr) => fr.recipientId === u.id,
-      );
-      const receivedFrIndex = receivedFriendRequests.findIndex(
-        (fr) => fr.requesterId === u.id,
-      );
-      const sentFrId =
-        sentFrIndex > -1 ? sentFriendRequests[sentFrIndex].id : null;
-      const receivedFrId =
-        receivedFrIndex > -1
-          ? receivedFriendRequests[receivedFrIndex].id
-          : null;
-
-      return { ...u, isFriend, sentFrId, receivedFrId };
-    });
+    return Promise.all(
+      searchUsers.map((targetUser) =>
+        this.getSearchUser(targetUser, {
+          friends,
+          sentFriendRequests,
+          receivedFriendRequests,
+        }),
+      ),
+    );
   }
 
   async unfriend(targetUserId: number, user: ActiveUserData) {
-    await this.prisma.$transaction([
+    await this.prisma.$transaction(
+      this.unfriendTransactions(targetUserId, user),
+    );
+  }
+
+  private unfriendTransactions(targetUserId: number, user: ActiveUserData) {
+    return [
       this.prisma.user.update({
         where: { id: user.sub },
         data: {
@@ -114,30 +118,68 @@ export class ChatService {
           },
         },
       }),
-    ]);
+    ];
   }
 
   async blockUser(user: ActiveUserData, targetUserId: number) {
-    await this.unfriend(targetUserId, user);
-    await this.prisma.user.update({
-      where: { id: user.sub },
-      data: {
-        blockedUsers: {
-          connect: { id: targetUserId },
-        },
+    const friendRequest = await this.prisma.friendRequest.findFirst({
+      where: {
+        OR: [
+          { recipientId: user.sub, requesterId: targetUserId },
+          { recipientId: targetUserId, requesterId: user.sub },
+        ],
       },
+      select: { id: true },
     });
+
+    await this.prisma.$transaction([
+      // remove friend request if exists
+      ...(friendRequest
+        ? [
+            this.prisma.friendRequest.delete({
+              where: { id: friendRequest.id },
+            }),
+          ]
+        : []),
+
+      // unfriend
+      ...this.unfriendTransactions(targetUserId, user),
+
+      // add target user to blocked users
+      this.prisma.user.update({
+        where: { id: user.sub },
+        data: {
+          blockedUsers: { connect: { id: targetUserId } },
+        },
+      }),
+      this.prisma.user.update({
+        where: { id: targetUserId },
+        data: {
+          blockingUsers: { connect: { id: user.sub } },
+        },
+      }),
+    ]);
   }
 
   async unblockUser(user: ActiveUserData, targetUserId: number) {
-    await this.prisma.user.update({
-      where: { id: user.sub },
-      data: {
-        blockedUsers: {
-          disconnect: { id: targetUserId },
+    await this.prisma.$transaction([
+      this.prisma.user.update({
+        where: { id: user.sub },
+        data: {
+          blockedUsers: {
+            disconnect: { id: targetUserId },
+          },
         },
-      },
-    });
+      }),
+      this.prisma.user.update({
+        where: { id: targetUserId },
+        data: {
+          blockingUsers: {
+            disconnect: { id: user.sub },
+          },
+        },
+      }),
+    ]);
   }
 
   async findBlockedUsers(activeUser: ActiveUserData) {
@@ -148,5 +190,63 @@ export class ChatService {
       },
     });
     return currentUser.blockedUsers;
+  }
+
+  async findBlockingUsers(targetUserId: number) {
+    const currentUser = await this.prisma.user.findFirstOrThrow({
+      where: { id: targetUserId },
+      include: {
+        blockingUsers: true,
+      },
+    });
+    return currentUser.blockingUsers;
+  }
+
+  async findBlockedUsersByUserId(userId: number) {
+    const currentUser = await this.prisma.user.findFirstOrThrow({
+      where: { id: userId },
+      include: {
+        blockedUsers: true,
+      },
+    });
+    return currentUser.blockedUsers;
+  }
+
+  private getFriendRequestId(
+    friendRequests: FriendRequest[],
+    where: (fr: FriendRequest) => boolean,
+  ) {
+    const index = friendRequests.findIndex(where);
+    return index > -1 ? friendRequests[index].id : null;
+  }
+
+  private async getSearchUser(
+    targetUser: User,
+    {
+      friends,
+      sentFriendRequests,
+      receivedFriendRequests,
+    }: {
+      friends: User[];
+      sentFriendRequests: FriendRequest[];
+      receivedFriendRequests: FriendRequest[];
+    },
+  ) {
+    const isFriend = friends.findIndex((frd) => frd.id === targetUser.id) > -1;
+
+    const sentFrId = this.getFriendRequestId(
+      sentFriendRequests,
+      (fr) => fr.recipientId === targetUser.id,
+    );
+    const receivedFrId = this.getFriendRequestId(
+      receivedFriendRequests,
+      (fr) => fr.requesterId === targetUser.id,
+    );
+    return {
+      ...targetUser,
+      isFriend,
+      sentFrId,
+      receivedFrId,
+    } satisfies SearchUser;
   }
 }

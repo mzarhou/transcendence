@@ -1,11 +1,17 @@
 "use client";
 
-import { Loader2, MoreVertical, UserPlus } from "lucide-react";
+import { Loader2, MoreVertical } from "lucide-react";
 import FriendItem from "./components/friend-item";
 import FakeChatSearch from "./components/fake-chat-search";
 import { useFriends } from "@/api-hooks/use-friends";
 import Link from "next/link";
 import FriendRequestsLink from "./components/friend-requests-link";
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuTrigger,
+} from "@/components/ui/dropdown-menu";
 
 export default function Game() {
   const { data: friends, isLoading } = useFriends();
@@ -29,7 +35,19 @@ export default function Game() {
       <div className="flex h-0 flex-grow flex-col space-y-4">
         <div className="flex items-center justify-between">
           <h3 className="text-sm">Friends</h3>
-          <FriendRequestsLink />
+          <div className="flex items-center space-x-1">
+            <FriendRequestsLink />
+            <DropdownMenu>
+              <DropdownMenuTrigger asChild>
+                <MoreVertical className="h-6 w-6 cursor-pointer" />
+              </DropdownMenuTrigger>
+              <DropdownMenuContent align="end">
+                <DropdownMenuItem className="cursor-pointer hover:bg-chat/90">
+                  <Link href="/game-chat/blocked-users">Blocked Users</Link>
+                </DropdownMenuItem>
+              </DropdownMenuContent>
+            </DropdownMenu>
+          </div>
         </div>
         <div className="h-0 flex-grow space-y-4 overflow-y-auto pr-2">
           {isLoading ? (
