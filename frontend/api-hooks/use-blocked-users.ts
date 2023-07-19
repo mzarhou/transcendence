@@ -2,10 +2,10 @@ import { api } from "@/lib/api";
 import { User } from "@transcendence/common";
 import useSWR from "swr";
 
-export const friendsKey = "/chat/friends";
+export const blockedUsersKey = "/chat/blocked";
 
-export function useFriends() {
-  return useSWR(friendsKey, (url) =>
+export function useBlockedUsers() {
+  return useSWR(blockedUsersKey, (url) =>
     api.get<User[]>(url).then((data) => data.data)
   );
 }

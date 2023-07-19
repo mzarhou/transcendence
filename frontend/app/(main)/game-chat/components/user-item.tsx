@@ -14,8 +14,13 @@ import { ReactNode } from "react";
 type UserItemProps = {
   user: User;
   children?: ReactNode;
+  isBlocked?: boolean;
 };
-export default function UserItem({ user, children }: UserItemProps) {
+export default function UserItem({
+  user,
+  children,
+  isBlocked = false,
+}: UserItemProps) {
   return (
     <div className="relative flex justify-between">
       <div className="flex flex-grow space-x-4">
@@ -36,24 +41,26 @@ export default function UserItem({ user, children }: UserItemProps) {
         </div>
         <div className="absolute bottom-0 right-2">{children}</div>
       </div>
-      <div className="">
-        <DropdownMenu>
-          <DropdownMenuTrigger asChild>
-            <MoreVertical className="h-6 w-6 cursor-pointer" />
-          </DropdownMenuTrigger>
-          <DropdownMenuContent align="end">
-            <DropdownMenuItem className="cursor-pointer hover:bg-chat/90">
-              Play
-            </DropdownMenuItem>
-            <DropdownMenuItem className="cursor-pointer hover:bg-chat/90">
-              Profile
-            </DropdownMenuItem>
-            <DropdownMenuItem className="cursor-pointer hover:bg-chat/90">
-              Block
-            </DropdownMenuItem>
-          </DropdownMenuContent>
-        </DropdownMenu>
-      </div>
+      {!isBlocked && (
+        <div className="">
+          <DropdownMenu>
+            <DropdownMenuTrigger asChild>
+              <MoreVertical className="h-6 w-6 cursor-pointer" />
+            </DropdownMenuTrigger>
+            <DropdownMenuContent align="end">
+              <DropdownMenuItem className="cursor-pointer hover:bg-chat/90">
+                Play
+              </DropdownMenuItem>
+              <DropdownMenuItem className="cursor-pointer hover:bg-chat/90">
+                Profile
+              </DropdownMenuItem>
+              <DropdownMenuItem className="cursor-pointer hover:bg-chat/90">
+                Block
+              </DropdownMenuItem>
+            </DropdownMenuContent>
+          </DropdownMenu>
+        </div>
+      )}
     </div>
   );
 }
