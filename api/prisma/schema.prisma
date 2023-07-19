@@ -30,6 +30,9 @@ model User {
   blockedUsers         User[] @relation("blockedUsers")
   blockedUsersRelation User[] @relation("blockedUsers")
 
+  blockingUsers         User[] @relation("blockingUsers")
+  blockingUsersRelation User[] @relation("blockingUsers")
+
   sentMessages     Message[] @relation("User_canSendMany_messages")
   receivedMessages Message[] @relation("User_canReceiveMany_messages")
 }
