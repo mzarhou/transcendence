@@ -5,7 +5,6 @@ import { FriendRequestService } from './friend-request/friend-request.service';
 import { AuthenticationService } from 'src/iam/authentication/authentication.service';
 import { Socket } from 'socket.io';
 import { parse } from 'cookie';
-import { WsException } from '@nestjs/websockets';
 import { WebsocketException } from './ws.exception';
 
 @Injectable()
@@ -97,7 +96,13 @@ export class ChatService {
   }
 
   async unfriend(targetUserId: number, user: ActiveUserData) {
-    await this.prisma.$transaction([
+    await this.prisma.$transaction(
+      this.unfriendTransactions(targetUserId, user),
+    );
+  }
+
+  private unfriendTransactions(targetUserId: number, user: ActiveUserData) {
+    return [
       this.prisma.user.update({
         where: { id: user.sub },
         data: {
@@ -114,19 +119,43 @@ export class ChatService {
           },
         },
       }),
-    ]);
+    ];
   }
 
   async blockUser(user: ActiveUserData, targetUserId: number) {
-    await this.unfriend(targetUserId, user);
-    await this.prisma.user.update({
-      where: { id: user.sub },
-      data: {
-        blockedUsers: {
-          connect: { id: targetUserId },
-        },
+    const friendRequest = await this.prisma.friendRequest.findFirst({
+      where: {
+        OR: [
+          { recipientId: user.sub, requesterId: targetUserId },
+          { recipientId: targetUserId, requesterId: user.sub },
+        ],
       },
+      select: { id: true },
     });
+
+    await this.prisma.$transaction([
+      // remove friend request if exists
+      ...(friendRequest
+        ? [
+            this.prisma.friendRequest.delete({
+              where: { id: friendRequest.id },
+            }),
+          ]
+        : []),
+
+      // unfriend
+      ...this.unfriendTransactions(targetUserId, user),
+
+      // add target user to blocked users
+      this.prisma.user.update({
+        where: { id: user.sub },
+        data: {
+          blockedUsers: {
+            connect: { id: targetUserId },
+          },
+        },
+      }),
+    ]);
   }
 
   async unblockUser(user: ActiveUserData, targetUserId: number) {
