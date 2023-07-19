@@ -1,5 +1,5 @@
 import {
-  ConflictException,
+  HttpStatus,
   Inject,
   Injectable,
   UnauthorizedException,
@@ -21,6 +21,9 @@ import { PrismaService } from '../../prisma/prisma.service';
 import { User } from '@prisma/client';
 import { AbilityFactory, AppAbility } from '../authorization/ability.factory';
 import { ForbiddenError } from '@casl/ability';
+import { Socket } from 'socket.io';
+import { parse } from 'cookie';
+import { WebsocketException } from 'src/notifications/ws.exception';
 
 @Injectable()
 export class AuthenticationService {
@@ -169,5 +172,22 @@ export class AuthenticationService {
         ForbiddenError.from(ability).throwUnlessCan(...args);
       },
     };
+  }
+
+  async getUserFromSocket(socket: Socket) {
+    try {
+      const cookies = parse(socket.handshake.headers.cookie ?? '');
+      let accessToken: string | undefined = cookies['accessToken'];
+
+      const headers = socket.handshake.headers;
+      accessToken ??= headers.authorization?.split(' ')[1];
+
+      return this.getUserFromToken(accessToken ?? '');
+    } catch (error) {
+      throw new WebsocketException({
+        message: 'Invalid credentials',
+        statusCode: HttpStatus.UNAUTHORIZED,
+      });
+    }
   }
 }
