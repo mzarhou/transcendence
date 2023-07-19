@@ -1,14 +1,45 @@
-import { Injectable } from '@nestjs/common';
+import { HttpStatus, Injectable } from '@nestjs/common';
 import { ActiveUserData } from 'src/iam/interface/active-user-data.interface';
 import { PrismaService } from 'src/prisma/prisma.service';
 import { FriendRequestService } from './friend-request/friend-request.service';
+import { AuthenticationService } from 'src/iam/authentication/authentication.service';
+import { Socket } from 'socket.io';
+import { parse } from 'cookie';
+import { WsException } from '@nestjs/websockets';
+import { WebsocketException } from './ws.exception';
 
 @Injectable()
 export class ChatService {
   constructor(
     private readonly prisma: PrismaService,
     private readonly friendRequestService: FriendRequestService,
+    private readonly authService: AuthenticationService,
   ) {}
+
+  async getUserFromSocket(socket: Socket) {
+    try {
+      const cookies = parse(socket.handshake.headers.cookie ?? '');
+      let accessToken: string | undefined = cookies['accessToken'];
+
+      const headers = socket.handshake.headers;
+      accessToken ??= headers.authorization?.split(' ')[1];
+
+      const user = await this.authService.getUserFromToken(accessToken ?? '');
+      return user;
+    } catch (error) {
+      throw new WebsocketException({
+        message: 'Invalid credentials',
+        statusCode: HttpStatus.UNAUTHORIZED,
+      });
+    }
+  }
+
+  async isFriendOf(user: ActiveUserData, targetUserId: number) {
+    const user1Friends = await this.findFriends(user);
+    const isFriends =
+      user1Friends.findIndex((frd) => frd.id === targetUserId) > -1;
+    return isFriends;
+  }
 
   async findFriends(activeUser: ActiveUserData) {
     const currentUser = await this.prisma.user.findFirstOrThrow({

@@ -3,7 +3,6 @@
 import { useSearchUsers } from "@/api-hooks/use-search-users";
 import { Input } from "@/components/ui/input";
 import SearchFriendItem from "./components/search-friend-item";
-import { useAutoFocus } from "@/hooks/use-auto-focus";
 import { useState } from "react";
 import { useDebouncedValue } from "@/hooks/use-debounced-value";
 
@@ -11,13 +10,12 @@ export default function ChatSearchPage() {
   const [query, setQuery] = useState("");
   const debouncedQuery = useDebouncedValue(query, 300);
   const { data } = useSearchUsers(debouncedQuery);
-  const inputRef = useAutoFocus();
 
   return (
     <div className="flex h-0 w-full flex-grow flex-col space-y-8 px-1 pt-8 md:p-4 md:px-6 md:pt-0">
       <Input
+        autoFocus
         id="search-users"
-        ref={inputRef}
         placeholder="Search @username, groups"
         value={query}
         onChange={(e) => setQuery(e.target.value)}

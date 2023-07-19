@@ -17,7 +17,7 @@ export const useSignIn = () => {
       onSuccess: async () => {
         await mutate("/users/me");
         toast({ description: "You are logged in" });
-        router.replace("/");
+        router.replace("/game-chat");
       },
       onError: (error) => {
         let message = "Failed to sign in";

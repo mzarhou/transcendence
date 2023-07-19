@@ -54,6 +54,10 @@ module.exports = {
           DEFAULT: "hsl(var(--chat))",
           foreground: "hsl(var(--chat-foreground))",
         },
+        "chat-card": {
+          DEFAULT: "hsl(var(--chat-card))",
+          foreground: "hsl(var(--chat-card-foreground))",
+        },
       },
       borderRadius: {
         lg: "var(--radius)",

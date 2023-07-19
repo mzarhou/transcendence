@@ -30,6 +30,8 @@
     "@nestjs/jwt": "^10.0.3",
     "@nestjs/mapped-types": "*",
     "@nestjs/platform-express": "^9.0.0",
+    "@nestjs/platform-socket.io": "^10.0.5",
+    "@nestjs/websockets": "^10.0.5",
     "@prisma/client": "4.16.1",
     "@transcendence/common": "0.0.1",
     "axios": "^1.4.0",

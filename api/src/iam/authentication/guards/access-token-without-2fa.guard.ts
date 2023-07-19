@@ -1,30 +1,16 @@
-import { ForbiddenError } from '@casl/ability';
 import {
   CanActivate,
   ExecutionContext,
-  Inject,
   Injectable,
   UnauthorizedException,
 } from '@nestjs/common';
-import { ConfigType } from '@nestjs/config';
-import { JwtService } from '@nestjs/jwt';
 import { Request } from 'express';
-import {
-  AbilityFactory,
-  AppAbility,
-} from 'src/iam/authorization/ability.factory';
-import jwtConfig from 'src/iam/config/jwt.config';
 import { REQUEST_USER_KEY } from 'src/iam/iam.constants';
-import { ActiveUserData } from 'src/iam/interface/active-user-data.interface';
+import { AuthenticationService } from '../authentication.service';
 
 @Injectable()
 export class AccessTokenWithout2faGuard implements CanActivate {
-  constructor(
-    @Inject(jwtConfig.KEY)
-    private readonly jwtConfiguration: ConfigType<typeof jwtConfig>,
-    private readonly jwtService: JwtService,
-    private readonly abilityFactory: AbilityFactory,
-  ) {}
+  constructor(private readonly authService: AuthenticationService) {}
 
   async canActivate(context: ExecutionContext): Promise<boolean> {
     await this.tryGetPayload(context);
@@ -39,18 +25,7 @@ export class AccessTokenWithout2faGuard implements CanActivate {
     }
 
     try {
-      const _payload = await this.jwtService.verifyAsync<
-        Omit<ActiveUserData, 'allow'>
-      >(token, this.jwtConfiguration);
-
-      const ability = this.abilityFactory.defineForUser(_payload);
-      const payload: ActiveUserData = {
-        ..._payload,
-        allow: (...args: Parameters<AppAbility['can']>) => {
-          ForbiddenError.from(ability).throwUnlessCan(...args);
-        },
-      };
-
+      const payload = await this.authService.getUserFromToken(token);
       request[REQUEST_USER_KEY] = payload;
       return payload;
     } catch (error) {

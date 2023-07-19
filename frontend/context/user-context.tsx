@@ -2,9 +2,7 @@
 
 import { api } from "@/lib/api";
 import { User } from "@transcendence/common";
-import axios, { AxiosError } from "axios";
-import { usePathname, useRouter } from "next/navigation";
-import { createContext, FC, useContext, useEffect, useState } from "react";
+import { createContext, FC, useContext } from "react";
 import useSWR, { SWRResponse } from "swr";
 
 type UserContextType = Pick<
@@ -30,47 +28,7 @@ async function fetchUser(endpoint: string) {
 }
 
 export const UserProvider: FC<UserProviderProps> = ({ children }) => {
-  const pathname = usePathname();
-  const router = useRouter();
-
-  const fetcher = async (endpoint: string) => {
-    let error;
-    try {
-      const user = await fetchUser(endpoint);
-      return user;
-    } catch (err) {
-      error = err;
-    }
-
-    if (!(error instanceof AxiosError)) throw error;
-
-    /**
-     * check if 2FA required
-     */
-    const wwwAuthHeader: string | undefined =
-      error.response?.headers?.["www-authenticate"];
-    if (
-      wwwAuthHeader?.toLocaleLowerCase().includes("2fa") &&
-      pathname != "/2fa"
-    ) {
-      router.push("/2fa");
-      return undefined;
-    }
-
-    /**
-     * refreshing tokens if status
-     * code is 401
-     * and try again
-     */
-    if (error.response?.status !== 401) {
-      throw "Unkown error";
-    }
-    await axios.post("/api/auth/refresh-tokens");
-    return fetchUser(endpoint);
-  };
-
-  const userData = useSWR("/users/me", fetcher, {
-    shouldRetryOnError: false,
+  const userData = useSWR("/users/me", fetchUser, {
     revalidateOnFocus: false,
   });
 

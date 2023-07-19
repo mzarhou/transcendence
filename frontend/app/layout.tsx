@@ -3,7 +3,7 @@ import { Inter } from "next/font/google";
 import { Toaster } from "@/components/ui/toaster";
 import { UserProvider } from "@/context/user-context";
 import { ThemeProvider } from "@/components/theme-provider";
-import { ModeToggle } from "@/components/mode-toggle";
+import { EventsSocketProvider } from "@/context/events-socket-context";
 
 const inter = Inter({ subsets: ["latin"] });
 
@@ -23,7 +23,9 @@ export default async function RootLayout({
         <head />
         <body>
           <ThemeProvider attribute="class" defaultTheme="system" enableSystem>
-            <UserProvider>{children}</UserProvider>
+            <UserProvider>
+              <EventsSocketProvider>{children}</EventsSocketProvider>
+            </UserProvider>
             <Toaster />
           </ThemeProvider>
         </body>

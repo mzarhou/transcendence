@@ -6,6 +6,7 @@ import {
   DropdownMenuContent,
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
+import { useIsFriendConnected } from "@/stores/connected-users-atom";
 import { DropdownMenuItem } from "@radix-ui/react-dropdown-menu";
 import { User } from "@transcendence/common";
 import { MoreVertical } from "lucide-react";
@@ -15,6 +16,8 @@ type FriendItemProps = {
   friend: User;
 };
 export default function FriendItem({ friend }: FriendItemProps) {
+  const isFriendConnected = useIsFriendConnected();
+
   return (
     <div className="flex justify-between">
       <div className="flex space-x-4">
@@ -26,7 +29,9 @@ export default function FriendItem({ friend }: FriendItemProps) {
             alt=""
             className="rounded-full"
           />
-          <div className="absolute bottom-1.5 right-0.5 h-4 w-4 rounded-full border-2 border-chat bg-green-400"></div>
+          {isFriendConnected(friend.id) && (
+            <div className="absolute bottom-1.5 right-0.5 h-4 w-4 rounded-full border-2 border-chat bg-green-400"></div>
+          )}
         </div>
         <div className="mt-0.5">
           <p>{friend.name}</p>

@@ -19,6 +19,8 @@ import { SignUpDto } from './dto/sign-up.dto';
 import { HashingService } from '../hashing/hashing.service';
 import { PrismaService } from '../../prisma/prisma.service';
 import { User } from '@prisma/client';
+import { AbilityFactory, AppAbility } from '../authorization/ability.factory';
+import { ForbiddenError } from '@casl/ability';
 
 @Injectable()
 export class AuthenticationService {
@@ -29,6 +31,7 @@ export class AuthenticationService {
     private readonly refreshTokenIdsStorage: RefreshTokenIdsStorage,
     private readonly prisma: PrismaService,
     private readonly hashingService: HashingService,
+    private readonly abilityFactory: AbilityFactory,
   ) {}
 
   async signIn(signInDto: SignInDto, fingerprintHash: string) {
@@ -152,5 +155,19 @@ export class AuthenticationService {
       }
       throw new UnauthorizedException();
     }
+  }
+
+  async getUserFromToken(token: string): Promise<ActiveUserData> {
+    const _payload = await this.jwtService.verifyAsync<
+      Omit<ActiveUserData, 'allow'>
+    >(token, this.jwtConfiguration);
+
+    const ability = this.abilityFactory.defineForUser(_payload);
+    return {
+      ..._payload,
+      allow: (...args: Parameters<AppAbility['can']>) => {
+        ForbiddenError.from(ability).throwUnlessCan(...args);
+      },
+    };
   }
 }
