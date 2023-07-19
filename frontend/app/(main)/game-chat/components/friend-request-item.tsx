@@ -1,7 +1,7 @@
 "use client";
 
 import { FriendRequest } from "@transcendence/common";
-import UserItem from "../../components/user-item";
+import UserItem from "./user-item";
 import { LoaderButton } from "@/components/ui/loader-button";
 import { Check, X } from "lucide-react";
 import { useAcceptFriendRequest } from "@/api-hooks/user-accept-friend-request";

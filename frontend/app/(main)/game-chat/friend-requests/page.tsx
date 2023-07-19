@@ -2,7 +2,7 @@
 
 import { useFriendRequests } from "@/api-hooks/use-friend-requests";
 import FullLoader from "@/components/ui/full-loader";
-import { FriendRequestItem } from "./components/friend-request-item";
+import { FriendRequestItem } from "../components/friend-request-item";
 
 export default function FriendRequestsPage() {
   const { data, isLoading } = useFriendRequests();

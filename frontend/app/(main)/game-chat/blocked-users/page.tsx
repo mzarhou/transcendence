@@ -13,7 +13,7 @@ export default function BlockedUsersPage() {
       <h3>Blocked Users</h3>
       {blockedUsers?.length ? (
         blockedUsers?.map((user) => (
-          <UserItem user={user}>
+          <UserItem key={user.id} user={user} isBlocked={true}>
             <UnblockUserBtn userId={user.id} />
           </UserItem>
         ))
