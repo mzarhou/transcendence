@@ -21,10 +21,11 @@ import {
   FriendRequest,
   MESSAGE_EVENT,
   MessageType,
+  ERROR_EVENT,
+  WsErrorData,
+  MESSAGE_READ_EVENT,
 } from "@transcendence/common";
 import { useToast } from "@/components/ui/use-toast";
-import { ERROR_EVENT } from "@transcendence/common";
-import { WsErrorData } from "@transcendence/common";
 import { useSWRConfig } from "swr";
 import { getMessagesKey } from "@/api-hooks/use-messages";
 import { useAtom } from "jotai";
@@ -45,6 +46,10 @@ export const EventsSocketProvider = ({ children }: { children: ReactNode }) => {
     </EventsSocketContext.Provider>
   );
 };
+
+function getFriendIdFromMessage(userId: number, data: MessageType) {
+  return data.recipientId === userId ? data.senderId : data.recipientId;
+}
 
 function useSocket_() {
   const { user: currentUser } = useUser();
@@ -70,6 +75,11 @@ function useSocket_() {
           onError(_socket, data)
         );
         _socket.on(MESSAGE_EVENT, (data: MessageType) => onMessage(data));
+        _socket.on(MESSAGE_READ_EVENT, (data: MessageType) => {
+          const friendId = getFriendIdFromMessage(currentUser.id, data);
+          mutate(getMessagesKey(friendId));
+          mutate(unreadMessagesKey);
+        });
         _socket.on(FRIEND_CONNECTED, (data: FriendConnectedData) => {
           onFriendConnected(data);
         });
@@ -100,13 +110,8 @@ const useOnMessage = () => {
     (data: MessageType) => {
       if (!currentUser) return;
 
-      const friendId =
-        data.recipientId === currentUser.id ? data.senderId : data.recipientId;
-      mutate(
-        getMessagesKey(friendId),
-        (messages) => [...(messages ?? []), data],
-        { revalidate: false }
-      );
+      const friendId = getFriendIdFromMessage(currentUser.id, data);
+      mutate(getMessagesKey(friendId));
       mutate(unreadMessagesKey);
     },
     [currentUser]

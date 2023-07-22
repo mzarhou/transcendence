@@ -28,3 +28,13 @@ export type FriendRequest = {
   createdAt: Date;
   updatedAt: Date;
 };
+
+export type MessageType = {
+  id: number;
+  senderId: number;
+  recipientId: number;
+  message: string;
+  isRead: boolean;
+  createdAt: Date;
+  updatedAt: Date;
+};

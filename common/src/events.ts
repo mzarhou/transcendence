@@ -1,4 +1,5 @@
 export const MESSAGE_EVENT = "message";
+export const MESSAGE_READ_EVENT = "message_read";
 
 export const ERROR_EVENT = "ws_error";
 export type WsErrorData = {

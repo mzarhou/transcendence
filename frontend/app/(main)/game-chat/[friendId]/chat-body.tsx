@@ -1,22 +1,43 @@
 "use client";
 
 import { cn } from "@/lib/utils";
-import { FormEventHandler, useEffect, useRef, useState } from "react";
+import { FormEventHandler, useEffect, useRef } from "react";
 import FullPlaceHolder from "@/components/ui/full-placeholder";
-import { MESSAGE_EVENT, SendMessageType } from "@transcendence/common";
+import {
+  MESSAGE_EVENT,
+  SendMessageType,
+  MessageType,
+} from "@transcendence/common";
+import {
+  IntersectionObserverProvider,
+  useIntersectionObserver,
+} from "./context/intersection-observer-context";
+import { useReadMessage } from "@/api-hooks/use-read-message";
+import { Check, CheckCheck } from "lucide-react";
+import {
+  ROOT_EL_ID,
+  useMessageIntersectionCallback,
+} from "./hooks/use-message-intersection-callback";
+import { isMessageVisible } from "./utils/is-message-visible";
 import { useUser } from "@/context/user-context";
 import { useSocket } from "@/context/events-socket-context";
 import { useMessages } from "@/api-hooks/use-messages";
+import { useLazyFirstUnreadMessageId } from "./hooks/use-lazy-first-unread-message-id";
+import { NEW_MESSAGES_LINE_ID, useScroll } from "./hooks/use-scroll";
 
 type ChatBodyProps = {
   friendId: number;
 };
 export default function ChatBody({ friendId }: ChatBodyProps) {
+  const messagesIntersectionCallback = useMessageIntersectionCallback(friendId);
+
   return (
-    <div className="flex h-0 flex-grow flex-col space-y-6">
-      <ChatMessages friendId={friendId} />
-      <ChatInput friendId={friendId} />
-    </div>
+    <IntersectionObserverProvider callback={messagesIntersectionCallback}>
+      <div className="flex h-0 flex-grow flex-col space-y-6">
+        <ChatMessages friendId={friendId} />
+        <ChatInput friendId={friendId} />
+      </div>
+    </IntersectionObserverProvider>
   );
 }
 
@@ -49,47 +70,101 @@ function ChatInput({ friendId }: { friendId: number }) {
 }
 
 function ChatMessages({ friendId }: { friendId: number }) {
-  const { user } = useUser();
   const { data: messages } = useMessages(friendId);
-
-  const wrapper = useRef<HTMLDivElement>(null);
-  const [showMessages, setShowMessages] = useState(false);
-
-  useEffect(() => {
-    if (messages.length === 0) return;
-    const lastchild = wrapper.current?.lastChild as Element | null | undefined;
-    lastchild?.scrollIntoView({
-      behavior: showMessages ? "smooth" : "instant",
-      block: "end",
-      inline: "nearest",
-    });
-    if (!showMessages) setShowMessages(true);
-  }, [messages]);
+  const { showMessages, wrapperRef } = useScroll(friendId);
+  const firstUreadMessageId = useLazyFirstUnreadMessageId({
+    friendId,
+    updateInterval: 1000,
+  });
 
   return (
     <div
-      ref={wrapper}
+      id={ROOT_EL_ID}
+      ref={wrapperRef}
       className={cn("flex flex-grow flex-col space-y-4 overflow-y-auto px-4", {
         invisible: !showMessages,
       })}
     >
       {messages.length > 0 ? (
-        messages.map((msg) => (
-          <div
-            key={msg.id}
-            className={cn(
-              "w-2/3 rounded-md bg-chat-card px-4 py-4 text-chat-card-foreground",
-              { "self-end": user?.id === msg.senderId }
-            )}
-          >
-            {msg.message}
-          </div>
-        ))
+        messages
+          .map((msg) => {
+            if (msg.id !== firstUreadMessageId)
+              return (
+                <MessageItem key={msg.id} message={msg} friendId={friendId} />
+              );
+            return [
+              <div
+                id={NEW_MESSAGES_LINE_ID}
+                key={"unread-messages-line"}
+                className="flex items-center"
+              >
+                <div className="inline-block h-[3px] flex-grow rounded-l-full bg-red-500" />
+                <div className="flex items-center justify-center rounded-l-full bg-red-500 pl-2 pr-1 text-xs uppercase">
+                  New
+                </div>
+              </div>,
+              <MessageItem key={msg.id} message={msg} friendId={friendId} />,
+            ];
+          })
+          .flat()
       ) : (
         <FullPlaceHolder
           text="No messages found"
           className="text-chat-foreground/30"
         />
+      )}
+    </div>
+  );
+}
+
+type MessageItemProps = {
+  message: MessageType;
+  friendId: number;
+};
+function MessageItem({ message: msg, friendId }: MessageItemProps) {
+  const { user } = useUser();
+  const observer = useIntersectionObserver();
+  const { trigger: readMessage } = useReadMessage(friendId);
+  const messageRef = useRef<HTMLDivElement>(null);
+
+  useEffect(() => {
+    const rootEl = document.getElementById(ROOT_EL_ID);
+    if (!rootEl) throw "root element is undefined";
+    if (!observer || !messageRef.current) return;
+    if (!user || msg.recipientId !== user.id || msg.isRead) return;
+
+    observer.observe(messageRef.current);
+    const newMessageRec = messageRef.current.getBoundingClientRect();
+    const messagesMargin = 16;
+    if (
+      isMessageVisible(messageRef.current, rootEl, {
+        scaleRootBottom: newMessageRec.height + messagesMargin,
+      })
+    ) {
+      readMessage(msg.id);
+    }
+  }, [observer, user]);
+
+  return (
+    <div
+      ref={messageRef}
+      className={cn(
+        "w-2/3 rounded-md bg-chat-card px-4 pb-3 pt-4 text-chat-card-foreground",
+        { "self-end": user?.id === msg.senderId }
+      )}
+      data-message-id={msg.id}
+    >
+      {msg.id}
+
+      {/* sent | received | read */}
+      {msg.senderId === user?.id && (
+        <div className="-mt-2 flex justify-end">
+          {msg.isRead ? (
+            <CheckCheck className="h-5 w-5 text-blue-500" />
+          ) : (
+            <Check className="h-5 w-5" />
+          )}
+        </div>
       )}
     </div>
   );

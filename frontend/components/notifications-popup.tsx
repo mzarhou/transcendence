@@ -27,6 +27,7 @@ export default function NotificationsPopup() {
     notifications.length > 0 ? (
       notifications.map((nt) => (
         <div
+          key={nt.id}
           className={cn({
             "bg-chat-card": !nt.isRead,
           })}
