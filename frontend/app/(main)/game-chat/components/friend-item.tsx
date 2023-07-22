@@ -12,15 +12,17 @@ import { User } from "@transcendence/common";
 import { MoreVertical } from "lucide-react";
 import Image from "next/image";
 import { BlockUserMenuItem } from "./user-item";
+import { useFriendUreadMessagesCount } from "@/api-hooks/use-unread-messages";
 
 type FriendItemProps = {
   friend: User;
 };
 export default function FriendItem({ friend }: FriendItemProps) {
   const isFriendConnected = useIsFriendConnected();
+  const unreadMessagesCount = useFriendUreadMessagesCount(friend.id);
 
   return (
-    <div className="flex justify-between">
+    <div className="relative flex justify-between">
       <div className="flex space-x-4">
         <div className="relative flex aspect-square h-[72px] items-center justify-center rounded-full bg-gray-100/10 text-lg">
           <Image
@@ -56,6 +58,11 @@ export default function FriendItem({ friend }: FriendItemProps) {
             <UnfriendDropdownMenuItem friendId={friend.id} />
           </DropdownMenuContent>
         </DropdownMenu>
+        {unreadMessagesCount > 0 && (
+          <div className="absolute right-6 top-0 flex aspect-square h-6 w-6 items-center justify-center rounded-full bg-primary font-semibold text-primary-foreground">
+            {unreadMessagesCount > 9 ? "9+" : unreadMessagesCount}
+          </div>
+        )}
       </div>
     </div>
   );

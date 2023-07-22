@@ -30,6 +30,7 @@ import { getMessagesKey } from "@/api-hooks/use-messages";
 import { useAtom } from "jotai";
 import { connectedFriendsAtom } from "@/stores/connected-users-atom";
 import { friendRequestsKey } from "@/api-hooks/use-friend-requests";
+import { unreadMessagesKey } from "@/api-hooks/use-unread-messages";
 
 const EventsSocketContext = createContext<Socket | null>(null);
 
@@ -106,6 +107,7 @@ const useOnMessage = () => {
         (messages) => [...(messages ?? []), data],
         { revalidate: false }
       );
+      mutate(unreadMessagesKey);
     },
     [currentUser]
   );

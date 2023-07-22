@@ -12,7 +12,7 @@ export class NotificationsController {
     return this.notificationsService.findNotifications(user);
   }
 
-  @Delete('/')
+  @Delete('/clear-all')
   async clearAll(@ActiveUser() user: ActiveUserData) {
     return this.notificationsService.clearAll(user);
   }

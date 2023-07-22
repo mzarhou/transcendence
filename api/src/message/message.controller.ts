@@ -14,4 +14,9 @@ export class MessageController {
   ) {
     return this.messageService.findFriendMessages(user, friendId);
   }
+
+  @Get('/unread-messages')
+  findUnreadMessages(@ActiveUser() user: ActiveUserData) {
+    return this.messageService.findUnreadMessages(user);
+  }
 }

@@ -17,6 +17,7 @@ import {
 import { useClearAllNotifications } from "@/api-hooks/use-clear-all-notifications";
 import { LoaderButton } from "./ui/loader-button";
 import { useReadAllNotifications } from "@/api-hooks/use-read-all-notifications";
+import { NoticationsBadge } from "./ui/notifications-badge";
 
 export default function NotificationsPopup() {
   const [open, setOpen] = useState(false);
@@ -49,16 +50,7 @@ export default function NotificationsPopup() {
       <PopoverTrigger asChild>
         <Button variant="link" className="relative">
           <Bell />
-          {unreadNotificationsCount > 0 && (
-            <div
-              className={cn(
-                "absolute bottom-1.5 right-0.5 flex aspect-square h-5 items-center justify-center rounded-full bg-red-400 text-xs",
-                unreadNotificationsCount > 9 ? "h-5" : "h-4"
-              )}
-            >
-              {unreadNotificationsCount > 9 ? "9+" : unreadNotificationsCount}
-            </div>
-          )}
+          <NoticationsBadge count={unreadNotificationsCount} />
         </Button>
       </PopoverTrigger>
       <PopoverContent

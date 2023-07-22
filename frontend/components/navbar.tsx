@@ -2,17 +2,19 @@
 
 import { useUser } from "@/context/user-context";
 import axios from "axios";
-import { Loader2, LucideChevronDown } from "lucide-react";
+import { Loader2, LucideChevronDown, Mail } from "lucide-react";
 import Link from "next/link";
 import { useSWRConfig } from "swr";
 import Auth from "./Auth";
 import Guest from "./Guest";
 import { Button, buttonVariants } from "./ui/button";
 import { Popover, PopoverContent, PopoverTrigger } from "./ui/popover";
-import { useRef, useState } from "react";
+import { useState } from "react";
 import { useRouter } from "next/navigation";
 import { ModeToggle } from "./mode-toggle";
 import NotificationsPopup from "./notifications-popup";
+import { NoticationsBadge } from "./ui/notifications-badge";
+import { useUnreadMessages } from "@/api-hooks/use-unread-messages";
 
 export function NavBar() {
   return (
@@ -20,6 +22,7 @@ export function NavBar() {
       <div></div>
       <div className="flex items-center">
         <Auth>
+          <MessagesIcon />
           <NotificationsPopup />
         </Auth>
         <ModeToggle className="mx-1" />
@@ -44,6 +47,16 @@ export function NavBar() {
         </Guest>
       </div>
     </div>
+  );
+}
+
+function MessagesIcon() {
+  const { data } = useUnreadMessages();
+  return (
+    <Button variant="link" className="relative">
+      <Mail />
+      <NoticationsBadge count={data.length} />
+    </Button>
   );
 }
 
