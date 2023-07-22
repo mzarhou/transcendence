@@ -9,16 +9,20 @@ import Auth from "./Auth";
 import Guest from "./Guest";
 import { Button, buttonVariants } from "./ui/button";
 import { Popover, PopoverContent, PopoverTrigger } from "./ui/popover";
-import { useRef } from "react";
+import { useRef, useState } from "react";
 import { useRouter } from "next/navigation";
 import { ModeToggle } from "./mode-toggle";
+import NotificationsPopup from "./notifications-popup";
 
 export function NavBar() {
   return (
     <div className="min-h-header max-w-container mx-auto flex items-center justify-between py-2">
       <div></div>
       <div className="flex items-center">
-        <ModeToggle className="mr-1" />
+        <Auth>
+          <NotificationsPopup />
+        </Auth>
+        <ModeToggle className="mx-1" />
         <Auth>
           <NavUserPopup />
         </Auth>
@@ -44,14 +48,12 @@ export function NavBar() {
 }
 
 function NavUserPopup() {
-  const poppupTriggerRef = useRef<HTMLButtonElement>(null);
   const { user } = useUser();
   const { mutate } = useSWRConfig();
   const router = useRouter();
+  const [open, setOpen] = useState(false);
 
-  const closePoppup = () => {
-    poppupTriggerRef.current?.click();
-  };
+  const closePoppup = () => setOpen(false);
 
   const logout = async () => {
     await axios.post("/api/auth/logout");
@@ -61,8 +63,8 @@ function NavUserPopup() {
   };
 
   return (
-    <Popover>
-      <PopoverTrigger ref={poppupTriggerRef} asChild>
+    <Popover onOpenChange={setOpen} open={open}>
+      <PopoverTrigger asChild>
         <Button variant="link" className="flex">
           <span
             className="inline-block overflow-hidden rounded-full"

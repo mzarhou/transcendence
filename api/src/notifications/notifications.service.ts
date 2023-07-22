@@ -1,4 +1,4 @@
-import { Injectable } from '@nestjs/common';
+import { Inject, Injectable, forwardRef } from '@nestjs/common';
 import { NotificationsClientsStorage } from './notifications-clients.storage';
 import { ActiveUserData } from 'src/iam/interface/active-user-data.interface';
 import {
@@ -7,16 +7,34 @@ import {
   FriendConnectedData,
 } from '@transcendence/common';
 import { ChatService } from 'src/chat/chat.service';
+import { PrismaService } from 'src/prisma/prisma.service';
 
 @Injectable()
 export class NotificationsService {
   constructor(
     private readonly clientsStorage: NotificationsClientsStorage,
     private readonly clientStorage: NotificationsClientsStorage,
+    @Inject(forwardRef(() => ChatService))
     private readonly chatService: ChatService,
+    private readonly prisma: PrismaService,
   ) {}
 
-  notify(usersIds: number[], event: string, ...data: any[]) {
+  async notify(usersIds: number[], event: string, data: any) {
+    await Promise.all(
+      usersIds.map((recipientId) =>
+        this.prisma.notifications.create({
+          data: {
+            event,
+            data: JSON.stringify(data),
+            recipientId,
+          },
+        }),
+      ),
+    );
+    this.clientStorage.emit(usersIds, event, data);
+  }
+
+  emit(usersIds: number[], event: string, ...data: any[]) {
     this.clientStorage.emit(usersIds, event, ...data);
   }
 
@@ -57,5 +75,31 @@ export class NotificationsService {
         friendId: user.sub,
       } satisfies FriendConnectedData);
     }
+  }
+
+  async findNotifications(user: ActiveUserData) {
+    const data = await this.prisma.notifications.findMany({
+      where: { recipientId: user.sub },
+      orderBy: [{ createdAt: 'desc' }],
+    });
+    return data.map((notification) => ({
+      ...notification,
+      data: JSON.parse(notification.data),
+    }));
+  }
+
+  async clearAll(user: ActiveUserData) {
+    await this.prisma.notifications.deleteMany({
+      where: { recipientId: user.sub },
+    });
+  }
+
+  async readAll(user: ActiveUserData) {
+    await this.prisma.notifications.updateMany({
+      where: { isRead: false, recipientId: user.sub },
+      data: {
+        isRead: true,
+      },
+    });
   }
 }

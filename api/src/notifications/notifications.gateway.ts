@@ -58,8 +58,4 @@ export class NotificationsGateway
       this.notificationsService.sendFriendDisconnectedEvent(user);
     } catch (error) {}
   }
-
-  notify(userId: number, data: unknown) {
-    // TODO: implement
-  }
 }

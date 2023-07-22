@@ -14,8 +14,11 @@ import { useUser } from "./user-context";
 import {
   FRIEND_CONNECTED,
   FRIEND_DISCONNECTED,
+  FRIEND_REQUEST_ACCEPTED_EVENT,
+  FRIEND_REQUEST_EVENT,
   FriendConnectedData,
   FriendDisconnectedData,
+  FriendRequest,
   MESSAGE_EVENT,
   MessageType,
 } from "@transcendence/common";
@@ -26,6 +29,7 @@ import { useSWRConfig } from "swr";
 import { getMessagesKey } from "@/api-hooks/use-messages";
 import { useAtom } from "jotai";
 import { connectedFriendsAtom } from "@/stores/connected-users-atom";
+import { friendRequestsKey } from "@/api-hooks/use-friend-requests";
 
 const EventsSocketContext = createContext<Socket | null>(null);
 
@@ -49,6 +53,7 @@ function useSocket_() {
   const onError = useOnError();
   const onFriendConnected = useOnFriendConnected();
   const onFriendDisconnected = useOnFriendDisconnected();
+  const { mutate } = useSWRConfig();
 
   useEffect(() => {
     if (!currentUser) return;
@@ -70,6 +75,13 @@ function useSocket_() {
         _socket.on(FRIEND_DISCONNECTED, (data: FriendDisconnectedData) => {
           onFriendDisconnected(data);
         });
+        [FRIEND_REQUEST_EVENT, FRIEND_REQUEST_ACCEPTED_EVENT].forEach(
+          (event) => {
+            _socket.on(event, (_data: FriendRequest) =>
+              mutate(friendRequestsKey)
+            );
+          }
+        );
       });
     }
 

@@ -1,8 +1,7 @@
 import { Injectable } from '@nestjs/common';
 import { ActiveUserData } from 'src/iam/interface/active-user-data.interface';
 import { PrismaService } from 'src/prisma/prisma.service';
-import { FriendRequestService } from './friend-request/friend-request.service';
-import { AuthenticationService } from 'src/iam/authentication/authentication.service';
+import { FriendRequestService } from '../friend-request/friend-request.service';
 import { FriendRequest, User } from '@prisma/client';
 import { SearchUser } from '@transcendence/common';
 

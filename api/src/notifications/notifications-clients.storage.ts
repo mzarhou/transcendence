@@ -1,6 +1,8 @@
 import { Injectable } from '@nestjs/common';
 import { Socket } from 'socket.io';
 
+// TODO: store clients in redis
+
 @Injectable()
 export class NotificationsClientsStorage {
   private readonly connectedClients: Map<number, Socket[]> = new Map();

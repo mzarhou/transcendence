@@ -4,7 +4,6 @@ import {
   SubscribeMessage,
   WebSocketGateway,
 } from '@nestjs/websockets';
-import { Server } from 'socket.io';
 import { ChatService } from '../chat/chat.service';
 import { Socket } from 'socket.io';
 import { HttpStatus, UseFilters, UsePipes } from '@nestjs/common';
@@ -64,7 +63,7 @@ export class MessageGateway {
       /**
        * send message to sender/recipient if he is connected
        */
-      this.notificationsService.notify(
+      this.notificationsService.emit(
         [sender.sub, recipientId],
         MESSAGE_EVENT,
         createdMessage,

@@ -13,3 +13,6 @@ export type FriendConnectedData = {
 
 export const FRIEND_DISCONNECTED = "friend_disconnected";
 export type FriendDisconnectedData = FriendConnectedData;
+
+export const FRIEND_REQUEST_EVENT = "friend_request";
+export const FRIEND_REQUEST_ACCEPTED_EVENT = "friend_request_accepted";
