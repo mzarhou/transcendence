@@ -1,13 +1,5 @@
 import z from "zod";
-
-export interface User {
-  id: number;
-  name: string;
-  avatar: string;
-  email: string;
-  school42Id: number | null;
-  isTfaEnabled: boolean;
-}
+import { User } from "./db-types";
 
 export type SearchUser = User & {
   isFriend: boolean;

@@ -1,24 +1,13 @@
-import { Module } from '@nestjs/common';
-import { FriendRequestService } from './friend-request/friend-request.service';
-import { FriendRequestController } from './friend-request/friend-request.controller';
+import { Module, forwardRef } from '@nestjs/common';
 import { PrismaModule } from 'src/prisma/prisma.module';
 import { ChatController } from './chat.controller';
 import { ChatService } from './chat.service';
-import { IamModule } from 'src/iam/iam.module';
-import { MessageService } from './message/message.service';
-import { MessageGateway } from './message/message.gateway';
-import { MessageController } from './message/message.controller';
-import { ClientsStorage } from './message/clients.storage';
+import { FriendRequestModule } from 'src/friend-request/friend-request.module';
 
 @Module({
-  controllers: [FriendRequestController, ChatController, MessageController],
-  providers: [
-    FriendRequestService,
-    ChatService,
-    MessageGateway,
-    MessageService,
-    ClientsStorage,
-  ],
-  imports: [PrismaModule, IamModule],
+  imports: [PrismaModule, FriendRequestModule],
+  controllers: [ChatController],
+  providers: [ChatService],
+  exports: [ChatService],
 })
 export class ChatModule {}

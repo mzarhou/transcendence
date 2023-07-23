@@ -2,23 +2,30 @@
 
 import { useUser } from "@/context/user-context";
 import axios from "axios";
-import { Loader2, LucideChevronDown } from "lucide-react";
+import { Loader2, LucideChevronDown, Mail } from "lucide-react";
 import Link from "next/link";
 import { useSWRConfig } from "swr";
 import Auth from "./Auth";
 import Guest from "./Guest";
 import { Button, buttonVariants } from "./ui/button";
 import { Popover, PopoverContent, PopoverTrigger } from "./ui/popover";
-import { useRef } from "react";
+import { useState } from "react";
 import { useRouter } from "next/navigation";
 import { ModeToggle } from "./mode-toggle";
+import NotificationsPopup from "./notifications-popup";
+import { NoticationsBadge } from "./ui/notifications-badge";
+import { useUnreadMessages } from "@/api-hooks/use-unread-messages";
 
 export function NavBar() {
   return (
     <div className="min-h-header max-w-container mx-auto flex items-center justify-between py-2">
       <div></div>
       <div className="flex items-center">
-        <ModeToggle className="mr-1" />
+        <Auth>
+          <MessagesIcon />
+          <NotificationsPopup />
+        </Auth>
+        <ModeToggle className="mx-1" />
         <Auth>
           <NavUserPopup />
         </Auth>
@@ -43,15 +50,23 @@ export function NavBar() {
   );
 }
 
+function MessagesIcon() {
+  const { data } = useUnreadMessages();
+  return (
+    <Button variant="link" className="relative">
+      <Mail />
+      <NoticationsBadge count={data.length} />
+    </Button>
+  );
+}
+
 function NavUserPopup() {
-  const poppupTriggerRef = useRef<HTMLButtonElement>(null);
   const { user } = useUser();
   const { mutate } = useSWRConfig();
   const router = useRouter();
+  const [open, setOpen] = useState(false);
 
-  const closePoppup = () => {
-    poppupTriggerRef.current?.click();
-  };
+  const closePoppup = () => setOpen(false);
 
   const logout = async () => {
     await axios.post("/api/auth/logout");
@@ -61,8 +76,8 @@ function NavUserPopup() {
   };
 
   return (
-    <Popover>
-      <PopoverTrigger ref={poppupTriggerRef} asChild>
+    <Popover onOpenChange={setOpen} open={open}>
+      <PopoverTrigger asChild>
         <Button variant="link" className="flex">
           <span
             className="inline-block overflow-hidden rounded-full"

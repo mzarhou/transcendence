@@ -6,20 +6,32 @@ import { cn } from "@/lib/utils";
 type LoaderButtonProps = React.ComponentProps<typeof Button> & {
   isLoading?: boolean;
   iconClassName?: string;
+  className?: string;
 };
 export const LoaderButton: FC<LoaderButtonProps> = ({
   isLoading,
   children,
   iconClassName,
+  className,
   ...props
 }) => {
   return (
-    <Button type="submit" disabled={isLoading} {...props}>
-      {isLoading ? (
-        <Loader2 className={cn("animate-spin", iconClassName)} />
-      ) : (
-        children
+    <Button
+      className={cn(
+        "group disabled:relative disabled:inline-flex disabled:items-center disabled:justify-center",
+        className
       )}
+      type="submit"
+      disabled={isLoading}
+      {...props}
+    >
+      <Loader2
+        className={cn(
+          "absolute opacity-0 group-disabled:animate-spin group-disabled:opacity-100",
+          iconClassName
+        )}
+      />
+      {children}
     </Button>
   );
 };

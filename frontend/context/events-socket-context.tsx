@@ -14,18 +14,24 @@ import { useUser } from "./user-context";
 import {
   FRIEND_CONNECTED,
   FRIEND_DISCONNECTED,
+  FRIEND_REQUEST_ACCEPTED_EVENT,
+  FRIEND_REQUEST_EVENT,
   FriendConnectedData,
   FriendDisconnectedData,
+  FriendRequest,
   MESSAGE_EVENT,
   MessageType,
+  ERROR_EVENT,
+  WsErrorData,
+  MESSAGE_READ_EVENT,
 } from "@transcendence/common";
 import { useToast } from "@/components/ui/use-toast";
-import { ERROR_EVENT } from "@transcendence/common";
-import { WsErrorData } from "@transcendence/common";
 import { useSWRConfig } from "swr";
 import { getMessagesKey } from "@/api-hooks/use-messages";
 import { useAtom } from "jotai";
 import { connectedFriendsAtom } from "@/stores/connected-users-atom";
+import { friendRequestsKey } from "@/api-hooks/use-friend-requests";
+import { unreadMessagesKey } from "@/api-hooks/use-unread-messages";
 
 const EventsSocketContext = createContext<Socket | null>(null);
 
@@ -41,6 +47,10 @@ export const EventsSocketProvider = ({ children }: { children: ReactNode }) => {
   );
 };
 
+function getFriendIdFromMessage(userId: number, data: MessageType) {
+  return data.recipientId === userId ? data.senderId : data.recipientId;
+}
+
 function useSocket_() {
   const { user: currentUser } = useUser();
   const [socket, setSocket] = useState<Socket | null>(null);
@@ -49,6 +59,7 @@ function useSocket_() {
   const onError = useOnError();
   const onFriendConnected = useOnFriendConnected();
   const onFriendDisconnected = useOnFriendDisconnected();
+  const { mutate } = useSWRConfig();
 
   useEffect(() => {
     if (!currentUser) return;
@@ -64,12 +75,24 @@ function useSocket_() {
           onError(_socket, data)
         );
         _socket.on(MESSAGE_EVENT, (data: MessageType) => onMessage(data));
+        _socket.on(MESSAGE_READ_EVENT, (data: MessageType) => {
+          const friendId = getFriendIdFromMessage(currentUser.id, data);
+          mutate(getMessagesKey(friendId));
+          mutate(unreadMessagesKey);
+        });
         _socket.on(FRIEND_CONNECTED, (data: FriendConnectedData) => {
           onFriendConnected(data);
         });
         _socket.on(FRIEND_DISCONNECTED, (data: FriendDisconnectedData) => {
           onFriendDisconnected(data);
         });
+        [FRIEND_REQUEST_EVENT, FRIEND_REQUEST_ACCEPTED_EVENT].forEach(
+          (event) => {
+            _socket.on(event, (_data: FriendRequest) =>
+              mutate(friendRequestsKey)
+            );
+          }
+        );
       });
     }
 
@@ -87,13 +110,9 @@ const useOnMessage = () => {
     (data: MessageType) => {
       if (!currentUser) return;
 
-      const friendId =
-        data.recipientId === currentUser.id ? data.senderId : data.recipientId;
-      mutate(
-        getMessagesKey(friendId),
-        (messages) => [...(messages ?? []), data],
-        { revalidate: false }
-      );
+      const friendId = getFriendIdFromMessage(currentUser.id, data);
+      mutate(getMessagesKey(friendId));
+      mutate(unreadMessagesKey);
     },
     [currentUser]
   );

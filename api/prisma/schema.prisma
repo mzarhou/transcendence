@@ -33,8 +33,12 @@ model User {
   blockingUsers         User[] @relation("blockingUsers")
   blockingUsersRelation User[] @relation("blockingUsers")
 
-  sentMessages     Message[] @relation("User_canSendMany_messages")
-  receivedMessages Message[] @relation("User_canReceiveMany_messages")
+  sentMessages     Message[]       @relation("User_canSendMany_messages")
+  receivedMessages Message[]       @relation("User_canReceiveMany_messages")
+  Notifications    Notifications[]
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
 }
 
 model Secrets {
@@ -54,6 +58,9 @@ model FriendRequest {
   recipient   User @relation("User_HasMany_RecievedFriendRequests", fields: [recipientId], references: [id])
   recipientId Int
 
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
   @@unique([requesterId, recipientId])
 }
 
@@ -66,4 +73,22 @@ model Message {
   recipientId Int
 
   message String
+
+  isRead Boolean @default(false)
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+}
+
+model Notifications {
+  id          Int    @id @default(autoincrement())
+  event       String
+  data        String
+  recipient   User   @relation(fields: [recipientId], references: [id])
+  recipientId Int
+
+  isRead Boolean @default(false)
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
 }
