@@ -8,7 +8,7 @@ export const useClearAllNotifications = () => {
   const { toast } = useToast();
   const { mutate } = useSWRConfig();
   const { trigger, ...rest } = useSWRMutation(
-    "/notifications",
+    "/notifications/clear-all",
     async (url) => api.delete(url),
     {
       onError: (_error) => {

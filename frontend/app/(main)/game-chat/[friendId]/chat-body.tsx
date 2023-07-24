@@ -131,15 +131,13 @@ function MessageItem({ message: msg }: MessageItemProps) {
     <div
       ref={messageRef}
       className={cn(
-        "w-2/3 rounded-md  px-4 pb-3 pt-4 text-chat-card-foreground",
-        { "self-end": user?.id === msg.senderId },
-        shoulBeObserved ? "bg-red-500 text-black" : "bg-chat-card"
+        "w-2/3 rounded-md  bg-chat-card px-4 pb-3 pt-4 text-chat-card-foreground",
+        { "self-end": user?.id === msg.senderId }
       )}
       data-message-id={msg.id}
     >
       {msg.id}
 
-      {/* sent | received | read */}
       {msg.senderId === user?.id && (
         <div className="-mt-2 flex justify-end">
           {msg.isRead ? (
