@@ -27,7 +27,7 @@ export default function BlockedUsersPage() {
 type UnblockUserBtnProps = {
   userId: number;
 };
-export function UnblockUserBtn({ userId }: UnblockUserBtnProps) {
+function UnblockUserBtn({ userId }: UnblockUserBtnProps) {
   const { trigger: unblockUser, isMutating } = useUnblockUser(userId);
   return (
     <LoaderButton

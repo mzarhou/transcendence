@@ -11,6 +11,18 @@ const nextConfig = {
     });
     return config;
   },
+
+  headers: () => [
+    {
+      source: "/game-chat/:friendId",
+      headers: [
+        {
+          key: "Cache-Control",
+          value: "no-store",
+        },
+      ],
+    },
+  ],
 };
 
 module.exports = nextConfig;

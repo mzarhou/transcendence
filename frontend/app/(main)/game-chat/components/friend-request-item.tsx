@@ -13,7 +13,7 @@ type FriendRequestItemProps = {
 export function FriendRequestItem({ friendRequest }: FriendRequestItemProps) {
   return (
     <div>
-      <UserItem user={friendRequest.requester}>
+      <UserItem user={friendRequest.requester!}>
         <AcceptFriendRequestBtn friendRequestId={friendRequest.id} />
         <RefuseFriendRequestBtn friendRequestId={friendRequest.id} />
       </UserItem>

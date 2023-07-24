@@ -1,7 +1,7 @@
 "use client";
 
 import { cn } from "@/lib/utils";
-import { FormEventHandler, useEffect, useRef } from "react";
+import { FormEventHandler, useEffect, useMemo, useRef } from "react";
 import FullPlaceHolder from "@/components/ui/full-placeholder";
 import {
   MESSAGE_EVENT,
@@ -12,17 +12,14 @@ import {
   IntersectionObserverProvider,
   useIntersectionObserver,
 } from "./context/intersection-observer-context";
-import { useReadMessage } from "@/api-hooks/use-read-message";
-import { Check, CheckCheck } from "lucide-react";
 import {
   ROOT_EL_ID,
   useMessageIntersectionCallback,
 } from "./hooks/use-message-intersection-callback";
-import { isMessageVisible } from "./utils/is-message-visible";
+import { Check, CheckCheck } from "lucide-react";
 import { useUser } from "@/context/user-context";
 import { useSocket } from "@/context/events-socket-context";
 import { useMessages } from "@/api-hooks/use-messages";
-import { useLazyFirstUnreadMessageId } from "./hooks/use-lazy-first-unread-message-id";
 import { NEW_MESSAGES_LINE_ID, useScroll } from "./hooks/use-scroll";
 
 type ChatBodyProps = {
@@ -71,11 +68,7 @@ function ChatInput({ friendId }: { friendId: number }) {
 
 function ChatMessages({ friendId }: { friendId: number }) {
   const { data: messages } = useMessages(friendId);
-  const { showMessages, wrapperRef } = useScroll(friendId);
-  const firstUreadMessageId = useLazyFirstUnreadMessageId({
-    friendId,
-    updateInterval: 1000,
-  });
+  const { showMessages, wrapperRef, firstUnreadMessage } = useScroll(friendId);
 
   return (
     <div
@@ -86,16 +79,16 @@ function ChatMessages({ friendId }: { friendId: number }) {
       })}
     >
       {messages.length > 0 ? (
-        messages
-          .map((msg) => {
-            if (msg.id !== firstUreadMessageId)
+        [
+          messages.map((msg) => {
+            if (!firstUnreadMessage || msg.id !== firstUnreadMessage?.id)
               return (
                 <MessageItem key={msg.id} message={msg} friendId={friendId} />
               );
             return [
               <div
                 id={NEW_MESSAGES_LINE_ID}
-                key={"unread-messages-line"}
+                key={NEW_MESSAGES_LINE_ID}
                 className="flex items-center"
               >
                 <div className="inline-block h-[3px] flex-grow rounded-l-full bg-red-500" />
@@ -105,8 +98,8 @@ function ChatMessages({ friendId }: { friendId: number }) {
               </div>,
               <MessageItem key={msg.id} message={msg} friendId={friendId} />,
             ];
-          })
-          .flat()
+          }),
+        ]
       ) : (
         <FullPlaceHolder
           text="No messages found"
@@ -121,36 +114,26 @@ type MessageItemProps = {
   message: MessageType;
   friendId: number;
 };
-function MessageItem({ message: msg, friendId }: MessageItemProps) {
+function MessageItem({ message: msg }: MessageItemProps) {
   const { user } = useUser();
   const observer = useIntersectionObserver();
-  const { trigger: readMessage } = useReadMessage(friendId);
   const messageRef = useRef<HTMLDivElement>(null);
 
+  const shoulBeObserved = msg.recipientId === user?.id && !msg.isRead;
   useEffect(() => {
     const rootEl = document.getElementById(ROOT_EL_ID);
     if (!rootEl) throw "root element is undefined";
-    if (!observer || !messageRef.current) return;
-    if (!user || msg.recipientId !== user.id || msg.isRead) return;
-
+    if (!observer || !messageRef.current || !shoulBeObserved) return;
     observer.observe(messageRef.current);
-    const newMessageRec = messageRef.current.getBoundingClientRect();
-    const messagesMargin = 16;
-    if (
-      isMessageVisible(messageRef.current, rootEl, {
-        scaleRootBottom: newMessageRec.height + messagesMargin,
-      })
-    ) {
-      readMessage(msg.id);
-    }
   }, [observer, user]);
 
   return (
     <div
       ref={messageRef}
       className={cn(
-        "w-2/3 rounded-md bg-chat-card px-4 pb-3 pt-4 text-chat-card-foreground",
-        { "self-end": user?.id === msg.senderId }
+        "w-2/3 rounded-md  px-4 pb-3 pt-4 text-chat-card-foreground",
+        { "self-end": user?.id === msg.senderId },
+        shoulBeObserved ? "bg-red-500 text-black" : "bg-chat-card"
       )}
       data-message-id={msg.id}
     >
