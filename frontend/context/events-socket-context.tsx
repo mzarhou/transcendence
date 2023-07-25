@@ -32,6 +32,7 @@ import { useAtom } from "jotai";
 import { connectedFriendsAtom } from "@/stores/connected-users-atom";
 import { friendRequestsKey } from "@/api-hooks/use-friend-requests";
 import { unreadMessagesKey } from "@/api-hooks/use-unread-messages";
+import { env } from "@/env/client.mjs";
 
 const EventsSocketContext = createContext<Socket | null>(null);
 
@@ -64,8 +65,7 @@ function useSocket_() {
   useEffect(() => {
     if (!currentUser) return;
 
-    // TODO: user NEXT_PUBLIC_API_URL
-    const _socket = io("http://localhost:8080", {
+    const _socket = io(env.NEXT_PUBLIC_API_URL, {
       withCredentials: true,
     });
 
