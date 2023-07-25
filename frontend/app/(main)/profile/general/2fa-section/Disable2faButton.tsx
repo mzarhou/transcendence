@@ -49,10 +49,10 @@ export default function Disable2faButton() {
       <DialogContent className="md:w-[380px]">
         <div className="space-y-12">
           <div className="flex flex-col items-center space-y-3">
-            <p className="text-center text-h4 font-semibold">
+            <p className="text-h4 text-center font-semibold">
               Verify you identity
             </p>
-            <p className="text-center text-gray-600">
+            <p className="text-center text-foreground/70">
               Enter the six-digit code from your two-factor authenticator app to
               continue.
             </p>

@@ -18,7 +18,7 @@ export const LoaderButton: FC<LoaderButtonProps> = ({
   return (
     <Button
       className={cn(
-        "group disabled:relative disabled:inline-flex disabled:items-center disabled:justify-center",
+        { "relative inline-flex items-center justify-center": isLoading },
         className
       )}
       type="submit"
@@ -27,7 +27,10 @@ export const LoaderButton: FC<LoaderButtonProps> = ({
     >
       <Loader2
         className={cn(
-          "absolute opacity-0 group-disabled:animate-spin group-disabled:opacity-100",
+          "absolute opacity-0",
+          {
+            "animate-spin opacity-100": isLoading,
+          },
           iconClassName
         )}
       />

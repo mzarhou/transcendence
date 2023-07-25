@@ -38,7 +38,7 @@ function Enable2faPoppupContent() {
         <div className="space-y-8">
           <div className="flex flex-col items-center">
             <p className="text-h4">Scan QR Code</p>
-            <p className="mt-1 text-center text-sm text-gray-600">
+            <p className="mt-1 text-center text-sm text-foreground/70">
               Scan the image below with the 2FA authenticator app on your phone.
             </p>
             <div className="mt-4">
@@ -57,7 +57,7 @@ function Enable2faPoppupContent() {
               <p className="text-base">
                 Enter the six-digit code from the application
               </p>
-              <p className="text-sm text-gray-600">
+              <p className="text-sm text-foreground/70">
                 After scanning the barcode above, the app will display a
                 six-digit code that you can enter below. Upon successful
                 activation, you will also be logged out of all other active

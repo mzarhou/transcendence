@@ -10,7 +10,7 @@ export default function TfaSection() {
     <div className="flex flex-col space-y-8">
       <div className="flex flex-col space-y-3">
         <h2 className="text-h4 font-semibold">Two-factor authentication</h2>
-        <p className="text-base text-gray-600">
+        <p className="text-base text-foreground/70">
           Use an authentication app to get a verification code to log into your
           Transcendence account safely.
         </p>
