@@ -1,7 +1,6 @@
 import { NextRequest, NextResponse } from "next/server";
 import { getForwardHeaders, setCookies } from "../auth-utils";
 import { tokensResponseSchema } from "@/schema/auth-schema";
-import { env } from "@/env/server.mjs";
 import { AxiosError } from "axios";
 import { signinSchema } from "@transcendence/common";
 import { serverApi } from "@/lib/serverApi";
@@ -17,7 +16,7 @@ export async function POST(req: NextRequest) {
       }
     );
     const tokens = tokensResponseSchema.parse(data);
-    const response = NextResponse.redirect(env.APP_URL);
+    const response = NextResponse.json({});
     return setCookies(response, tokens);
   } catch (error) {
     if (error instanceof AxiosError) {
