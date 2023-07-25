@@ -12,7 +12,9 @@ import { ActiveUser } from 'src/iam/decorators/active-user.decorator';
 import { ActiveUserData } from 'src/iam/interface/active-user-data.interface';
 import { ChatService } from './chat.service';
 import { IdDto } from 'src/common/dto/id-param.dto';
+import { ApiTags } from '@nestjs/swagger';
 
+@ApiTags('Chat')
 @Controller('chat')
 export class ChatController {
   constructor(private readonly chatService: ChatService) {}

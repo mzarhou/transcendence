@@ -14,7 +14,9 @@ import { RefreshTokenDto } from './dto/refresh-token-dto';
 import { AuthType } from './enum/auth-type.enum';
 import { SignInDto } from './dto/sign-in.dto';
 import { SignUpDto } from './dto/sign-up.dto';
+import { ApiTags } from '@nestjs/swagger';
 
+@ApiTags('authentication')
 @Auth(AuthType.None)
 @Controller('authentication')
 export class AuthenticationController {
@@ -39,11 +41,5 @@ export class AuthenticationController {
     @Body() refreshTokenDto: RefreshTokenDto,
   ) {
     return this.authService.refreshTokens(refreshTokenDto.refreshToken, fpHash);
-  }
-
-  @Get('/fp')
-  getFingerprint(@FPHash() fpHash: string) {
-    return fpHash;
-    1;
   }
 }

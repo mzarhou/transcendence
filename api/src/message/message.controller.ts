@@ -5,7 +5,9 @@ import { ActiveUser } from 'src/iam/decorators/active-user.decorator';
 import { ActiveUserData } from 'src/iam/interface/active-user-data.interface';
 import { subject } from '@casl/ability';
 import { Message } from '@prisma/client';
+import { ApiTags } from '@nestjs/swagger';
 
+@ApiTags('messages')
 @Controller('chat')
 export class MessageController {
   constructor(private readonly messageService: MessageService) {}

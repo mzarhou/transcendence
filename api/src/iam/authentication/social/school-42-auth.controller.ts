@@ -4,7 +4,9 @@ import { FPHash } from '../decorators/fingerprint-hash.decorator';
 import { School42AuthDto } from '../dto/school-42-token.dto';
 import { AuthType } from '../enum/auth-type.enum';
 import { School42AuthService } from './school42-auth.service';
+import { ApiTags } from '@nestjs/swagger';
 
+@ApiTags('social-authentication')
 @Auth(AuthType.None)
 @Controller('authentication/school-42')
 export class School42AuthController {

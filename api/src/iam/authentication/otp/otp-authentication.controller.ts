@@ -13,12 +13,13 @@ import { ActiveUser } from '../../decorators/active-user.decorator';
 import { ActiveUserData } from '../../interface/active-user-data.interface';
 import { Auth } from '../decorators/auth.decorator';
 import { FPHash } from '../decorators/fingerprint-hash.decorator';
-import { UserAgent } from '../decorators/user-agent.decorator';
 import { Enable2faDto } from '../dto/enable-2fa.dto';
 import { Provide2faCodeDto } from '../dto/provide-2fa-code.dto';
 import { AuthType } from '../enum/auth-type.enum';
 import { OtpAuthenticationService } from './otp-authentication.service';
+import { ApiTags } from '@nestjs/swagger';
 
+@ApiTags('2fa')
 @Controller('authentication/2fa')
 export class OtpAuthenticationController {
   constructor(private readonly otpAuthService: OtpAuthenticationService) {}
