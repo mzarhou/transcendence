@@ -10,11 +10,11 @@ import { Logger } from '@nestjs/common';
 import { Socket } from 'socket.io';
 import { WebsocketException } from './ws.exception';
 import { ERROR_EVENT } from '@transcendence/common';
+import { env } from 'src/env/server';
 
 @WebSocketGateway({
   cors: {
-    // Todo: use env FRONTEND_URL
-    origin: 'http://localhost:3000',
+    origin: env.FRONTEND_URL,
     credentials: true,
   },
 })

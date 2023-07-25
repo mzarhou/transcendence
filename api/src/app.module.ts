@@ -4,7 +4,6 @@ import { AppController } from './app.controller';
 import { AppService } from './app.service';
 import { UsersModule } from './users/users.module';
 import { IamModule } from './iam/iam.module';
-import z from 'zod';
 import { APP_PIPE } from '@nestjs/core';
 import { ZodValidationPipe } from 'nestjs-zod';
 import { RedisModule } from './redis/redis.module';
@@ -13,15 +12,6 @@ import { ChatModule } from './chat/chat.module';
 import { NotificationsModule } from './notifications/notifications.module';
 import { MessageModule } from './message/message.module';
 import { FriendRequestModule } from './friend-request/friend-request.module';
-
-export const dbConfigSchema = z.object({
-  DB_TYPE: z.enum(['mysql', 'postgres']),
-  DB_HOST: z.string(),
-  DB_PORT: z.number(),
-  DB_USERNAME: z.string(),
-  DB_PASSWORD: z.string(),
-  DB_DATABASE: z.string(),
-});
 
 @Module({
   imports: [

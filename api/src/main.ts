@@ -1,16 +1,18 @@
 import { NestFactory } from '@nestjs/core';
 import * as cookieParser from 'cookie-parser';
 import { AppModule } from './app.module';
+import * as dotenv from 'dotenv';
+import { env } from './env/server';
 
 async function bootstrap() {
+  dotenv.config();
   const app = await NestFactory.create(AppModule);
   app.enableCors({
-    // Todo: use env FRONTEND_URL
-    origin: 'http://localhost:3000',
+    origin: env.FRONTEND_URL,
     credentials: true,
     exposedHeaders: ['WWW-Authenticate'],
   });
   app.use(cookieParser());
-  await app.listen(8080);
+  await app.listen(env.PORT ?? 8080);
 }
 bootstrap();

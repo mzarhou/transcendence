@@ -15,13 +15,13 @@ import { WebsocketExceptionFilter } from '../notifications/ws-exception.filter';
 import { AuthenticationService } from 'src/iam/authentication/authentication.service';
 import { WebsocketException } from 'src/notifications/ws.exception';
 import { NotificationsService } from 'src/notifications/notifications.service';
+import { env } from 'src/env/server';
 
 @UsePipes(new ZodValidationPipe())
 @UseFilters(new WebsocketExceptionFilter())
 @WebSocketGateway({
   cors: {
-    // Todo: use env FRONTEND_URL
-    origin: 'http://localhost:3000',
+    origin: env.FRONTEND_URL,
     credentials: true,
   },
 })
