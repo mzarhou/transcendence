@@ -3,7 +3,8 @@ import { TokensResponse } from "@/schema/auth-schema";
 import { NextRequest, NextResponse } from "next/server";
 
 function getCookieDomain() {
-  const domain = env.APP_URL.split("https://")[1].split(".");
+  const splitBy = env.APP_URL.includes("https") ? "https://" : "http://";
+  const domain = env.APP_URL.split(splitBy)[1].split(":")[0].split(".");
   if (domain.length > 2) {
     return domain.slice(1).join(".");
   }
@@ -12,7 +13,10 @@ function getCookieDomain() {
 
 export function setCookies(
   response: NextResponse<unknown>,
-  tokens: TokensResponse
+  tokens: TokensResponse,
+  options?: {
+    maxAge: number | undefined;
+  }
 ) {
   type CookieConfig = Parameters<typeof response.cookies.set>[2];
 
@@ -22,6 +26,7 @@ export function setCookies(
     secure: process.env.NODE_ENV === "production" ? true : false,
     domain:
       process.env.NODE_ENV === "production" ? getCookieDomain() : undefined,
+    maxAge: options?.maxAge,
   };
   response.cookies.set("accessToken", tokens.accessToken, cookieConfig);
   response.cookies.set("refreshToken", tokens.refreshToken, cookieConfig);
