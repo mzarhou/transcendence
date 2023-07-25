@@ -33,6 +33,7 @@ import { connectedFriendsAtom } from "@/stores/connected-users-atom";
 import { friendRequestsKey } from "@/api-hooks/use-friend-requests";
 import { unreadMessagesKey } from "@/api-hooks/use-unread-messages";
 import { env } from "@/env/client.mjs";
+import { notificationsKey } from "@/api-hooks/use-notifications";
 
 const EventsSocketContext = createContext<Socket | null>(null);
 
@@ -88,9 +89,10 @@ function useSocket_() {
         });
         [FRIEND_REQUEST_EVENT, FRIEND_REQUEST_ACCEPTED_EVENT].forEach(
           (event) => {
-            _socket.on(event, (_data: FriendRequest) =>
-              mutate(friendRequestsKey)
-            );
+            _socket.on(event, (_data: FriendRequest) => {
+              mutate(friendRequestsKey);
+              mutate(notificationsKey);
+            });
           }
         );
       });
