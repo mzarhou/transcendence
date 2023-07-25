@@ -3,6 +3,8 @@ import { redirect } from "next/navigation";
 import { cookies } from "next/headers";
 import { log } from "@/lib/utils";
 import { serverApi } from "@/lib/serverApi";
+import GoBackBtn from "../components/chat-go-back";
+import FriendItem from "../components/friend-item";
 
 async function fetchFriend(friendId: string) {
   const accessToken = cookies().get("accessToken")?.value ?? "";
@@ -29,5 +31,12 @@ export default async function ChatPage({ params: { friendId } }: ChatPageType) {
   if (!friend) {
     redirect("/game-chat");
   }
-  return <ChatBody friendId={parseInt(friendId)} />;
+  return (
+    <>
+      <GoBackBtn className="pb-2" full={false}>
+        <FriendItem friend={friend} size="sm" />
+      </GoBackBtn>
+      <ChatBody friendId={parseInt(friendId)} />
+    </>
+  );
 }

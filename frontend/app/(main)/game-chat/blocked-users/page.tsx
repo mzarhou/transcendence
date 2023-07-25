@@ -5,22 +5,27 @@ import { useUnblockUser } from "@/api-hooks/use-unblock-user";
 import { LoaderButton } from "@/components/ui/loader-button";
 import UserItem from "../components/user-item";
 import FullPlaceHolder from "@/components/ui/full-placeholder";
+import GoBackBtn from "../components/chat-go-back";
 
 export default function BlockedUsersPage() {
   const { data: blockedUsers } = useBlockedUsers();
   return (
-    <div className="h-full space-y-4 px-5">
-      <h3>Blocked Users</h3>
-      {blockedUsers?.length ? (
-        blockedUsers?.map((user) => (
-          <UserItem key={user.id} user={user} isBlocked={true}>
-            <UnblockUserBtn userId={user.id} />
-          </UserItem>
-        ))
-      ) : (
-        <FullPlaceHolder text="No blocked user found" />
-      )}
-    </div>
+    <>
+      <GoBackBtn>
+        <h3>Blocked Users</h3>
+      </GoBackBtn>
+      <div className="h-full space-y-4 px-5">
+        {blockedUsers?.length ? (
+          blockedUsers?.map((user) => (
+            <UserItem key={user.id} user={user} isBlocked={true}>
+              <UnblockUserBtn userId={user.id} />
+            </UserItem>
+          ))
+        ) : (
+          <FullPlaceHolder text="No blocked user found" />
+        )}
+      </div>
+    </>
   );
 }
 

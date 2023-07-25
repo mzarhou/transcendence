@@ -13,39 +13,73 @@ import { MoreVertical } from "lucide-react";
 import Image from "next/image";
 import { BlockUserMenuItem } from "./user-item";
 import { useFriendUreadMessagesCount } from "@/api-hooks/use-unread-messages";
+import { cn } from "@/lib/utils";
 
 type FriendItemProps = {
   friend: User;
+  className?: string;
+  size?: "default" | "sm";
 };
-export default function FriendItem({ friend }: FriendItemProps) {
+export default function FriendItem({
+  friend,
+  className,
+  size,
+}: FriendItemProps) {
+  size ??= "default";
+
   const isFriendConnected = useIsFriendConnected();
   const unreadMessagesCount = useFriendUreadMessagesCount(friend.id);
 
   return (
-    <div className="relative flex justify-between">
+    <div className={cn("relative flex justify-between", className)}>
       <div className="flex space-x-4">
-        <div className="relative flex aspect-square h-[72px] items-center justify-center rounded-full bg-gray-100/10 text-lg">
+        <div
+          className={cn(
+            "relative flex aspect-square items-center justify-center rounded-full bg-gray-100/10 text-lg",
+            size === "default" ? "h-[72px]" : "h-[40px]"
+          )}
+        >
           <Image
             src={friend.avatar}
-            width={72}
-            height={72}
+            width={size === "default" ? 72 : 40}
+            height={size === "default" ? 72 : 40}
             alt=""
             className="rounded-full"
           />
           {isFriendConnected(friend.id) && (
-            <div className="absolute bottom-1.5 right-0.5 h-4 w-4 rounded-full border-2 border-chat bg-green-400"></div>
+            <div
+              className={cn(
+                "absolute  bottom-1.5 right-0.5 h-4 w-4 rounded-full border-2 border-chat bg-green-400",
+                {
+                  "bottom-0 right-0 h-3 w-3": size === "sm",
+                  "": size === "sm",
+                }
+              )}
+            ></div>
           )}
         </div>
-        <div className="mt-0.5">
+        <div
+          className={cn("mt-0.5", {
+            "flex flex-col justify-center text-lg": size === "sm",
+          })}
+        >
           <p>{friend.name}</p>
-          <p className="text-sm text-chat-foreground/60">In game</p>
-          <p className="text-sm text-chat-foreground/60">#60</p>
+          {size === "default" && (
+            <>
+              <p className="text-sm text-chat-foreground/60">In game</p>
+              <p className="text-sm text-chat-foreground/60">#60</p>
+            </>
+          )}
         </div>
       </div>
-      <div className="">
+      <div className={cn(size === "sm" && "flex flex-col justify-center")}>
         <DropdownMenu>
           <DropdownMenuTrigger asChild>
-            <MoreVertical className="h-6 w-6 cursor-pointer" />
+            <MoreVertical
+              className={cn("h-6 w-6 cursor-pointer", {
+                "h-5 w-5": size === "sm",
+              })}
+            />
           </DropdownMenuTrigger>
           <DropdownMenuContent align="end">
             <DropdownMenuItem className="cursor-pointer hover:bg-chat/90">

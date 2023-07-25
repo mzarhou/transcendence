@@ -2,7 +2,6 @@ import { Button } from "@/components/ui/button";
 import { Dialog, DialogContent, DialogTrigger } from "@/components/ui/dialog";
 import { MessagesSquare } from "lucide-react";
 import { ReactNode } from "react";
-import GoBackBtn from "./components/chat-go-back";
 
 type Props = {
   children: ReactNode;
@@ -11,7 +10,6 @@ export default function GameLayout({ children }: Props) {
   const chatPopup = (
     <>
       <div className="flex h-full w-full flex-col rounded-md bg-chat text-chat-foreground/70 md:shadow-sm">
-        <GoBackBtn className="md:ml-4 md:py-5" />
         {children}
       </div>
     </>

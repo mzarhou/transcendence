@@ -46,12 +46,12 @@ export class UsersService {
       throw new NotFoundException();
     }
 
-    const { id, name, friends } = friend;
-    const isFriend = friends.findIndex((frd) => frd.id === user.sub) > -1;
+    const isFriend =
+      friend.friends.findIndex((frd) => frd.id === user.sub) > -1;
     if (!isFriend) {
       throw new NotFoundException();
     }
 
-    return { id, name };
+    return friend;
   }
 }
