@@ -6,7 +6,7 @@ export const $42TokenUrl = "https://api.intra.42.fr/oauth/token";
 
 export function get42RedirectUri() {
   const authorizeUrlParams = new URLSearchParams();
-  authorizeUrlParams.set("client_id", env._42_CLIENT_ID);
+  authorizeUrlParams.set("client_id", env.CLIENT_ID_42);
   authorizeUrlParams.set("scope", "public");
   authorizeUrlParams.set("redirect_uri", $42RedirectUri);
   authorizeUrlParams.set("response_type", "code");

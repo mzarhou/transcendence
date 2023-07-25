@@ -11,8 +11,8 @@ async function getAccessToken(code: string): Promise<string | null> {
   try {
     const { data: authData } = await axios.post($42TokenUrl, {
       grant_type: "authorization_code",
-      client_id: env._42_CLIENT_ID,
-      client_secret: env._42_CLIENT_SECRET,
+      client_id: env.CLIENT_ID_42,
+      client_secret: env.CLIENT_SECRET_42,
       redirect_uri: $42RedirectUri,
       code,
     });

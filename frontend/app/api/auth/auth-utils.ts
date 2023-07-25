@@ -11,6 +11,7 @@ export function setCookies(
   const cookieConfig: CookieConfig = {
     httpOnly: true,
     sameSite: "lax",
+    secure: process.env.NODE_ENV === "production" ? true : false,
   };
   response.cookies.set("accessToken", tokens.accessToken, cookieConfig);
   response.cookies.set("refreshToken", tokens.refreshToken, cookieConfig);
