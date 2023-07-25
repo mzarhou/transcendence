@@ -19,7 +19,11 @@ import { useUnreadMessages } from "@/api-hooks/use-unread-messages";
 export function NavBar() {
   return (
     <div className="min-h-header max-w-container mx-auto flex items-center justify-between py-2">
-      <div></div>
+      <div>
+        <Link href="/game-chat">
+          <img src="/logo.png" className="h-20" />
+        </Link>
+      </div>
       <div className="flex items-center">
         <Auth>
           <MessagesIcon />

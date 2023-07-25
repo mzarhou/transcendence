@@ -55,7 +55,7 @@ export default function NotificationsPopup() {
         </Button>
       </PopoverTrigger>
       <PopoverContent
-        align="end"
+        align="center"
         className="flex max-h-[50vh] flex-col space-y-4 overflow-hidden rounded-xl p-4"
       >
         {notifications.length > 0 && (
