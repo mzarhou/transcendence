@@ -169,9 +169,9 @@ export class GroupsController {
     return this.groupsService.joinGroup(user, group);
   }
 
-  @ApiOperation({ summary: 'Join a group' })
+  @ApiOperation({ summary: 'Leave a group' })
   @HttpCode(HttpStatus.OK)
-  @Post('/:id/join')
+  @Post('/:id/leave')
   async leaveGroup(
     @ActiveUser() user: ActiveUserData,
     @Param() { id: groupId }: IdDto,
