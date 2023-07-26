@@ -152,7 +152,7 @@ export class GroupsController {
     } else {
       user.allow('kick-user', subject('Group', group));
     }
-    return this.groupsService.kickUser(group.id, kickUserDto);
+    return this.groupsService.kickUser(group, kickUserDto);
   }
 
   @ApiOperation({ summary: 'Join a group' })

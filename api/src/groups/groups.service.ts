@@ -1,7 +1,6 @@
 import {
   BadRequestException,
   Injectable,
-  InternalServerErrorException,
   NotFoundException,
 } from '@nestjs/common';
 import { CreateGroupDto } from './dto/create-group.dto';
@@ -20,6 +19,12 @@ import {
 } from './group.types';
 import { UnBanUserDto } from './dto/ban-user/unban-user.dto';
 import { KickUserDto } from './dto/kick-user.dto';
+import { NotificationsService } from 'src/notifications/notifications.service';
+import { GROUP_DELETED_EVENT, GROUP_KICKED_EVENT } from '@transcendence/common';
+import { ADD_ADMIN_EVENT } from '@transcendence/common';
+import { GROUP_BANNED_EVENT } from '@transcendence/common';
+import { JOIN_GROUP_EVENT } from '@transcendence/common';
+import { LEAVE_GROUP_EVENT } from '@transcendence/common';
 import { HashingService } from 'src/iam/hashing/hashing.service';
 
 @ApiTags('groups')
@@ -27,6 +32,7 @@ import { HashingService } from 'src/iam/hashing/hashing.service';
 export class GroupsService {
   constructor(
     private readonly prisma: PrismaService,
+    private readonly notificationService: NotificationsService,
     private readonly hashingService: HashingService,
   ) {}
 
@@ -142,6 +148,11 @@ export class GroupsService {
         role: 'ADMIN',
       },
     });
+    await this.notificationService.notify(
+      [targetUserId],
+      ADD_ADMIN_EVENT,
+      `You ${group.name} role changed to admin`,
+    );
   }
 
   async removeGroupAdmin(group: Group, { userId }: RemoveGroupAdminDto) {
@@ -151,9 +162,17 @@ export class GroupsService {
         role: 'MEMBER',
       },
     });
+    await this.notificationService.notify(
+      [userId],
+      ADD_ADMIN_EVENT,
+      `You ${group.name} role changed to member`,
+    );
   }
 
-  async banUser({ id: groupId }: Group, { userId: targetUserId }: BanUserDto) {
+  async banUser(
+    { id: groupId, name: groupName }: Group,
+    { userId: targetUserId }: BanUserDto,
+  ) {
     await this.prisma.$transaction([
       /**
        * add user to blocked users
@@ -171,6 +190,11 @@ export class GroupsService {
         where: { userId_groupId: { groupId: groupId, userId: targetUserId } },
       }),
     ]);
+    await this.notificationService.notify(
+      [targetUserId],
+      GROUP_BANNED_EVENT,
+      `You've been unbanned from ${groupName} group`,
+    );
   }
 
   async unbanUser(group: Group, { userId: targetUserId }: UnBanUserDto) {
@@ -180,12 +204,22 @@ export class GroupsService {
         blockedUsers: { disconnect: { id: targetUserId } },
       },
     });
+    await this.notificationService.notify(
+      [targetUserId],
+      GROUP_BANNED_EVENT,
+      `You've been unbanned from ${group.name} group, you can now join the group`,
+    );
   }
 
-  async kickUser(groupId: number, { userId }: KickUserDto) {
+  async kickUser(group: Group, { userId }: KickUserDto) {
     await this.prisma.usersOnGroups.delete({
-      where: { userId_groupId: { groupId, userId } },
+      where: { userId_groupId: { groupId: group.id, userId } },
     });
+    await this.notificationService.notify(
+      [userId],
+      GROUP_KICKED_EVENT,
+      `You've been kicked out from ${group.name} group`,
+    );
   }
 
   isUserAdmin(userId: number, group: GroupWithUsers) {
@@ -203,6 +237,11 @@ export class GroupsService {
         },
       },
     });
+    await this.notificationService.notify(
+      [user.sub],
+      JOIN_GROUP_EVENT,
+      `You've joined ${group.name} group!`,
+    );
   }
 
   async leaveGroup(user: ActiveUserData, group: Group) {
@@ -214,5 +253,10 @@ export class GroupsService {
         },
       },
     });
+    await this.notificationService.notify(
+      [user.sub],
+      LEAVE_GROUP_EVENT,
+      `You've leaved ${group.name} group!`,
+    );
   }
 }
