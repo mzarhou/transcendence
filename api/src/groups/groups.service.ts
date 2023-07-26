@@ -100,9 +100,20 @@ export class GroupsService {
   }
 
   async remove(id: number) {
-    await this.prisma.group.delete({
-      where: { id },
-    });
+    const groupUsersIds = (await this.findGroupUsers(id)).map((u) => u.id);
+    const [, deletedGroup] = await this.prisma.$transaction([
+      this.prisma.usersOnGroups.deleteMany({
+        where: { groupId: id },
+      }),
+      this.prisma.group.delete({
+        where: { id },
+      }),
+    ]);
+    await this.notificationService.notify(
+      groupUsersIds,
+      GROUP_DELETED_EVENT,
+      `group ${deletedGroup.name} deleted`,
+    );
   }
 
   async addGroupAdmin(
