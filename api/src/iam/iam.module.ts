@@ -65,6 +65,7 @@ const Fingerprint = require('express-fingerprint');
     AuthenticationService,
     AccessTokenGuard,
     AccessTokenWithout2faGuard,
+    HashingService,
   ],
 })
 export class IamModule implements NestModule {

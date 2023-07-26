@@ -20,16 +20,25 @@ import {
 } from './group.types';
 import { UnBanUserDto } from './dto/ban-user/unban-user.dto';
 import { KickUserDto } from './dto/kick-user.dto';
+import { HashingService } from 'src/iam/hashing/hashing.service';
 
 @ApiTags('groups')
 @Injectable()
 export class GroupsService {
-  constructor(private readonly prisma: PrismaService) {}
+  constructor(
+    private readonly prisma: PrismaService,
+    private readonly hashingService: HashingService,
+  ) {}
 
   async create(
     user: ActiveUserData,
     { name, status, password }: CreateGroupDto,
   ) {
+    const groupPassword =
+      status === 'PROTECTED'
+        ? await this.hashingService.hash(password!)
+        : undefined;
+
     await this.prisma.$transaction([
       this.prisma.group.create({
         data: {
@@ -37,7 +46,7 @@ export class GroupsService {
           ownerId: user.sub,
           avatar: 'https://api.dicebear.com/6.x/identicon/svg?seed=' + name,
           status,
-          password: status === 'PROTECTED' ? password : undefined,
+          password: groupPassword,
         },
       }),
       this.prisma.group.update({
