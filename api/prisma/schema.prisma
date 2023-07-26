@@ -37,6 +37,11 @@ model User {
   receivedMessages Message[]       @relation("User_canReceiveMany_messages")
   Notifications    Notifications[]
 
+  ownGroups      Group[]         @relation("users_own_groups")
+  groups         UsersOnGroups[]
+  blockingGroups Group[]
+  groupMessages  GroupMessage[]
+
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
 }
@@ -88,6 +93,63 @@ model Notifications {
   recipientId Int
 
   isRead Boolean @default(false)
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+}
+
+enum GroupStatus {
+  PUBLIC
+  PROTECTED
+  PRIVATE
+}
+
+enum UserGroupRole {
+  ADMIN
+  MEMBER
+}
+
+model Group {
+  id       Int         @id @default(autoincrement())
+  name     String      @unique
+  avatar   String
+  password String?
+  status   GroupStatus
+
+  ownerId      Int
+  owner        User            @relation("users_own_groups", fields: [ownerId], references: [id])
+  users        UsersOnGroups[]
+  blockedUsers User[]
+  messages     GroupMessage[]
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+}
+
+model UsersOnGroups {
+  groupId Int
+  group   Group @relation(fields: [groupId], references: [id])
+  userId  Int
+  user    User  @relation(fields: [userId], references: [id])
+
+  role UserGroupRole @default(MEMBER)
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@id([userId, groupId])
+}
+
+model GroupMessage {
+  id Int @id @default(autoincrement())
+
+  sender   User @relation(fields: [senderId], references: [id])
+  senderId Int
+
+  group   Group @relation(fields: [groupId], references: [id])
+  groupId Int
+
+  message String
 
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
