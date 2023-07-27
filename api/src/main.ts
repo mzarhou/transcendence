@@ -16,6 +16,8 @@ async function bootstrap() {
     .setDescription('The Transcendence API description')
     .setVersion('1.0')
     .addTag('transcendence')
+    .addBearerAuth()
+    .setExternalDoc('Download api collection', '/api-json')
     .build();
   const document = SwaggerModule.createDocument(app, config);
   SwaggerModule.setup('api', app, document);
