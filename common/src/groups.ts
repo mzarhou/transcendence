@@ -44,3 +44,8 @@ export const joinGroupSchema = z.object({
   password: z.string().optional(),
 });
 export type JoinGroupType = z.infer<typeof joinGroupSchema>;
+
+export const leaveGroupSchema = z.object({
+  newOwnerId: z.number().positive().optional(),
+});
+export type LeaveGroupType = z.infer<typeof leaveGroupSchema>;

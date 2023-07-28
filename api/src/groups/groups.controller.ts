@@ -14,7 +14,6 @@ import { UpdateGroupDto } from './dto/update-group.dto';
 import { ActiveUser } from 'src/iam/decorators/active-user.decorator';
 import { ActiveUserData } from 'src/iam/interface/active-user-data.interface';
 import { IdDto } from 'src/common/dto/id-param.dto';
-import { subject } from '@casl/ability';
 import { AddGroupAdminDto } from './dto/group-admin/add-group-admin.dto';
 import { BanUserDto } from './dto/ban-user/ban-user.dto';
 import { UnBanUserDto } from './dto/ban-user/unban-user.dto';
@@ -22,6 +21,7 @@ import { RemoveGroupAdminDto } from './dto/group-admin/remove-group-admin.dto';
 import { ApiBearerAuth, ApiOperation, ApiTags } from '@nestjs/swagger';
 import { KickUserDto } from './dto/kick-user.dto';
 import { JoinGroupDto } from './dto/join-group.dto';
+import { LeaveGroupDto } from './dto/leave-group.dto';
 
 @ApiBearerAuth()
 @ApiTags('groups')
@@ -133,9 +133,8 @@ export class GroupsController {
   async leaveGroup(
     @ActiveUser() user: ActiveUserData,
     @Param() { id: groupId }: IdDto,
+    @Body() leaveGroupDto: LeaveGroupDto,
   ) {
-    const group = await this.groupsService.findOne(groupId);
-    user.allow('leave', subject('Group', group));
-    return this.groupsService.leaveGroup(user, group);
+    return this.groupsService.leaveGroup(user, groupId, leaveGroupDto);
   }
 }

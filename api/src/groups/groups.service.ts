@@ -33,6 +33,7 @@ import { LEAVE_GROUP_EVENT } from '@transcendence/common';
 import { HashingService } from 'src/iam/hashing/hashing.service';
 import { subject } from '@casl/ability';
 import { JoinGroupDto } from './dto/join-group.dto';
+import { LeaveGroupDto } from './dto/leave-group.dto';
 
 @ApiTags('groups')
 @Injectable()
@@ -337,22 +338,47 @@ export class GroupsService {
       JOIN_GROUP_EVENT,
       `You've joined ${group.name} group!`,
     );
+    return this.omitPassword(group);
   }
 
-  async leaveGroup(user: ActiveUserData, group: Group) {
-    await this.prisma.usersOnGroups.delete({
-      where: {
-        userId_groupId: {
-          userId: user.sub,
-          groupId: group.id,
+  async leaveGroup(
+    user: ActiveUserData,
+    groupId: number,
+    { newOwnerId }: LeaveGroupDto,
+  ) {
+    const group = await this.findOne(groupId, { includeUsers: true });
+    user.allow('leave', subject('Group', group));
+
+    const isOwnerLeaving = user.sub === group.ownerId;
+
+    if (isOwnerLeaving && newOwnerId === undefined) {
+      throw new UnauthorizedException('You must specify a new owner');
+    }
+
+    await this.prisma.$transaction([
+      ...(isOwnerLeaving
+        ? [
+            this.prisma.group.update({
+              where: { id: group.id },
+              data: { ownerId: newOwnerId! },
+            }),
+          ]
+        : []),
+      this.prisma.usersOnGroups.delete({
+        where: {
+          userId_groupId: {
+            userId: user.sub,
+            groupId: group.id,
+          },
         },
-      },
-    });
+      }),
+    ]);
     await this.notificationService.notify(
       [user.sub],
       LEAVE_GROUP_EVENT,
       `You've leaved ${group.name} group!`,
     );
+    return this.omitPassword(group);
   }
 
   private omitPassword<T extends { password: string | null | undefined }>(
