@@ -7,6 +7,13 @@ services:
       - 5432:5432
     environment:
       POSTGRES_PASSWORD: password123
+  testdb:
+    image: postgres
+    restart: always
+    ports:
+      - 5434:5432
+    environment:
+      POSTGRES_PASSWORD: password123
   redis:
     image: redis
     ports:

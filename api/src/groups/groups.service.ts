@@ -20,12 +20,17 @@ import {
 import { UnBanUserDto } from './dto/ban-user/unban-user.dto';
 import { KickUserDto } from './dto/kick-user.dto';
 import { NotificationsService } from 'src/notifications/notifications.service';
-import { GROUP_DELETED_EVENT, GROUP_KICKED_EVENT } from '@transcendence/common';
+import {
+  GROUP_DELETED_EVENT,
+  GROUP_KICKED_EVENT,
+  updateGroupSchema,
+} from '@transcendence/common';
 import { ADD_ADMIN_EVENT } from '@transcendence/common';
 import { GROUP_BANNED_EVENT } from '@transcendence/common';
 import { JOIN_GROUP_EVENT } from '@transcendence/common';
 import { LEAVE_GROUP_EVENT } from '@transcendence/common';
 import { HashingService } from 'src/iam/hashing/hashing.service';
+import { subject } from '@casl/ability';
 
 @ApiTags('groups')
 @Injectable()
@@ -45,7 +50,7 @@ export class GroupsService {
         ? await this.hashingService.hash(password!)
         : undefined;
 
-    await this.prisma.$transaction([
+    const [createdGroup, _] = await this.prisma.$transaction([
       this.prisma.group.create({
         data: {
           name,
@@ -67,6 +72,7 @@ export class GroupsService {
         },
       }),
     ]);
+    return this.omitPassword(createdGroup);
   }
 
   async findOne(
@@ -105,23 +111,33 @@ export class GroupsService {
     })) satisfies UserGroup[];
   }
 
-  async update(id: number, updateGroupDto: UpdateGroupDto) {
-    await this.prisma.group.update({
-      where: { id },
+  async update(
+    user: ActiveUserData,
+    groupId: number,
+    updateGroupDto: UpdateGroupDto,
+  ) {
+    const group = await this.findOne(groupId);
+    user.allow('update', subject('Group', group));
+    const updatedGroup = await this.prisma.group.update({
+      where: { id: groupId },
       data: {
         ...updateGroupDto,
       },
     });
+    return this.omitPassword(updatedGroup);
   }
 
-  async remove(id: number) {
-    const groupUsersIds = (await this.findGroupUsers(id)).map((u) => u.id);
+  async remove(user: ActiveUserData, groupId: number) {
+    const group = await this.findOne(groupId);
+    user.allow('delete', subject('Group', group));
+
+    const groupUsersIds = (await this.findGroupUsers(groupId)).map((u) => u.id);
     const [, deletedGroup] = await this.prisma.$transaction([
       this.prisma.usersOnGroups.deleteMany({
-        where: { groupId: id },
+        where: { groupId: groupId },
       }),
       this.prisma.group.delete({
-        where: { id },
+        where: { id: groupId },
       }),
     ]);
     await this.notificationService.notify(
@@ -129,12 +145,21 @@ export class GroupsService {
       GROUP_DELETED_EVENT,
       `group ${deletedGroup.name} deleted`,
     );
+    return this.omitPassword(deletedGroup);
   }
 
   async addGroupAdmin(
-    group: GroupWithBlockedUsers,
+    user: ActiveUserData,
+    groupId: number,
     { userId: targetUserId }: AddGroupAdminDto,
   ) {
+    const group = await this.findOne(groupId, {
+      includeBlockedUsers: true,
+    });
+    user.allow('add-admin', subject('Group', group));
+    if (user.sub === targetUserId)
+      throw new BadRequestException('You can not set your self admin');
+
     const isUserBlocked = group.blockedUsers.find(
       (user) => user.id === targetUserId,
     );
@@ -142,7 +167,7 @@ export class GroupsService {
       throw new BadRequestException('user is blocked');
     }
 
-    await this.prisma.usersOnGroups.update({
+    const updatedUserGroup = await this.prisma.usersOnGroups.update({
       where: { userId_groupId: { groupId: group.id, userId: targetUserId } },
       data: {
         role: 'ADMIN',
@@ -153,10 +178,18 @@ export class GroupsService {
       ADD_ADMIN_EVENT,
       `You ${group.name} role changed to admin`,
     );
+    return updatedUserGroup;
   }
 
-  async removeGroupAdmin(group: Group, { userId }: RemoveGroupAdminDto) {
-    await this.prisma.usersOnGroups.update({
+  async removeGroupAdmin(
+    user: ActiveUserData,
+    groupId: number,
+    { userId }: RemoveGroupAdminDto,
+  ) {
+    const group = await this.findOne(groupId);
+    user.allow('update', subject('Group', group), 'users.role');
+
+    const updatedUserGroup = await this.prisma.usersOnGroups.update({
       where: { userId_groupId: { groupId: group.id, userId } },
       data: {
         role: 'MEMBER',
@@ -167,13 +200,31 @@ export class GroupsService {
       ADD_ADMIN_EVENT,
       `You ${group.name} role changed to member`,
     );
+    return updatedUserGroup;
   }
 
   async banUser(
-    { id: groupId, name: groupName }: Group,
+    user: ActiveUserData,
+    groupId: number,
     { userId: targetUserId }: BanUserDto,
   ) {
-    await this.prisma.$transaction([
+    const group = await this.findOne(groupId, {
+      includeUsers: true,
+    });
+
+    if (this.isUserAdmin(targetUserId, group)) {
+      user.allow('delete', subject('Group', group));
+    } else {
+      user.allow('ban-user', subject('Group', group));
+    }
+
+    const [_, updatedGroup] = await this.prisma.$transaction([
+      /**
+       * remove user
+       */
+      this.prisma.usersOnGroups.delete({
+        where: { userId_groupId: { groupId: groupId, userId: targetUserId } },
+      }),
       /**
        * add user to blocked users
        */
@@ -183,22 +234,31 @@ export class GroupsService {
           blockedUsers: { connect: { id: targetUserId } },
         },
       }),
-      /**
-       * remove user
-       */
-      this.prisma.usersOnGroups.delete({
-        where: { userId_groupId: { groupId: groupId, userId: targetUserId } },
-      }),
     ]);
     await this.notificationService.notify(
       [targetUserId],
       GROUP_BANNED_EVENT,
-      `You've been unbanned from ${groupName} group`,
+      `You've been unbanned from ${group.name} group`,
     );
+    return this.omitPassword(updatedGroup);
   }
 
-  async unbanUser(group: Group, { userId: targetUserId }: UnBanUserDto) {
-    await this.prisma.group.update({
+  async unbanUser(
+    user: ActiveUserData,
+    groupId: number,
+    { userId: targetUserId }: UnBanUserDto,
+  ) {
+    const group = await this.findOne(groupId, {
+      includeBlockedUsers: true,
+      includeUsers: true,
+    });
+    if (this.isUserAdmin(targetUserId, group)) {
+      user.allow('delete', subject('Group', group));
+    } else {
+      user.allow('unban-user', subject('Group', group));
+    }
+
+    const updateGroup = await this.prisma.group.update({
       where: { id: group.id },
       data: {
         blockedUsers: { disconnect: { id: targetUserId } },
@@ -209,6 +269,7 @@ export class GroupsService {
       GROUP_BANNED_EVENT,
       `You've been unbanned from ${group.name} group, you can now join the group`,
     );
+    return this.omitPassword(updateGroup);
   }
 
   async kickUser(group: Group, { userId }: KickUserDto) {
@@ -258,5 +319,12 @@ export class GroupsService {
       LEAVE_GROUP_EVENT,
       `You've leaved ${group.name} group!`,
     );
+  }
+
+  private omitPassword<T extends { password: string | null | undefined }>(
+    group: T,
+  ) {
+    const { password, ...rest } = group;
+    return rest;
   }
 }

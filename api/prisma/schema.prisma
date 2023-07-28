@@ -18,8 +18,7 @@ model User {
   isTfaEnabled Boolean @default(false)
   school42Id   Int?
 
-  secrets   Secrets @relation(fields: [secretsId], references: [id])
-  secretsId Int     @unique
+  secrets Secrets?
 
   SentFriendRequests     FriendRequest[] @relation("User_HasMany_SentFriendRequests")
   RecievedFriendRequests FriendRequest[] @relation("User_HasMany_RecievedFriendRequests")
@@ -51,16 +50,18 @@ model Secrets {
 
   password  String?
   tfaSecret String?
-  User      User[]
+
+  userId Int  @unique
+  user   User @relation(fields: [userId], references: [id], onDelete: Cascade)
 }
 
 model FriendRequest {
   id Int @id @default(autoincrement())
 
-  requester   User @relation("User_HasMany_SentFriendRequests", fields: [requesterId], references: [id])
+  requester   User @relation("User_HasMany_SentFriendRequests", fields: [requesterId], references: [id], onDelete: Cascade)
   requesterId Int
 
-  recipient   User @relation("User_HasMany_RecievedFriendRequests", fields: [recipientId], references: [id])
+  recipient   User @relation("User_HasMany_RecievedFriendRequests", fields: [recipientId], references: [id], onDelete: Cascade)
   recipientId Int
 
   createdAt DateTime @default(now())
@@ -71,10 +72,10 @@ model FriendRequest {
 
 model Message {
   id     Int  @id @default(autoincrement())
-  sender User @relation("User_canSendMany_messages", fields: [senderId], references: [id])
+  sender User @relation("User_canSendMany_messages", fields: [senderId], references: [id], onDelete: Cascade)
 
   senderId    Int
-  recipient   User @relation("User_canReceiveMany_messages", fields: [recipientId], references: [id])
+  recipient   User @relation("User_canReceiveMany_messages", fields: [recipientId], references: [id], onDelete: Cascade)
   recipientId Int
 
   message String
@@ -89,7 +90,7 @@ model Notifications {
   id          Int    @id @default(autoincrement())
   event       String
   data        String
-  recipient   User   @relation(fields: [recipientId], references: [id])
+  recipient   User   @relation(fields: [recipientId], references: [id], onDelete: Cascade)
   recipientId Int
 
   isRead Boolean @default(false)
@@ -117,7 +118,7 @@ model Group {
   status   GroupStatus
 
   ownerId      Int
-  owner        User            @relation("users_own_groups", fields: [ownerId], references: [id])
+  owner        User            @relation("users_own_groups", fields: [ownerId], references: [id], onDelete: Cascade)
   users        UsersOnGroups[]
   blockedUsers User[]
   messages     GroupMessage[]
@@ -128,9 +129,9 @@ model Group {
 
 model UsersOnGroups {
   groupId Int
-  group   Group @relation(fields: [groupId], references: [id])
+  group   Group @relation(fields: [groupId], references: [id], onDelete: Cascade)
   userId  Int
-  user    User  @relation(fields: [userId], references: [id])
+  user    User  @relation(fields: [userId], references: [id], onDelete: Cascade)
 
   role UserGroupRole @default(MEMBER)
 
@@ -143,10 +144,10 @@ model UsersOnGroups {
 model GroupMessage {
   id Int @id @default(autoincrement())
 
-  sender   User @relation(fields: [senderId], references: [id])
+  sender   User @relation(fields: [senderId], references: [id], onDelete: Cascade)
   senderId Int
 
-  group   Group @relation(fields: [groupId], references: [id])
+  group   Group @relation(fields: [groupId], references: [id], onDelete: Cascade)
   groupId Int
 
   message String

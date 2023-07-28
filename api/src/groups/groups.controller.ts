@@ -41,20 +41,19 @@ export class GroupsController {
   @Patch(':id')
   async update(
     @ActiveUser() user: ActiveUserData,
-    @Param() { id }: IdDto,
+    @Param() { id: groupId }: IdDto,
     @Body() updateGroupDto: UpdateGroupDto,
   ) {
-    const group = await this.groupsService.findOne(id);
-    user.allow('update', subject('Group', group));
-    return this.groupsService.update(id, updateGroupDto);
+    return this.groupsService.update(user, groupId, updateGroupDto);
   }
 
   @ApiOperation({ summary: 'Delete the group' })
   @Delete(':id')
-  async remove(@ActiveUser() user: ActiveUserData, @Param() { id }: IdDto) {
-    const group = await this.groupsService.findOne(id);
-    user.allow('delete', subject('Group', group));
-    return this.groupsService.remove(id);
+  async remove(
+    @ActiveUser() user: ActiveUserData,
+    @Param() { id: groupId }: IdDto,
+  ) {
+    return this.groupsService.remove(user, groupId);
   }
 
   @ApiOperation({ summary: 'Add an admin' })
@@ -65,15 +64,7 @@ export class GroupsController {
     @Param() { id: groupId }: IdDto,
     @Body() addGroupAdminDto: AddGroupAdminDto,
   ) {
-    const group = await this.groupsService.findOne(groupId, {
-      includeBlockedUsers: true,
-    });
-    /**
-     * if a user can delete a group
-     * its a group owner
-     */
-    user.allow('add-admin', subject('Group', group));
-    return this.groupsService.addGroupAdmin(group, addGroupAdminDto);
+    return this.groupsService.addGroupAdmin(user, groupId, addGroupAdminDto);
   }
 
   @ApiOperation({ summary: 'Remove an admin (change its role to member)' })
@@ -84,13 +75,11 @@ export class GroupsController {
     @Param() { id: groupId }: IdDto,
     @Body() removeGroupAdminDto: RemoveGroupAdminDto,
   ) {
-    const group = await this.groupsService.findOne(groupId);
-    /**
-     * if a user can delete a group
-     * its a group owner
-     */
-    user.allow('update', subject('Group', group), 'users.role');
-    return this.groupsService.removeGroupAdmin(group, removeGroupAdminDto);
+    return this.groupsService.removeGroupAdmin(
+      user,
+      groupId,
+      removeGroupAdminDto,
+    );
   }
 
   @ApiOperation({ summary: 'Ban a user' })
@@ -101,16 +90,7 @@ export class GroupsController {
     @Param() { id: groupId }: IdDto,
     @Body() banUserDto: BanUserDto,
   ) {
-    const group = await this.groupsService.findOne(groupId, {
-      includeUsers: true,
-    });
-
-    if (this.groupsService.isUserAdmin(banUserDto.userId, group)) {
-      user.allow('delete', subject('Group', group));
-    } else {
-      user.allow('ban-user', subject('Group', group));
-    }
-    return this.groupsService.banUser(group, banUserDto);
+    return this.groupsService.banUser(user, groupId, banUserDto);
   }
 
   @ApiOperation({ summary: 'Unban a user' })
@@ -121,15 +101,7 @@ export class GroupsController {
     @Param() { id: groupId }: IdDto,
     @Body() unbanUserDto: UnBanUserDto,
   ) {
-    const group = await this.groupsService.findOne(groupId, {
-      includeBlockedUsers: true,
-    });
-    if (this.groupsService.isUserAdmin(unbanUserDto.userId, group)) {
-      user.allow('delete', subject('Group', group));
-    } else {
-      user.allow('unban-user', subject('Group', group));
-    }
-    return this.groupsService.unbanUser(group, unbanUserDto);
+    return this.groupsService.unbanUser(user, groupId, unbanUserDto);
   }
 
   @ApiOperation({ summary: 'Kick a user' })

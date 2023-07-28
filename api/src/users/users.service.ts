@@ -30,8 +30,7 @@ export class UsersService {
     if (!user) {
       throw new NotFoundException();
     }
-    const { secretsId, ...rest } = user;
-    return rest;
+    return user;
   }
 
   async findFriend(user: ActiveUserData, friendId: number) {

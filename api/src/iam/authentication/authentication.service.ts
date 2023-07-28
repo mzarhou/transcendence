@@ -49,7 +49,7 @@ export class AuthenticationService {
     }
     const isEqual = await this.hashingService.compare(
       signInDto.password,
-      user.secrets.password ?? '',
+      user.secrets?.password ?? '',
     );
     if (!isEqual) {
       throw new UnauthorizedException(undefined, "Password doesn't match");

@@ -66,17 +66,15 @@ export class OtpAuthenticationService {
   }
 
   async disableTfaForUser(activeUser: ActiveUserData, code: string) {
-    const {
-      id,
-      secrets: { tfaSecret },
-      isTfaEnabled,
-    } = await this.prisma.user.findFirstOrThrow({
-      where: { id: activeUser.sub },
-      include: { secrets: true },
-    });
+    const { id, secrets, isTfaEnabled } =
+      await this.prisma.user.findFirstOrThrow({
+        where: { id: activeUser.sub },
+        include: { secrets: true },
+      });
     if (!isTfaEnabled) {
       throw new UnauthorizedException(undefined, `2FA isn't enabled`);
     }
+    const tfaSecret = secrets?.tfaSecret;
     if (!tfaSecret || !this.verifyCode(code, tfaSecret)) {
       throw new UnauthorizedException(`Invalid code: ${code}`);
     }
@@ -108,7 +106,7 @@ export class OtpAuthenticationService {
     }
 
     const isValid =
-      user.secrets.tfaSecret &&
+      user.secrets?.tfaSecret &&
       (await this.verifyCode(
         provide2faCodeDto.tfaCode,
         user.secrets.tfaSecret,
