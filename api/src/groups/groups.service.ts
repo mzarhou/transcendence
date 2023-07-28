@@ -272,7 +272,20 @@ export class GroupsService {
     return this.omitPassword(updateGroup);
   }
 
-  async kickUser(group: Group, { userId }: KickUserDto) {
+  async kickUser(
+    user: ActiveUserData,
+    groupId: number,
+    { userId }: KickUserDto,
+  ) {
+    const group = await this.findOne(groupId, {
+      includeUsers: true,
+    });
+    const isTargetUserAdmin = this.isUserAdmin(userId, group);
+    if (isTargetUserAdmin) {
+      user.allow('delete', subject('Group', group), 'users.role');
+    } else {
+      user.allow('kick-user', subject('Group', group));
+    }
     await this.prisma.usersOnGroups.delete({
       where: { userId_groupId: { groupId: group.id, userId } },
     });
@@ -281,6 +294,7 @@ export class GroupsService {
       GROUP_KICKED_EVENT,
       `You've been kicked out from ${group.name} group`,
     );
+    return this.omitPassword(group);
   }
 
   isUserAdmin(userId: number, group: GroupWithUsers) {

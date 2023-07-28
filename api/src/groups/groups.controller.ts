@@ -112,19 +112,7 @@ export class GroupsController {
     @Param() { id: groupId }: IdDto,
     @Body() kickUserDto: KickUserDto,
   ) {
-    const group = await this.groupsService.findOne(groupId, {
-      includeUsers: true,
-    });
-    const isTargetUserAdmin = this.groupsService.isUserAdmin(
-      kickUserDto.userId,
-      group,
-    );
-    if (isTargetUserAdmin) {
-      user.allow('delete', subject('Group', group), 'users.role');
-    } else {
-      user.allow('kick-user', subject('Group', group));
-    }
-    return this.groupsService.kickUser(group, kickUserDto);
+    return this.groupsService.kickUser(user, groupId, kickUserDto);
   }
 
   @ApiOperation({ summary: 'Join a group' })

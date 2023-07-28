@@ -426,4 +426,101 @@ describe('GroupService int', () => {
         .catch((e) => expect(e).toBeTruthy());
     }, 30000);
   });
+
+  describe('kick user', () => {
+    let owner: ActiveUserData;
+    let group: Group;
+
+    it('should create group with one member', async () => {
+      owner = await createUser();
+      const _group = await createGroup(owner, 'PUBLIC');
+      group = { ..._group, password: null };
+    }, 30000);
+
+    it('owner can not be kicked out', async () => {
+      const user = await createUser();
+      await groupService.joinGroup(user, group);
+
+      const admin = await createUser();
+      await groupService.joinGroup(admin, group);
+      await groupService.addGroupAdmin(owner, group.id, { userId: admin.sub });
+
+      await groupService
+        .kickUser(admin, group.id, { userId: owner.sub })
+        .then((data) => expect(data).toBe(undefined))
+        .catch((e) => expect(e).toBeTruthy());
+      await groupService
+        .kickUser(user, group.id, { userId: owner.sub })
+        .then((data) => expect(data).toBe(undefined))
+        .catch((e) => expect(e).toBeTruthy());
+      const { users } = await groupService.findOne(group.id, {
+        includeUsers: true,
+      });
+      expect(users.find((u) => u.userId === owner.sub)).toBeTruthy();
+    });
+
+    it('owner can kick user', async () => {
+      const user = await createUser();
+      await groupService.joinGroup(user, group);
+
+      const admin = await createUser();
+      await groupService.joinGroup(admin, group);
+      await groupService.addGroupAdmin(owner, group.id, { userId: admin.sub });
+
+      await groupService.kickUser(owner, group.id, { userId: user.sub });
+      await groupService.kickUser(owner, group.id, { userId: admin.sub });
+
+      const { users, blockedUsers } = await groupService.findOne(group.id, {
+        includeBlockedUsers: true,
+        includeUsers: true,
+      });
+      const isMember = !!users.find((u) => u.userId === user.sub);
+      const isBanned = !!blockedUsers.find((u) => u.id === user.sub);
+      expect(isMember).toBeFalsy();
+      expect(isBanned).toBeFalsy();
+
+      const isAdminMember = !!users.find((u) => u.userId === user.sub);
+      const isAdminBanned = !!blockedUsers.find((u) => u.id === user.sub);
+      expect(isAdminMember).toBeFalsy();
+      expect(isAdminBanned).toBeFalsy();
+    });
+
+    it('admin can kick user', async () => {
+      const user = await createUser();
+      const admin = await createUser();
+
+      await groupService.joinGroup(user, group);
+      await groupService.joinGroup(admin, group);
+      await groupService.addGroupAdmin(owner, group.id, { userId: admin.sub });
+      await groupService.kickUser(admin, group.id, { userId: user.sub });
+
+      const { users, blockedUsers } = await groupService.findOne(group.id, {
+        includeBlockedUsers: true,
+        includeUsers: true,
+      });
+      const isMember = !!users.find((u) => u.userId === user.sub);
+      const isBanned = !!blockedUsers.find((u) => u.id === user.sub);
+      expect(isMember).toBeFalsy();
+      expect(isBanned).toBeFalsy();
+    });
+
+    it('users can not kick admins', async () => {
+      const admin = await createUser();
+      const user = await createUser();
+
+      await groupService.joinGroup(user, group);
+      await groupService.joinGroup(admin, group);
+      await groupService.addGroupAdmin(owner, group.id, { userId: admin.sub });
+
+      await groupService
+        .kickUser(user, group.id, { userId: admin.sub })
+        .then((data) => expect(data).toBeFalsy())
+        .catch((e) => expect(e).toBeTruthy());
+      const { users } = await groupService.findOne(group.id, {
+        includeUsers: true,
+      });
+      const isAdminMember = !!users.find((u) => u.userId === user.sub);
+      expect(isAdminMember).toBeTruthy();
+    });
+  });
 });
