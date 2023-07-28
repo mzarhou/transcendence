@@ -48,6 +48,21 @@ describe('GroupService int', () => {
     return authService.getUserFromToken(accessToken);
   }
 
+  async function createAdmin(group: Group, groupOwner: ActiveUserData) {
+    const admin = await createUser();
+    await groupService.joinGroup(admin, group);
+    await groupService.addGroupAdmin(groupOwner, group.id, {
+      userId: admin.sub,
+    });
+    return admin;
+  }
+
+  async function createMember(group: Group) {
+    const user = await createUser();
+    await groupService.joinGroup(user, group);
+    return user;
+  }
+
   /**
    * create a group with random name
    */
@@ -163,89 +178,111 @@ describe('GroupService int', () => {
   });
 
   describe('add group admin', () => {
-    let user: ActiveUserData;
-    it('should create a user', async () => {
-      user = await createUser();
+    let owner: ActiveUserData;
+    let group: Group;
+
+    it('should create group with one member', async () => {
+      owner = await createUser();
+      const _group = await createGroup(owner, 'PUBLIC');
+      group = { ..._group, password: null };
     }, 30000);
 
     it('group owner should add admin', async () => {
-      const newAdmin = await createUser();
-      const group = await createGroup(user, 'PUBLIC');
-      // add user to group
-      await groupService.joinGroup(newAdmin, { ...group, password: '' });
-      await groupService.addGroupAdmin(user, group.id, {
-        userId: newAdmin.sub,
+      const admin = await createUser();
+      await groupService.joinGroup(admin, group);
+      await groupService.addGroupAdmin(owner, group.id, {
+        userId: admin.sub,
       });
-      const { users } = await prisma.group.findFirstOrThrow({
-        where: { id: group.id },
-        include: { users: true },
+      const { users } = await groupService.findOne(group.id, {
+        includeUsers: true,
       });
-      const admin = users.find(
-        (u) => u.role === 'ADMIN' && u.userId === newAdmin.sub,
+      const isAdmin = !!users.find(
+        (u) => u.role === 'ADMIN' && u.userId === admin.sub,
       );
-      expect(admin).toBeTruthy();
+      expect(isAdmin).toBeTruthy();
     }, 30000);
 
-    it('admins/users can not add admins', async () => {
-      const newAdmin = await createUser();
-      const groupOwner = await createUser();
-      const group = await createGroup(groupOwner, 'PUBLIC');
-      await groupService.joinGroup(newAdmin, { ...group, password: '' });
+    it('new admin should be member', async () => {
+      const admin = await createUser();
+      // admin isn't a member of group
       await groupService
-        .addGroupAdmin(user, group.id, {
-          userId: newAdmin.sub,
+        .addGroupAdmin(owner, group.id, {
+          userId: admin.sub,
         })
         .then((data) => expect(data).toBeFalsy())
-        .catch((e) => expect(e).not.toBeFalsy());
-      const { users } = await prisma.group.findFirstOrThrow({
-        where: { id: group.id },
-        include: { users: true },
+        .catch((e) => expect(e).toBeTruthy());
+      const { users } = await groupService.findOne(group.id, {
+        includeUsers: true,
       });
-      const isAdminSet = !!users.find(
-        (u) => u.role === 'ADMIN' && u.userId === newAdmin.sub,
+      const isAdmin = !!users.find(
+        (u) => u.role === 'ADMIN' && u.userId === admin.sub,
       );
-      expect(isAdminSet).toBe(false);
+      expect(isAdmin).toBe(false);
+    }, 30000);
+
+    it('admins/members can not set admins', async () => {
+      const member = await createMember(group);
+      const admin = await createAdmin(group, owner);
+      const targetUser = await createMember(group);
+
+      await groupService
+        .addGroupAdmin(member, group.id, { userId: targetUser.sub })
+        .then((data) => expect(data).toBeFalsy())
+        .catch((e) => expect(e).not.toBeFalsy());
+      await groupService
+        .addGroupAdmin(admin, group.id, { userId: targetUser.sub })
+        .then((data) => expect(data).toBeFalsy())
+        .catch((e) => expect(e).not.toBeFalsy());
+
+      const { users } = await groupService.findOne(group.id, {
+        includeUsers: true,
+      });
+      const isAdmin = !!users.find(
+        (u) => u.role === 'ADMIN' && u.userId === targetUser.sub,
+      );
+      expect(isAdmin).toBe(false);
     }, 30000);
   });
 
   describe('remove admin', () => {
-    let user: ActiveUserData;
-    it('should create a user', async () => {
-      user = await createUser();
+    let owner: ActiveUserData;
+    let group: Group;
+
+    it('should create group with one member', async () => {
+      owner = await createUser();
+      const _group = await createGroup(owner, 'PUBLIC');
+      group = { ..._group, password: null };
     }, 30000);
 
     it('group owner should remove an admin', async () => {
-      const newAdmin = await createUser();
-      let group = await createGroup(user, 'PUBLIC');
-      await groupService.joinGroup(newAdmin, { ...group, password: '' });
-      await groupService.addGroupAdmin(user, group.id, {
-        userId: newAdmin.sub,
-      });
+      const admin = await createAdmin(group, owner);
 
-      await groupService.removeGroupAdmin(user, group.id, {
-        userId: newAdmin.sub,
+      await groupService.removeGroupAdmin(owner, group.id, {
+        userId: admin.sub,
       });
       const { users } = await groupService.findOne(group.id, {
         includeUsers: true,
       });
       const userGroup = users.find(
-        (u) => u.role === 'ADMIN' && u.userId === newAdmin.sub,
+        (u) => u.role === 'ADMIN' && u.userId === admin.sub,
       );
       expect(userGroup).toBeFalsy();
     }, 30000);
 
     it('admins/users can not remove an admin', async () => {
-      const newAdmin = await createUser();
-      const groupOwner = await createUser();
-      let group = await createGroup(groupOwner, 'PUBLIC');
-      await groupService.joinGroup(newAdmin, { ...group, password: '' });
-      await groupService.addGroupAdmin(groupOwner, group.id, {
-        userId: newAdmin.sub,
-      });
+      const admin = await createAdmin(group, owner);
+      const targetAdmin = await createAdmin(group, owner);
+      const member = await createMember(group);
 
       await groupService
-        .removeGroupAdmin(user, group.id, {
-          userId: newAdmin.sub,
+        .removeGroupAdmin(member, group.id, {
+          userId: targetAdmin.sub,
+        })
+        .then((data) => expect(data).toBeFalsy())
+        .catch((e) => expect(e).toBeTruthy());
+      await groupService
+        .removeGroupAdmin(admin, group.id, {
+          userId: targetAdmin.sub,
         })
         .then((data) => expect(data).toBeFalsy())
         .catch((e) => expect(e).toBeTruthy());
@@ -254,7 +291,7 @@ describe('GroupService int', () => {
         includeUsers: true,
       });
       const userGroup = users.find(
-        (u) => u.role === 'ADMIN' && u.userId === newAdmin.sub,
+        (u) => u.role === 'ADMIN' && u.userId === targetAdmin.sub,
       );
       expect(userGroup).toBeTruthy();
     }, 30000);
@@ -262,17 +299,20 @@ describe('GroupService int', () => {
 
   describe('ban user', () => {
     let owner: ActiveUserData;
-    let group: Omit<Group, 'password'>;
+    let group: Group;
 
     it('should create group with one member', async () => {
       owner = await createUser();
-      group = await createGroup(owner, 'PUBLIC');
+      const _group = await createGroup(owner, 'PUBLIC');
+      group = { ..._group, password: '' };
     }, 30000);
 
-    it('owner can ban members', async () => {
-      const user = await createUser();
-      await groupService.joinGroup(user, { ...group, password: '' });
+    it('owner can ban any one', async () => {
+      const user = await createMember(group);
+      const admin = await createAdmin(group, owner);
+
       await groupService.banUser(owner, group.id, { userId: user.sub });
+      await groupService.banUser(owner, group.id, { userId: admin.sub });
 
       const { users, blockedUsers } = await groupService.findOne(group.id, {
         includeBlockedUsers: true,
@@ -280,16 +320,31 @@ describe('GroupService int', () => {
       });
       const isMember = !!users.find((u) => u.userId === user.sub);
       const isBanned = !!blockedUsers.find((u) => u.id === user.sub);
+      const isAdminMember = !!users.find((u) => u.userId === admin.sub);
+      const isAdminBanned = !!blockedUsers.find((u) => u.id === admin.sub);
       expect(isMember).toBeFalsy();
       expect(isBanned).toBeTruthy();
+      expect(isAdminMember).toBeFalsy();
+      expect(isAdminBanned).toBeTruthy();
+    }, 30000);
+
+    it('owner can not be banned', async () => {
+      const admin = await createAdmin(group, owner);
+      const user = await createMember(group);
+
+      await groupService
+        .banUser(admin, group.id, { userId: owner.sub })
+        .then((data) => expect(data).toBeFalsy())
+        .catch((e) => expect(e).toBeTruthy());
+      await groupService
+        .banUser(user, group.id, { userId: owner.sub })
+        .then((data) => expect(data).toBeFalsy())
+        .catch((e) => expect(e).toBeTruthy());
     }, 30000);
 
     it('admin can ban members', async () => {
-      const user = await createUser();
-      const admin = await createUser();
-      await groupService.joinGroup(user, { ...group, password: '' });
-      await groupService.joinGroup(admin, { ...group, password: '' });
-      await groupService.addGroupAdmin(owner, group.id, { userId: admin.sub });
+      const admin = await createAdmin(group, owner);
+      const user = await createMember(group);
 
       await groupService.banUser(admin, group.id, { userId: user.sub });
 
@@ -303,60 +358,44 @@ describe('GroupService int', () => {
       expect(isBanned).toBeTruthy();
     }, 30000);
 
-    it('member user can not ban other users', async () => {
-      const user1 = await createUser();
-      const user2 = await createUser();
-      await groupService.joinGroup(user1, { ...group, password: '' });
-      await groupService.joinGroup(user2, { ...group, password: '' });
-
-      await groupService
-        .banUser(user1, group.id, {
-          userId: user2.sub,
-        })
-        .then((data) => expect(data).toBeFalsy())
-        .catch((e) => expect(e).toBeTruthy());
-    }, 30000);
-
     it('admin can not ban other admin', async () => {
-      const groupOwner = await createUser();
-      const admin1 = await createUser();
-      const admin2 = await createUser();
-      const group = await createGroup(groupOwner, 'PUBLIC');
-      await groupService.joinGroup(admin1, { ...group, password: '' });
-      await groupService.joinGroup(admin2, { ...group, password: '' });
-      await groupService.addGroupAdmin(groupOwner, group.id, {
-        userId: admin1.sub,
-      });
-      await groupService.addGroupAdmin(groupOwner, group.id, {
-        userId: admin2.sub,
-      });
+      const admin1 = await createAdmin(group, owner);
+      const admin2 = await createAdmin(group, owner);
+
       await groupService
         .banUser(admin1, group.id, { userId: admin2.sub })
         .then((data) => expect(data).toBeFalsy())
         .catch((e) => expect(e).toBeTruthy());
     }, 30000);
 
-    it('admin can not ban owner', async () => {
-      const groupOwner = await createUser();
-      const admin = await createUser();
-      const group = await createGroup(groupOwner, 'PUBLIC');
-      await groupService.joinGroup(admin, { ...group, password: '' });
-      await groupService.addGroupAdmin(groupOwner, group.id, {
-        userId: admin.sub,
-      });
+    it('member user can not ban other users/admins', async () => {
+      const user1 = await createMember(group);
+      const user2 = await createMember(group);
+      const admin = await createAdmin(group, owner);
+
       await groupService
-        .banUser(admin, group.id, { userId: groupOwner.sub })
+        .banUser(user1, group.id, { userId: user2.sub })
+        .then((data) => expect(data).toBeFalsy())
+        .catch((e) => expect(e).toBeTruthy());
+      await groupService
+        .banUser(user1, group.id, { userId: admin.sub })
         .then((data) => expect(data).toBeFalsy())
         .catch((e) => expect(e).toBeTruthy());
     }, 30000);
   });
 
   describe('unban user', () => {
+    let owner: ActiveUserData;
+    let group: Group;
+
+    it('should create group with one member', async () => {
+      owner = await createUser();
+      const _group = await createGroup(owner, 'PUBLIC');
+      group = { ..._group, password: '' };
+    }, 30000);
+
     it('owner can unban members', async () => {
-      const owner = await createUser();
-      const member = await createUser();
-      const group = await createGroup(owner, 'PUBLIC');
-      await groupService.joinGroup(member, { ...group, password: '' });
+      const member = await createMember(group);
 
       await groupService.banUser(owner, group.id, { userId: member.sub });
       await groupService
@@ -366,13 +405,8 @@ describe('GroupService int', () => {
     }, 30000);
 
     it('admin can unban members', async () => {
-      const owner = await createUser();
-      const member = await createUser();
-      const admin = await createUser();
-      const group = await createGroup(owner, 'PUBLIC');
-      await groupService.joinGroup(member, { ...group, password: '' });
-      await groupService.joinGroup(admin, { ...group, password: '' });
-      await groupService.addGroupAdmin(owner, group.id, { userId: admin.sub });
+      const member = await createMember(group);
+      const admin = await createAdmin(group, owner);
 
       await groupService.banUser(admin, group.id, { userId: member.sub });
       await groupService
@@ -382,12 +416,8 @@ describe('GroupService int', () => {
     }, 30000);
 
     it('users can not unban other users', async () => {
-      const owner = await createUser();
-      const user1 = await createUser();
-      const user2 = await createUser();
-      const group = await createGroup(owner, 'PUBLIC');
-      await groupService.joinGroup(user1, { ...group, password: '' });
-      await groupService.joinGroup(user2, { ...group, password: '' });
+      const user1 = await createMember(group);
+      const user2 = await createMember(group);
 
       await groupService.banUser(owner, group.id, { userId: user1.sub });
       await groupService
