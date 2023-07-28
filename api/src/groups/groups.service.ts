@@ -2,6 +2,7 @@ import {
   BadRequestException,
   Injectable,
   NotFoundException,
+  UnauthorizedException,
 } from '@nestjs/common';
 import { CreateGroupDto } from './dto/create-group.dto';
 import { UpdateGroupDto } from './dto/update-group.dto';
@@ -31,6 +32,7 @@ import { JOIN_GROUP_EVENT } from '@transcendence/common';
 import { LEAVE_GROUP_EVENT } from '@transcendence/common';
 import { HashingService } from 'src/iam/hashing/hashing.service';
 import { subject } from '@casl/ability';
+import { JoinGroupDto } from './dto/join-group.dto';
 
 @ApiTags('groups')
 @Injectable()
@@ -301,7 +303,25 @@ export class GroupsService {
     return !!group.users.find((u) => u.userId === userId && u.role === 'ADMIN');
   }
 
-  async joinGroup(user: ActiveUserData, group: Group) {
+  async joinGroup(
+    user: ActiveUserData,
+    groupId: number,
+    joinGroupDto?: JoinGroupDto,
+  ) {
+    const password = joinGroupDto?.password;
+    const group = await this.findOne(groupId, {
+      includeBlockedUsers: true,
+    });
+
+    user.allow('join', subject('Group', group));
+    if (
+      group.status === 'PRIVATE' ||
+      (group.status === 'PROTECTED' &&
+        !(await this.hashingService.compare(password ?? '', group.password!)))
+    ) {
+      throw new UnauthorizedException();
+    }
+
     await this.prisma.group.update({
       where: { id: group.id },
       data: {

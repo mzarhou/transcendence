@@ -21,6 +21,7 @@ import { UnBanUserDto } from './dto/ban-user/unban-user.dto';
 import { RemoveGroupAdminDto } from './dto/group-admin/remove-group-admin.dto';
 import { ApiBearerAuth, ApiOperation, ApiTags } from '@nestjs/swagger';
 import { KickUserDto } from './dto/kick-user.dto';
+import { JoinGroupDto } from './dto/join-group.dto';
 
 @ApiBearerAuth()
 @ApiTags('groups')
@@ -121,12 +122,9 @@ export class GroupsController {
   async joinGroup(
     @ActiveUser() user: ActiveUserData,
     @Param() { id: groupId }: IdDto,
+    @Body() joinGroupDto: JoinGroupDto,
   ) {
-    const group = await this.groupsService.findOne(groupId, {
-      includeBlockedUsers: true,
-    });
-    user.allow('join', subject('Group', group));
-    return this.groupsService.joinGroup(user, group);
+    return this.groupsService.joinGroup(user, groupId, joinGroupDto);
   }
 
   @ApiOperation({ summary: 'Leave a group' })

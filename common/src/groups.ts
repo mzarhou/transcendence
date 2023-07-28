@@ -39,3 +39,8 @@ export type UnBanUserType = z.infer<typeof unBanUserSchema>;
 
 export const kickUserSchema = banUserSchema;
 export type KickUserType = z.infer<typeof kickUserSchema>;
+
+export const joinGroupSchema = z.object({
+  password: z.string().optional(),
+});
+export type JoinGroupType = z.infer<typeof joinGroupSchema>;

@@ -48,18 +48,22 @@ describe('GroupService int', () => {
     return authService.getUserFromToken(accessToken);
   }
 
-  async function createAdmin(group: Group, groupOwner: ActiveUserData) {
+  async function createAdmin(
+    group: Group,
+    groupOwner: ActiveUserData,
+    groupPassword?: string,
+  ) {
     const admin = await createUser();
-    await groupService.joinGroup(admin, group);
+    await groupService.joinGroup(admin, group.id, { password: groupPassword });
     await groupService.addGroupAdmin(groupOwner, group.id, {
       userId: admin.sub,
     });
     return admin;
   }
 
-  async function createMember(group: Group) {
+  async function createMember(group: Group, groupPassword?: string) {
     const user = await createUser();
-    await groupService.joinGroup(user, group);
+    await groupService.joinGroup(user, group.id, { password: groupPassword });
     return user;
   }
 
@@ -189,7 +193,7 @@ describe('GroupService int', () => {
 
     it('group owner should add admin', async () => {
       const admin = await createUser();
-      await groupService.joinGroup(admin, group);
+      await groupService.joinGroup(admin, group.id);
       await groupService.addGroupAdmin(owner, group.id, {
         userId: admin.sub,
       });
@@ -513,6 +517,80 @@ describe('GroupService int', () => {
       const isUserMember = !!users.find((u) => u.userId === targetUser.sub);
       expect(isAdminMember).toBeTruthy();
       expect(isUserMember).toBeTruthy();
+    });
+  });
+
+  describe('join', () => {
+    let owner: ActiveUserData;
+    let group: Group;
+
+    it('should create group with one member', async () => {
+      owner = await createUser();
+      const _group = await createGroup(owner, 'PUBLIC');
+      group = { ..._group, password: null };
+    }, 30000);
+
+    it('users can join public group', async () => {
+      const user = await createUser();
+      const publicGroup = await createGroup(owner, 'PUBLIC');
+
+      await groupService.joinGroup(user, publicGroup.id);
+      const { users } = await groupService.findOne(publicGroup.id, {
+        includeUsers: true,
+      });
+      const isMember = users.find((u) => u.userId === user.sub);
+      expect(isMember).toBeTruthy();
+    });
+
+    it('users can not join private group', async () => {
+      const user = await createUser();
+      const privateGroup = await createGroup(owner, 'PRIVATE');
+
+      await groupService
+        .joinGroup(user, privateGroup.id)
+        .then((data) => expect(data).toBeFalsy())
+        .catch((e) => expect(e).toBeTruthy());
+
+      const { users } = await groupService.findOne(privateGroup.id, {
+        includeUsers: true,
+      });
+      const isMember = users.find((u) => u.userId === user.sub);
+      expect(isMember).toBeFalsy();
+    });
+
+    it('users can not join protected group with incorrect password', async () => {
+      const user = await createUser();
+      const protectedGroup = await createGroup(owner, 'PROTECTED', 'pass123');
+
+      await groupService
+        .joinGroup(user, protectedGroup.id, {
+          password: 'incorrect password',
+        })
+        .then((data) => expect(data).toBeFalsy())
+        .catch((e) => expect(e).toBeTruthy());
+
+      const { users } = await groupService.findOne(protectedGroup.id, {
+        includeUsers: true,
+      });
+      const isMember = !!users.find((u) => u.userId === user.sub);
+      expect(isMember).toBeFalsy();
+    });
+
+    it('users can join protected group with correct password', async () => {
+      const password = 'pass123';
+      const user = await createUser();
+      const protectedGroup = await createGroup(owner, 'PROTECTED', password);
+
+      await groupService
+        .joinGroup(user, protectedGroup.id, { password })
+        .then((data) => expect(data).toBeFalsy())
+        .catch((e) => expect(e).toBeTruthy());
+
+      const { users } = await groupService.findOne(protectedGroup.id, {
+        includeUsers: true,
+      });
+      const isMember = users.find((u) => u.userId === user.sub);
+      expect(isMember).toBeTruthy();
     });
   });
 });
