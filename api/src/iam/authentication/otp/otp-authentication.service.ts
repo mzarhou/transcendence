@@ -8,6 +8,7 @@ import { Provide2faCodeDto } from '../dto/provide-2fa-code.dto';
 import { CryptoService } from './crypto.service';
 import { UsersService } from 'src/users/users.service';
 import { PrismaService } from 'src/prisma/prisma.service';
+import { env } from 'src/env/server';
 
 @Injectable()
 export class OtpAuthenticationService {
@@ -26,7 +27,7 @@ export class OtpAuthenticationService {
       throw new UnauthorizedException(undefined, '2FA already enabled');
     }
     const secret = authenticator.generateSecret();
-    const appName = this.configService.getOrThrow('TFA_APP_NAME');
+    const appName = this.configService.getOrThrow(env.TFA_APP_NAME);
     const uri = authenticator.keyuri(user.email, appName, secret);
 
     const encryptedSecret = this.cryptoService.encrypt(secret);
