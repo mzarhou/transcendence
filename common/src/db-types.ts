@@ -65,11 +65,14 @@ export enum UserGroupRole {
 
 export type UserGroup = User & { role: UserGroupRole };
 
+export type GroupStatus = "PUBLIC" | "PROTECTED" | "PRIVATE";
+
 export type Group = {
   id: number;
   name: string;
   avatar: string;
   ownerId: number;
+  status: GroupStatus;
   createdAt: Date;
   updatedAt: Date;
 

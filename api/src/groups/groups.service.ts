@@ -11,21 +11,12 @@ import { PrismaService } from 'src/prisma/prisma.service';
 import { AddGroupAdminDto } from './dto/group-admin/add-group-admin.dto';
 import { ApiTags } from '@nestjs/swagger';
 import { BanUserDto } from './dto/ban-user/ban-user.dto';
-import { Group } from '@prisma/client';
 import { RemoveGroupAdminDto } from './dto/group-admin/remove-group-admin.dto';
-import {
-  GroupWithBlockedUsers,
-  GroupWithUsers,
-  UserGroup,
-} from './group.types';
+import { GroupWithUsers, UserGroup } from './group.types';
 import { UnBanUserDto } from './dto/ban-user/unban-user.dto';
 import { KickUserDto } from './dto/kick-user.dto';
 import { NotificationsService } from 'src/notifications/notifications.service';
-import {
-  GROUP_DELETED_EVENT,
-  GROUP_KICKED_EVENT,
-  updateGroupSchema,
-} from '@transcendence/common';
+import { GROUP_DELETED_EVENT, GROUP_KICKED_EVENT } from '@transcendence/common';
 import { ADD_ADMIN_EVENT } from '@transcendence/common';
 import { GROUP_BANNED_EVENT } from '@transcendence/common';
 import { JOIN_GROUP_EVENT } from '@transcendence/common';
@@ -34,6 +25,7 @@ import { HashingService } from 'src/iam/hashing/hashing.service';
 import { subject } from '@casl/ability';
 import { JoinGroupDto } from './dto/join-group.dto';
 import { LeaveGroupDto } from './dto/leave-group.dto';
+import { UserGroupRole } from '@prisma/client';
 
 @ApiTags('groups')
 @Injectable()
@@ -379,6 +371,31 @@ export class GroupsService {
       `You've leaved ${group.name} group!`,
     );
     return this.omitPassword(group);
+  }
+
+  async search(user: ActiveUserData, term: any) {
+    const userGroups = await this.findGroups(user);
+    if (!term || term.length === 0) {
+      return [];
+    }
+
+    const groups = await this.prisma.group.findMany({
+      where: {
+        status: {
+          not: 'PRIVATE',
+        },
+        name: {
+          contains: term,
+        },
+      },
+    });
+    return groups.map((g) => {
+      if (g.ownerId === user.sub) {
+        return { ...this.omitPassword(g), role: 'ADMIN' as UserGroupRole };
+      }
+      const roleInGroup = userGroups.find((u) => u.id === g.id)?.role;
+      return { ...this.omitPassword(g), role: roleInGroup };
+    });
   }
 
   async findGroups(user: ActiveUserData) {

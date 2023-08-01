@@ -8,6 +8,7 @@ import {
   HttpCode,
   HttpStatus,
   Get,
+  Query,
 } from '@nestjs/common';
 import { GroupsService } from './groups.service';
 import { CreateGroupDto } from './dto/create-group.dto';
@@ -23,6 +24,7 @@ import { ApiBearerAuth, ApiOperation, ApiTags } from '@nestjs/swagger';
 import { KickUserDto } from './dto/kick-user.dto';
 import { JoinGroupDto } from './dto/join-group.dto';
 import { LeaveGroupDto } from './dto/leave-group.dto';
+import { SearchUsersDto } from 'src/chat/dto/search-users.dto';
 
 @ApiBearerAuth()
 @ApiTags('groups')
@@ -137,6 +139,16 @@ export class GroupsController {
     @Body() leaveGroupDto: LeaveGroupDto,
   ) {
     return this.groupsService.leaveGroup(user, groupId, leaveGroupDto);
+  }
+
+  @ApiOperation({ summary: 'Search public/protected groups' })
+  @HttpCode(HttpStatus.OK)
+  @Get('search')
+  async search(
+    @ActiveUser() user: ActiveUserData,
+    @Query() { term }: SearchUsersDto,
+  ) {
+    return this.groupsService.search(user, term);
   }
 
   @ApiOperation({ summary: 'Get user groups' })

@@ -22,7 +22,7 @@ export class ChatController {
 
   @HttpCode(HttpStatus.OK)
   @Get('search')
-  async search2(
+  async search(
     @ActiveUser() user: ActiveUserData,
     @Query() { term }: SearchUsersDto,
   ) {

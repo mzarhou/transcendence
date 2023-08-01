@@ -52,3 +52,4 @@ export const leaveGroupSchema = z.object({
 export type LeaveGroupType = z.infer<typeof leaveGroupSchema>;
 
 export type GroupWithRole = Group & { role: UserGroupRole };
+export type SearchGroup = Group & { role: UserGroupRole | undefined };
