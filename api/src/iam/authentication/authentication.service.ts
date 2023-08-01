@@ -141,7 +141,7 @@ export class AuthenticationService {
         refreshTokenId,
       );
       if (!isValid) {
-        throw new UnauthorizedException(undefined, 'Invalide refresh token');
+        throw new UnauthorizedException('Invalide refresh token');
       }
 
       await this.refreshTokenIdsStorage.invalidate(

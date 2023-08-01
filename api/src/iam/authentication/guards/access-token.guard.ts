@@ -1,8 +1,8 @@
 import {
   CanActivate,
   ExecutionContext,
+  ForbiddenException,
   Injectable,
-  UnauthorizedException,
 } from '@nestjs/common';
 import { Request } from 'express';
 import { AccessTokenWithout2faGuard } from './access-token-without-2fa.guard';
@@ -22,10 +22,7 @@ export class AccessTokenGuard implements CanActivate {
     if (payload.isTfaEnabled && !payload.isTfaCodeProvided) {
       const authenticationHeader = `2FA realm="Secure Area"`;
       request.res?.setHeader('WWW-Authenticate', authenticationHeader);
-      throw new UnauthorizedException(
-        undefined,
-        'You must provide 2FA code first',
-      );
+      throw new ForbiddenException('You must provide 2FA code first');
     }
     return true;
   }

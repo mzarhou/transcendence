@@ -3,8 +3,10 @@ import { SearchUser } from "@transcendence/common";
 import { AxiosError } from "axios";
 import useSWR from "swr";
 
+export const searchUsersKey = "/chat/search";
+
 export const useSearchUsers = (query: string) => {
-  return useSWR([`/chat/search`, query], async ([url, query]) => {
+  return useSWR([searchUsersKey, query], async ([url, query]) => {
     const { data } = await api
       .get<SearchUser[]>(url + `?term=${query}`)
       .catch((err) => {

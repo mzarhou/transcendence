@@ -42,7 +42,7 @@ export class UsersService {
     });
 
     if (!friend) {
-      throw new NotFoundException();
+      throw new NotFoundException('Friend not found');
     }
 
     const isFriend =

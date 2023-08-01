@@ -1,21 +1,25 @@
 import { useToast } from "@/components/ui/use-toast";
-import { useRevalidateSearch } from "@/hooks/use-revalidate-search";
+import { useRevalidateUsersSearch } from "@/hooks/use-revalidate-search";
 import { api } from "@/lib/api";
+import { getServerMessage } from "@/lib/utils";
 import { useSWRConfig } from "swr";
 import useSWRMutation from "swr/mutation";
 
 export const useDeleteFriendRequest = (friendRequestId: number) => {
   const { toast } = useToast();
   const { mutate } = useSWRConfig();
-  const { revalidateSearch } = useRevalidateSearch();
+  const { revalidateSearch } = useRevalidateUsersSearch();
 
   const { trigger, ...rest } = useSWRMutation(
     `/chat/friend-request/${friendRequestId}`,
     async (url) => api.delete(url),
     {
-      onError: (_error) => {
+      onError: (error) => {
         toast({
-          description: "Failed to delete friend request",
+          description: getServerMessage(
+            error,
+            "Failed to delete friend request"
+          ),
           variant: "destructive",
         });
       },

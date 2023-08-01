@@ -1,8 +1,8 @@
 import {
   BadRequestException,
+  ForbiddenException,
   Injectable,
   NotFoundException,
-  UnauthorizedException,
 } from '@nestjs/common';
 import { CreateFriendRequestDto } from './dto/create-friend-request.dto';
 import { PrismaService } from 'src/prisma/prisma.service';
@@ -25,7 +25,9 @@ export class FriendRequestService {
   ) {
     const { targetUserId } = createFriendRequestDto;
     if (targetUserId === user.sub) {
-      throw new BadRequestException();
+      throw new BadRequestException(
+        "You can't send friend request to your self",
+      );
     }
 
     const receivedFriendRequests = await this.findRecieved(user);
@@ -34,7 +36,9 @@ export class FriendRequestService {
         (rfr) => rfr.requesterId === targetUserId,
       ) > -1;
     if (pendingFriendRequest) {
-      throw new BadRequestException();
+      throw new BadRequestException(
+        'You have a pending friend request from this user',
+      );
     }
 
     const createdFriendRequest = await this.prisma.friendRequest.create({
@@ -111,7 +115,7 @@ export class FriendRequestService {
       } = acceptedFriendRequest;
 
       if (recipientId !== user.sub) {
-        throw new UnauthorizedException();
+        throw new ForbiddenException('You can not accept this friend request');
       }
 
       // add user as friend

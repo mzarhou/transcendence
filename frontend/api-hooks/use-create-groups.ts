@@ -1,5 +1,6 @@
 import { useToast } from "@/components/ui/use-toast";
 import { api } from "@/lib/api";
+import { getServerMessage } from "@/lib/utils";
 import { CreateGroupType } from "@transcendence/common";
 import { useRouter } from "next/navigation";
 import useSWRMutation from "swr/mutation";
@@ -18,9 +19,9 @@ export const useCreateGroup = () => {
         toast({ description: "Group created" });
         router.push("/game-chat");
       },
-      onError: (_error) => {
+      onError: (error) => {
         toast({
-          description: "Failed to create the group",
+          description: getServerMessage(error, "Failed to create the group"),
           variant: "destructive",
         });
       },

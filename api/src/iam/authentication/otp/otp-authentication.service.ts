@@ -1,4 +1,4 @@
-import { Injectable, UnauthorizedException } from '@nestjs/common';
+import { ForbiddenException, Injectable } from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
 import { authenticator } from 'otplib';
 import { OtpSecretsStorage } from './otp-secrets.storage';
@@ -24,7 +24,7 @@ export class OtpAuthenticationService {
   async generateSecret(activeUser: ActiveUserData) {
     const user = await this.usersService.findOne(activeUser.sub);
     if (await this.is2faEnabled(activeUser.sub)) {
-      throw new UnauthorizedException(undefined, '2FA already enabled');
+      throw new ForbiddenException('2FA already enabled');
     }
     const secret = authenticator.generateSecret();
     const appName = this.configService.getOrThrow(env.TFA_APP_NAME);
@@ -38,10 +38,10 @@ export class OtpAuthenticationService {
   async enableTfaForUser(activeUser: ActiveUserData, code: string) {
     const encryptedSecret = await this.otpSecretsStorage.get(activeUser.sub);
     if (!encryptedSecret) {
-      throw new UnauthorizedException('You must generate qrcode first');
+      throw new ForbiddenException('You must generate qrcode first');
     }
     if (!this.verifyCode(code, encryptedSecret)) {
-      throw new UnauthorizedException(`Invalid code: ${code}`);
+      throw new ForbiddenException(`Invalid code: ${code}`);
     }
 
     const { id, isTfaEnabled } = await this.prisma.user.findFirstOrThrow({
@@ -49,7 +49,7 @@ export class OtpAuthenticationService {
       select: { id: true, isTfaEnabled: true },
     });
     if (isTfaEnabled) {
-      throw new UnauthorizedException(undefined, '2FA already enabled');
+      throw new ForbiddenException('2FA already enabled');
     }
 
     await this.otpSecretsStorage.invalidate(activeUser.sub);
@@ -73,11 +73,11 @@ export class OtpAuthenticationService {
         include: { secrets: true },
       });
     if (!isTfaEnabled) {
-      throw new UnauthorizedException(undefined, `2FA isn't enabled`);
+      throw new ForbiddenException(`2FA isn't enabled`);
     }
     const tfaSecret = secrets?.tfaSecret;
     if (!tfaSecret || !this.verifyCode(code, tfaSecret)) {
-      throw new UnauthorizedException(`Invalid code: ${code}`);
+      throw new ForbiddenException(`Invalid code: ${code}`);
     }
 
     await this.prisma.user.update({
@@ -98,13 +98,10 @@ export class OtpAuthenticationService {
     provide2faCodeDto: Provide2faCodeDto,
     fingerprintHash: string,
   ) {
-    const user = await this.prisma.user.findFirst({
+    const user = await this.prisma.user.findFirstOrThrow({
       where: { id: activeUser.sub },
       include: { secrets: true },
     });
-    if (!user) {
-      throw new UnauthorizedException();
-    }
 
     const isValid =
       user.secrets?.tfaSecret &&
@@ -113,7 +110,7 @@ export class OtpAuthenticationService {
         user.secrets.tfaSecret,
       ));
     if (!isValid) {
-      throw new UnauthorizedException('Invalid Code');
+      throw new ForbiddenException('Invalid Code');
     }
     return this.authService.generateTokens(user, fingerprintHash, true);
   }

@@ -1,6 +1,7 @@
 import { useToast } from "@/components/ui/use-toast";
+import { getServerMessage } from "@/lib/utils";
 import { SignInType } from "@transcendence/common";
-import axios, { AxiosError } from "axios";
+import axios from "axios";
 import { useRouter } from "next/navigation";
 import { useSWRConfig } from "swr";
 import useSWRMutation from "swr/mutation";
@@ -20,12 +21,8 @@ export const useSignIn = () => {
         router.replace("/game-chat");
       },
       onError: (error) => {
-        let message = "Failed to sign in";
-        if (error instanceof AxiosError) {
-          message = error.response?.data;
-        }
         toast({
-          description: message,
+          description: getServerMessage(error, "Failed to sign in"),
           variant: "destructive",
         });
       },

@@ -3,6 +3,7 @@ import { api } from "@/lib/api";
 import { useSWRConfig } from "swr";
 import useSWRMutation from "swr/mutation";
 import { notificationsKey } from "./use-notifications";
+import { getServerMessage } from "@/lib/utils";
 
 export const useClearAllNotifications = () => {
   const { toast } = useToast();
@@ -11,9 +12,12 @@ export const useClearAllNotifications = () => {
     "/notifications/clear-all",
     async (url) => api.delete(url),
     {
-      onError: (_error) => {
+      onError: (error) => {
         toast({
-          description: "Failed to clear all notifications",
+          description: getServerMessage(
+            error,
+            "Failed to clear all notifications"
+          ),
           variant: "destructive",
         });
       },

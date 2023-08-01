@@ -4,6 +4,7 @@ import { useSWRConfig } from "swr";
 import useSWRMutation from "swr/mutation";
 import { blockedUsersKey } from "./use-blocked-users";
 import { friendsKey } from "./use-friends";
+import { getServerMessage } from "@/lib/utils";
 
 export const useBlockUser = (userId: number) => {
   const { toast } = useToast();
@@ -13,9 +14,9 @@ export const useBlockUser = (userId: number) => {
     `/chat/block/${userId}`,
     async (url) => api.post(url),
     {
-      onError: (_error) => {
+      onError: (error) => {
         toast({
-          description: "Failed to block user",
+          description: getServerMessage(error, "Failed to block user"),
           variant: "destructive",
         });
       },

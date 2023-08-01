@@ -1,5 +1,6 @@
 import { useToast } from "@/components/ui/use-toast";
 import { api } from "@/lib/api";
+import { getServerMessage } from "@/lib/utils";
 import { useSWRConfig } from "swr";
 import useSWRMutation from "swr/mutation";
 
@@ -12,9 +13,9 @@ export const useDisable2fa = () => {
       await api.post(url, { tfaCode });
     },
     {
-      onError: (_error) => {
+      onError: (error) => {
         toast({
-          description: "Failed to disable 2FA",
+          description: getServerMessage(error, "Failed to disable 2FA"),
           variant: "destructive",
         });
       },

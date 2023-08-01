@@ -1,6 +1,7 @@
 import { useToast } from "@/components/ui/use-toast";
-import { useRevalidateSearch } from "@/hooks/use-revalidate-search";
+import { useRevalidateUsersSearch } from "@/hooks/use-revalidate-search";
 import { api } from "@/lib/api";
+import { getServerMessage } from "@/lib/utils";
 import { useSWRConfig } from "swr";
 import useSWRMutation from "swr/mutation";
 
@@ -10,15 +11,15 @@ type useUnfriendProps = {
 export const useUnfriend = ({ targetUserId }: useUnfriendProps) => {
   const { toast } = useToast();
   const { mutate } = useSWRConfig();
-  const { revalidateSearch } = useRevalidateSearch();
+  const { revalidateSearch } = useRevalidateUsersSearch();
 
   const { trigger, ...rest } = useSWRMutation(
     `chat/unfriend/${targetUserId}`,
     async (url) => api.post(url),
     {
-      onError: (_error) => {
+      onError: (error) => {
         toast({
-          description: "Request failed",
+          description: getServerMessage(error, "Unfriend request failed"),
           variant: "destructive",
         });
       },

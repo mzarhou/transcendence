@@ -1,8 +1,8 @@
 import {
   BadRequestException,
+  ForbiddenException,
   Injectable,
   NotFoundException,
-  UnauthorizedException,
 } from '@nestjs/common';
 import { CreateGroupDto } from './dto/create-group.dto';
 import { UpdateGroupDto } from './dto/update-group.dto';
@@ -89,7 +89,7 @@ export class GroupsService {
       },
     });
 
-    if (!group) throw new NotFoundException();
+    if (!group) throw new NotFoundException('Group not found');
     return group;
   }
 
@@ -307,12 +307,14 @@ export class GroupsService {
     });
 
     user.allow('join', subject('Group', group));
+    if (group.status === 'PRIVATE') {
+      throw new ForbiddenException('You can not join the group');
+    }
     if (
-      group.status === 'PRIVATE' ||
-      (group.status === 'PROTECTED' &&
-        !(await this.hashingService.compare(password ?? '', group.password!)))
+      group.status === 'PROTECTED' &&
+      !(await this.hashingService.compare(password ?? '', group.password!))
     ) {
-      throw new UnauthorizedException();
+      throw new ForbiddenException('Invalid password');
     }
 
     await this.prisma.group.update({
@@ -344,7 +346,7 @@ export class GroupsService {
     const isOwnerLeaving = user.sub === group.ownerId;
 
     if (isOwnerLeaving && newOwnerId === undefined) {
-      throw new UnauthorizedException('You must specify a new owner');
+      throw new ForbiddenException('You must specify a new owner');
     }
 
     await this.prisma.$transaction([

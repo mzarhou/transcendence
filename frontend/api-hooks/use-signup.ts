@@ -1,5 +1,6 @@
 import { useToast } from "@/components/ui/use-toast";
 import { api } from "@/lib/api";
+import { getServerMessage } from "@/lib/utils";
 import { SignUpType } from "@transcendence/common";
 import { useRouter } from "next/navigation";
 import useSWRMutation from "swr/mutation";
@@ -18,9 +19,9 @@ export const useSignUp = () => {
         toast({ description: "Account Created successfully" });
         router.replace("/login");
       },
-      onError: (_error) => {
+      onError: (error) => {
         toast({
-          description: "Failed to signup",
+          description: getServerMessage(error, "Failed to signup"),
           variant: "destructive",
         });
       },

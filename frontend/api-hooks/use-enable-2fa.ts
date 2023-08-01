@@ -1,5 +1,6 @@
 import { useToast } from "@/components/ui/use-toast";
 import { api } from "@/lib/api";
+import { getServerMessage } from "@/lib/utils";
 import { AxiosError } from "axios";
 import { useSWRConfig } from "swr";
 import useSWRMutation from "swr/mutation";
@@ -16,12 +17,8 @@ export const useEnable2fa = () => {
     },
     {
       onError: (error) => {
-        let message = "Failed to enable 2FA";
-        if (error instanceof AxiosError) {
-          message = error.message;
-        }
         toast({
-          description: message,
+          description: getServerMessage(error, "Failed to enable 2FA"),
           variant: "destructive",
         });
       },
