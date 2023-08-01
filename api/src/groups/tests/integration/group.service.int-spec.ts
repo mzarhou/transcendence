@@ -34,9 +34,9 @@ describe('GroupService int', () => {
 
     const dbUser = await prisma.user.create({
       data: {
+        name,
         email,
         avatar: `https://avatars.dicebear.com/api/avataaars/${name}.svg`,
-        name: 'testname',
         secrets: {
           create: {
             password: await hashingService.hash('testpassword'),
