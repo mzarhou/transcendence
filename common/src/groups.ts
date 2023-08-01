@@ -1,4 +1,5 @@
 import z from "zod";
+import { Group, UserGroupRole } from "./db-types";
 
 const errorMessage =
   "You must provide a password when setting status to `PROTECTED`";
@@ -49,3 +50,5 @@ export const leaveGroupSchema = z.object({
   newOwnerId: z.number().positive().optional(),
 });
 export type LeaveGroupType = z.infer<typeof leaveGroupSchema>;
+
+export type GroupWithRole = Group & { role: UserGroupRole };

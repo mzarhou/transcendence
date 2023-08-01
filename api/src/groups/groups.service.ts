@@ -381,6 +381,20 @@ export class GroupsService {
     return this.omitPassword(group);
   }
 
+  async findGroups(user: ActiveUserData) {
+    const { groups } = await this.prisma.user.findFirstOrThrow({
+      where: { id: user.sub },
+      include: {
+        groups: {
+          include: {
+            group: true,
+          },
+        },
+      },
+    });
+    return groups.map((g) => ({ ...this.omitPassword(g.group), role: g.role }));
+  }
+
   private omitPassword<T extends { password: string | null | undefined }>(
     group: T,
   ) {

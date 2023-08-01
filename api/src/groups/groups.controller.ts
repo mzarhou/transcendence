@@ -7,6 +7,7 @@ import {
   Delete,
   HttpCode,
   HttpStatus,
+  Get,
 } from '@nestjs/common';
 import { GroupsService } from './groups.service';
 import { CreateGroupDto } from './dto/create-group.dto';
@@ -136,5 +137,12 @@ export class GroupsController {
     @Body() leaveGroupDto: LeaveGroupDto,
   ) {
     return this.groupsService.leaveGroup(user, groupId, leaveGroupDto);
+  }
+
+  @ApiOperation({ summary: 'Get user groups' })
+  @HttpCode(HttpStatus.OK)
+  @Get()
+  async findGroups(@ActiveUser() user: ActiveUserData) {
+    return this.groupsService.findGroups(user);
   }
 }

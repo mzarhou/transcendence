@@ -12,6 +12,12 @@ import {
   DropdownMenuItem,
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
+import { useGroups } from "@/api-hooks/use-groups";
+import { GroupWithRole, UserGroupRole } from "@transcendence/common";
+import FullLoader from "@/components/ui/full-loader";
+import FullPlaceHolder from "@/components/ui/full-placeholder";
+import { useUser } from "@/context/user-context";
+import { cn } from "@/lib/utils";
 
 export default function Game() {
   const { data: friends, isLoading } = useFriends();
@@ -34,13 +40,7 @@ export default function Game() {
           </DropdownMenu>
           {/* <MoreVertical className="h-5 w-5" /> */}
         </div>
-        <div className="mt-4 flex space-x-4 overflow-x-auto">
-          {Array(5)
-            .fill(null)
-            .map((_, index) => (
-              <GroupItem key={index} />
-            ))}
-        </div>
+        <Groups />
       </div>
       <div className="flex h-0 flex-grow flex-col space-y-4">
         <div className="flex items-center justify-between">
@@ -81,8 +81,48 @@ export default function Game() {
   );
 }
 
-function GroupItem() {
+type GroupItemProps = {
+  group: GroupWithRole;
+};
+function GroupItem({ group: { avatar, role, ownerId } }: GroupItemProps) {
+  const { user } = useUser();
+  const isOwner = user?.id === ownerId;
+
   return (
-    <div className="relative aspect-square h-20 rounded-full bg-gray-200"></div>
+    <div className="relative aspect-square h-20 rounded-full bg-gray-200">
+      <img className="h-full w-full rounded-full" src={avatar} />
+      {(role === UserGroupRole.ADMIN || isOwner) && (
+        <span
+          className={cn(
+            "absolute bottom-0 right-0 rounded-full bg-accent px-1 text-[10px] text-accent-foreground",
+            {
+              "bg-primary text-primary-foreground": isOwner,
+            }
+          )}
+        >
+          {isOwner ? "Owner" : "Admin"}
+        </span>
+      )}
+    </div>
+  );
+}
+
+function Groups() {
+  const { data: groups, isLoading } = useGroups();
+
+  if (isLoading) return <FullLoader />;
+  if (groups.length === 0)
+    return (
+      <FullPlaceHolder
+        text="Unite with others. Explore group possibilities now! "
+        className="text-center text-card-foreground/40"
+      />
+    );
+  return (
+    <div className="mt-4 flex space-x-4 overflow-x-auto">
+      {groups.map((g) => (
+        <GroupItem key={g.id} group={g} />
+      ))}
+    </div>
   );
 }
