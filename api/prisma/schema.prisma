@@ -12,7 +12,7 @@ datasource db {
 
 model User {
   id           Int     @id @default(autoincrement())
-  name         String
+  name         String  @unique
   avatar       String
   email        String  @unique
   isTfaEnabled Boolean @default(false)
