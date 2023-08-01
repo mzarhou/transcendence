@@ -70,6 +70,7 @@ export class AuthenticationService {
         },
       },
     });
+    return { success: true };
   }
 
   async generateTokens(
