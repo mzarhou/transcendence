@@ -5,6 +5,14 @@ import { TokensResponse, tokensResponseSchema } from "./schema/auth-schema";
 import { env } from "./env/server.mjs";
 import { log } from "@/lib/utils";
 
+export let refreshingPromise: Map<
+  string,
+  Promise<{
+    refreshToken: string;
+    accessToken: string;
+  } | null>
+> = new Map();
+
 async function fetchUser(accessToken: string) {
   try {
     const data = await fetch(env.NEXT_PUBLIC_API_URL + "/users/me", {
@@ -64,14 +72,22 @@ type UserAuthData = {
   user: User | null;
   newTokens: TokensResponse | null;
 };
-async function getUserFromRequest(request: NextRequest): Promise<UserAuthData> {
+export async function getUserFromRequest(
+  request: NextRequest
+): Promise<UserAuthData> {
   const accessToken = request.cookies.get("accessToken")?.value ?? "";
+  const refreshToken = request.cookies.get("refreshToken")?.value ?? "";
 
   const user = await fetchUser(accessToken);
   if (user) return { user, newTokens: null };
 
   // try to refresh tokens
-  const newTokens = await refreshTokens(request);
+  if (!refreshingPromise.get(refreshToken)) {
+    refreshingPromise.set(refreshToken, refreshTokens(request));
+  }
+  const newTokens = await refreshingPromise.get(refreshToken);
+  refreshingPromise.delete(refreshToken);
+
   if (!newTokens) return { user: null, newTokens: null };
 
   const newUser = await fetchUser(newTokens.accessToken);
