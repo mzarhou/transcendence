@@ -1,5 +1,5 @@
-import { Button } from "@/components/ui/button";
 import { SearchGroup } from "@transcendence/common";
+import JoinProtectedGroupAction from "./join-protected-group-action";
 
 type SearchGroupItemProps = {
   className?: string;
@@ -19,7 +19,7 @@ export default function SearchGroupItem({ group }: SearchGroupItemProps) {
       </div>
       {!group.role && (
         <div className="mt-1">
-          <Button>Join</Button>
+          <JoinProtectedGroupAction group={group} />
         </div>
       )}
     </div>
