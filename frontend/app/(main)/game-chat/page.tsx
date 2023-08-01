@@ -22,7 +22,17 @@ export default function Game() {
       <div className="space-y-4">
         <div className="flex justify-between">
           <h3 className="text-sm">Your groups</h3>
-          <MoreVertical className="h-5 w-5" />
+          <DropdownMenu>
+            <DropdownMenuTrigger asChild>
+              <MoreVertical className="h-6 w-6 cursor-pointer" />
+            </DropdownMenuTrigger>
+            <DropdownMenuContent align="end">
+              <DropdownMenuItem className="cursor-pointer hover:bg-chat/90">
+                <Link href="/game-chat/groups/create">Create Group</Link>
+              </DropdownMenuItem>
+            </DropdownMenuContent>
+          </DropdownMenu>
+          {/* <MoreVertical className="h-5 w-5" /> */}
         </div>
         <div className="mt-4 flex space-x-4 overflow-x-auto">
           {Array(5)
