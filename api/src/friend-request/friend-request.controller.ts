@@ -14,8 +14,9 @@ import { ActiveUser } from 'src/iam/decorators/active-user.decorator';
 import { ActiveUserData } from 'src/iam/interface/active-user-data.interface';
 import { IdDto } from 'src/common/dto/id-param.dto';
 import { subject } from '@casl/ability';
-import { ApiTags } from '@nestjs/swagger';
+import { ApiBearerAuth, ApiTags } from '@nestjs/swagger';
 
+@ApiBearerAuth()
 @ApiTags('friend-request')
 @Controller('chat/friend-request')
 export class FriendRequestController {

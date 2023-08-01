@@ -17,8 +17,9 @@ import { Enable2faDto } from '../dto/enable-2fa.dto';
 import { Provide2faCodeDto } from '../dto/provide-2fa-code.dto';
 import { AuthType } from '../enum/auth-type.enum';
 import { OtpAuthenticationService } from './otp-authentication.service';
-import { ApiTags } from '@nestjs/swagger';
+import { ApiBearerAuth, ApiTags } from '@nestjs/swagger';
 
+@ApiBearerAuth()
 @ApiTags('2fa')
 @Controller('authentication/2fa')
 export class OtpAuthenticationController {
