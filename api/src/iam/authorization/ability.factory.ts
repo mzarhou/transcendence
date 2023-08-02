@@ -33,9 +33,9 @@ export type AppAbility = PureAbility<
       Message: Message;
       UsersOnGroups: UsersOnGroups;
       Group: Prisma.GroupGetPayload<{
-        include: {
-          blockedUsers: true;
-        };
+        // include: {
+        //   blockedUsers: boolean;
+        // };
       }>;
     }>,
   ],
@@ -79,6 +79,14 @@ export class AbilityFactory {
       },
     ];
 
+    /** members only can read group details (members, etc...) */
+    can('read', 'Group', {
+      users: {
+        some: {
+          userId,
+        },
+      },
+    });
     can('delete', 'Group', { ownerId: userId });
     can('update', 'Group', { ownerId: userId });
 

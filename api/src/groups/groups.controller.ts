@@ -142,7 +142,6 @@ export class GroupsController {
   }
 
   @ApiOperation({ summary: 'Search public/protected groups' })
-  @HttpCode(HttpStatus.OK)
   @Get('search')
   async search(
     @ActiveUser() user: ActiveUserData,
@@ -152,9 +151,17 @@ export class GroupsController {
   }
 
   @ApiOperation({ summary: 'Get user groups' })
-  @HttpCode(HttpStatus.OK)
   @Get()
   async findGroups(@ActiveUser() user: ActiveUserData) {
     return this.groupsService.findGroups(user);
+  }
+
+  @ApiOperation({ summary: 'Get group' })
+  @Get('/:id')
+  async show(
+    @ActiveUser() user: ActiveUserData,
+    @Param() { id: groupId }: IdDto,
+  ) {
+    return this.groupsService.show(user, groupId);
   }
 }

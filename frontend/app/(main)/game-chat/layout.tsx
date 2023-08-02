@@ -9,7 +9,7 @@ type Props = {
 export default function GameLayout({ children }: Props) {
   const chatPopup = (
     <>
-      <div className="flex h-full w-full flex-col rounded-md bg-chat text-chat-foreground/70 md:shadow-sm">
+      <div className="flex h-full w-full flex-col rounded-md bg-chat text-card-foreground md:shadow-sm">
         {children}
       </div>
     </>

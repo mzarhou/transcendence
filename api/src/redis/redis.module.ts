@@ -12,6 +12,7 @@ const redisProvider: Provider = {
       port: env.REDISPORT,
       password: env.REDISPASSWORD,
       username: env.REDISUSER,
+      connectTimeout: 10000,
     });
     return redisClient;
   },

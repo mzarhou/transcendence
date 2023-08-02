@@ -55,7 +55,11 @@ export default function CreateGroupPage() {
                 <FormItem>
                   <FormLabel>Name</FormLabel>
                   <FormControl>
-                    <Input placeholder="Group name" {...field} />
+                    <Input
+                      placeholder="Group name"
+                      {...field}
+                      value={field.value ?? ""}
+                    />
                   </FormControl>
                   <FormMessage />
                 </FormItem>
@@ -111,6 +115,7 @@ export default function CreateGroupPage() {
                         type="password"
                         placeholder="********"
                         {...field}
+                        value={field.value ?? ""}
                       />
                     </FormControl>
                     <FormMessage />

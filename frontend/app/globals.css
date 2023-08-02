@@ -41,6 +41,8 @@
 
     --chat-card: 182 30% 94%;
     --chat-card-foreground: 182 30% 15%;
+
+    --input-placeholder: 215 16% 47%;
   }
 
   .dark {
@@ -78,6 +80,8 @@
 
     --chat-card: 222.2 40% 12%;
     --chat-card-foreground: 210 40% 72%;
+
+    --input-placeholder: 221 20% 70%;
   }
 }
 

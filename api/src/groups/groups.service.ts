@@ -25,7 +25,7 @@ import { HashingService } from 'src/iam/hashing/hashing.service';
 import { subject } from '@casl/ability';
 import { JoinGroupDto } from './dto/join-group.dto';
 import { LeaveGroupDto } from './dto/leave-group.dto';
-import { UserGroupRole } from '@prisma/client';
+import { Group, User, UserGroupRole } from '@prisma/client';
 
 @ApiTags('groups')
 @Injectable()
@@ -85,7 +85,13 @@ export class GroupsService {
         blockedUsers: options?.includeBlockedUsers,
         messages: options?.includeMessages,
         owner: options?.includeOwner,
-        users: options?.includeUsers,
+        users: options?.includeUsers
+          ? {
+              include: {
+                user: true,
+              },
+            }
+          : undefined,
       },
     });
 
@@ -113,10 +119,20 @@ export class GroupsService {
   ) {
     const group = await this.findOne(groupId);
     user.allow('update', subject('Group', group));
+
+    if (updateGroupDto.status === 'PROTECTED' && !updateGroupDto.password) {
+      throw new BadRequestException('You set group password');
+    }
+
     const updatedGroup = await this.prisma.group.update({
       where: { id: groupId },
       data: {
-        ...updateGroupDto,
+        name: updateGroupDto.name,
+        status: updateGroupDto.status,
+        password:
+          updateGroupDto.status === 'PROTECTED'
+            ? updateGroupDto.password
+            : undefined,
       },
     });
     return this.omitPassword(updatedGroup);
@@ -412,6 +428,31 @@ export class GroupsService {
       },
     });
     return groups.map((g) => ({ ...this.omitPassword(g.group), role: g.role }));
+  }
+
+  async show(user: ActiveUserData, groupId: number) {
+    const group = await this.prisma.group.findFirst({
+      where: { id: groupId },
+      include: {
+        users: {
+          include: {
+            user: true,
+          },
+        },
+      },
+    });
+    if (!group) throw new NotFoundException('group not found');
+    user.allow('read', subject('Group', group));
+    const role = group.users.find((u) => u.userId === user.sub)?.role;
+    if (!role) throw new ForbiddenException('Invalid role');
+    return {
+      ...group,
+      users: group.users.map((u) => ({ ...u.user, role: u.role })),
+      role,
+    } satisfies Omit<Group, 'password'> & {
+      role: UserGroupRole;
+      users: User[];
+    };
   }
 
   private omitPassword<T extends { password: string | null | undefined }>(

@@ -58,10 +58,7 @@ export type MessageType = {
   recipient?: User;
 };
 
-export enum UserGroupRole {
-  ADMIN,
-  MEMBER,
-}
+export type UserGroupRole = "ADMIN" | "MEMBER";
 
 export type UserGroup = User & { role: UserGroupRole };
 

@@ -13,11 +13,17 @@ import {
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
 import { useGroups } from "@/api-hooks/use-groups";
-import { GroupWithRole, UserGroupRole } from "@transcendence/common";
+import { GroupWithRole } from "@transcendence/common";
 import FullLoader from "@/components/ui/full-loader";
 import FullPlaceHolder from "@/components/ui/full-placeholder";
 import { useUser } from "@/context/user-context";
 import { cn } from "@/lib/utils";
+import {
+  Tooltip,
+  TooltipContent,
+  TooltipProvider,
+  TooltipTrigger,
+} from "@/components/ui/tooltip";
 
 export default function Game() {
   const { data: friends, isLoading } = useFriends();
@@ -84,26 +90,30 @@ export default function Game() {
 type GroupItemProps = {
   group: GroupWithRole;
 };
-function GroupItem({ group: { avatar, role, ownerId } }: GroupItemProps) {
-  const { user } = useUser();
-  const isOwner = user?.id === ownerId;
-
+function GroupItem({
+  group: { id, avatar, name, role, status },
+}: GroupItemProps) {
   return (
-    <div className="relative aspect-square h-20 rounded-full bg-gray-200">
-      <img className="h-full w-full rounded-full" src={avatar} />
-      {(role === UserGroupRole.ADMIN || isOwner) && (
-        <span
-          className={cn(
-            "absolute bottom-0 right-0 rounded-full bg-accent px-1 text-[10px] text-accent-foreground",
-            {
-              "bg-primary text-primary-foreground": isOwner,
-            }
-          )}
-        >
-          {isOwner ? "Owner" : "Admin"}
-        </span>
-      )}
-    </div>
+    <TooltipProvider>
+      <Tooltip>
+        <TooltipTrigger asChild>
+          <div className="relative aspect-square h-20 rounded-full bg-gray-200">
+            <Link href={`/game-chat/groups/${id}/info`}>
+              <img className="h-full w-full rounded-full" src={avatar} />
+            </Link>
+          </div>
+        </TooltipTrigger>
+        <TooltipContent>
+          <h4 className="mx-auto border-b pb-1 text-lg">{name}</h4>
+          <div className="mt-1 space-y-2 py-4">
+            <p className="font-semibold">{status}</p>
+            <p>
+              role: <span className="font-semibold">{role}</span>
+            </p>
+          </div>
+        </TooltipContent>
+      </Tooltip>
+    </TooltipProvider>
   );
 }
 

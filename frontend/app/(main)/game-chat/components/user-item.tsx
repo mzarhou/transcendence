@@ -11,7 +11,6 @@ import { MoreVertical } from "lucide-react";
 import Image from "next/image";
 import { ReactNode } from "react";
 import { useBlockUser } from "@/api-hooks/use-block-user";
-import { MouseEventHandler } from "react";
 
 type UserItemProps = {
   user: User;

@@ -16,12 +16,11 @@ export const createGroupSchema = baseCreateGroupSchema.refine(
 );
 export type CreateGroupType = z.infer<typeof createGroupSchema>;
 
-export const updateGroupSchema = baseCreateGroupSchema
-  .partial()
-  .refine(
-    (data) => data.status !== "PROTECTED" || data.password !== undefined,
-    errorMessage
-  );
+export const updateGroupSchema = baseCreateGroupSchema.partial();
+//   .refine(
+//     (data) => data.status !== "PROTECTED" || data.password !== undefined,
+//     errorMessage
+//   );
 export type UpdateGroupType = z.infer<typeof updateGroupSchema>;
 
 export const addGroupAdminSchema = z.object({
