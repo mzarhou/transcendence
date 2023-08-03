@@ -53,7 +53,7 @@ export function GroupInfoBody({ groupId }: GroupInfoBodyProps) {
               <SlidersHorizontal className="w-5" />
             </ActionLink>
           )}
-          <ActionLink text="Users" href="#">
+          <ActionLink text="Users" href="manage">
             <Users className="w-5" />
           </ActionLink>
         </div>

@@ -19,6 +19,8 @@ import { useUpdateGroup } from "@/api-hooks/use-update-group";
 import GoBackBtn from "../../../components/chat-go-back";
 import { GroupType, useGroup } from "@/api-hooks/use-group";
 import FullLoader from "@/components/ui/full-loader";
+import { useRouter } from "next/navigation";
+import { useUser } from "@/context/user-context";
 
 type GroupInfoPageProps = {
   params: {
@@ -30,6 +32,13 @@ export default function UpdateGroupPage({
   params: { groupId },
 }: GroupInfoPageProps) {
   const { data: group, isLoading } = useGroup(groupId);
+  const router = useRouter();
+  const { user } = useUser();
+
+  useEffect(() => {
+    if (group && user && group.ownerId !== user.id)
+      router.replace("/game-chat");
+  }, [router, group, user]);
 
   return (
     <>
