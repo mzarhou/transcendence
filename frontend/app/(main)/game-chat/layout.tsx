@@ -9,7 +9,7 @@ type Props = {
 export default function GameLayout({ children }: Props) {
   const chatPopup = (
     <>
-      <div className="flex h-full w-full flex-col rounded-md bg-chat text-card-foreground md:shadow-sm">
+      <div className="flex h-full w-full flex-col rounded-md bg-card text-card-foreground md:shadow-sm">
         {children}
       </div>
     </>
@@ -23,12 +23,12 @@ export default function GameLayout({ children }: Props) {
             <MessagesSquare />
           </Button>
         </DialogTrigger>
-        <DialogContent className="mt-2 h-[98vh] w-[96vw] overflow-hidden rounded-md border-0 border-transparent bg-chat">
+        <DialogContent className="mt-2 h-[98vh] w-[96vw] overflow-hidden rounded-md border-0 border-transparent">
           <div className="h-full overflow-y-hidden">{chatPopup}</div>
         </DialogContent>
       </Dialog>
       <div className="h-full space-x-4 md:flex">
-        <div className="flex h-full flex-grow items-center justify-center rounded-md bg-chat text-3xl font-light text-chat-foreground/40">
+        <div className="flex h-full flex-grow items-center justify-center rounded-md border text-3xl font-light text-card-foreground/40">
           Game
         </div>
         <div className="relative hidden h-full w-full overflow-y-hidden md:block md:max-w-sm">

@@ -10,7 +10,7 @@ export default function FullPlaceHolder({
   return (
     <div
       className={cn(
-        "flex h-full flex-grow items-center justify-center text-lg text-chat-foreground/50",
+        "flex h-full flex-grow items-center justify-center text-lg text-foreground/50",
         className
       )}
     >

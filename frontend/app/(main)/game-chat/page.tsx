@@ -16,8 +16,6 @@ import { useGroups } from "@/api-hooks/use-groups";
 import { GroupWithRole } from "@transcendence/common";
 import FullLoader from "@/components/ui/full-loader";
 import FullPlaceHolder from "@/components/ui/full-placeholder";
-import { useUser } from "@/context/user-context";
-import { cn } from "@/lib/utils";
 import {
   Tooltip,
   TooltipContent,
@@ -39,7 +37,7 @@ export default function Game() {
               <MoreVertical className="h-6 w-6 cursor-pointer" />
             </DropdownMenuTrigger>
             <DropdownMenuContent align="end">
-              <DropdownMenuItem className="cursor-pointer hover:bg-chat/90">
+              <DropdownMenuItem className="cursor-pointer">
                 <Link href="/game-chat/groups/create">Create Group</Link>
               </DropdownMenuItem>
             </DropdownMenuContent>
@@ -58,7 +56,7 @@ export default function Game() {
                 <MoreVertical className="h-6 w-6 cursor-pointer" />
               </DropdownMenuTrigger>
               <DropdownMenuContent align="end">
-                <DropdownMenuItem className="cursor-pointer hover:bg-chat/90">
+                <DropdownMenuItem className="cursor-pointer">
                   <Link href="/game-chat/blocked-users">Blocked Users</Link>
                 </DropdownMenuItem>
               </DropdownMenuContent>
@@ -67,7 +65,7 @@ export default function Game() {
         </div>
         <div className="h-0 flex-grow space-y-4 overflow-y-auto pr-2">
           {isLoading ? (
-            <div className="h-full pt-4 text-chat-foreground/30">
+            <div className="h-full pt-4 text-card-foreground/50">
               <Loader2 className="mx-auto h-8 w-8 animate-spin" />
             </div>
           ) : friends && friends.length ? (
@@ -77,9 +75,7 @@ export default function Game() {
               </Link>
             ))
           ) : (
-            <div className="flex h-full items-center justify-center text-2xl text-chat-foreground/30">
-              No friend found
-            </div>
+            <FullPlaceHolder text="No friend found" className="text-xl" />
           )}
         </div>
       </div>

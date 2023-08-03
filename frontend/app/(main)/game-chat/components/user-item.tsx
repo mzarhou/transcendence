@@ -41,8 +41,8 @@ export default function UserItem({
         <div className="mt-0.5">
           <p>{user.name}</p>
           {/* TODO: update with real data */}
-          <p className="text-sm text-chat-foreground/60">In game</p>
-          <p className="text-sm text-chat-foreground/60">#55</p>
+          <p className="text-chat-foreground/60 text-sm">In game</p>
+          <p className="text-chat-foreground/60 text-sm">#55</p>
         </div>
         <div className="absolute bottom-0 right-2">{children}</div>
       </div>
@@ -53,10 +53,10 @@ export default function UserItem({
               <MoreVertical className="h-6 w-6 cursor-pointer" />
             </DropdownMenuTrigger>
             <DropdownMenuContent align="end">
-              <DropdownMenuItem className="cursor-pointer hover:bg-chat/90">
+              <DropdownMenuItem className="cursor-pointer">
                 Play
               </DropdownMenuItem>
-              <DropdownMenuItem className="cursor-pointer hover:bg-chat/90">
+              <DropdownMenuItem className="cursor-pointer">
                 Profile
               </DropdownMenuItem>
               <BlockUserMenuItem userId={user.id} />
@@ -73,10 +73,7 @@ export function BlockUserMenuItem({ userId }: { userId: number }) {
   const { trigger: blockeUser } = useBlockUser(userId);
 
   return (
-    <DropdownMenuItem
-      className="cursor-pointer hover:bg-chat/90"
-      onClick={blockeUser}
-    >
+    <DropdownMenuItem className="cursor-pointer" onClick={blockeUser}>
       Block
     </DropdownMenuItem>
   );
