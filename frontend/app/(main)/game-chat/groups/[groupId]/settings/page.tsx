@@ -21,6 +21,8 @@ import { GroupType, useGroup } from "@/api-hooks/use-group";
 import FullLoader from "@/components/ui/full-loader";
 import { useRouter } from "next/navigation";
 import { useUser } from "@/context/user-context";
+import FullPlaceHolder from "@/components/ui/full-placeholder";
+import { truncateText } from "@/lib/utils";
 
 type GroupInfoPageProps = {
   params: {
@@ -31,7 +33,7 @@ type GroupInfoPageProps = {
 export default function UpdateGroupPage({
   params: { groupId },
 }: GroupInfoPageProps) {
-  const { data: group, isLoading } = useGroup(groupId);
+  const { data: group, isLoading, error } = useGroup(groupId);
   const router = useRouter();
   const { user } = useUser();
 
@@ -43,9 +45,21 @@ export default function UpdateGroupPage({
   return (
     <>
       <GoBackBtn>
-        <h3>Update settings</h3>
+        {group && (
+          <h3 title={group.name}>
+            {truncateText(group?.name, 16)}: Update settings
+          </h3>
+        )}
       </GoBackBtn>
-      {isLoading ? <FullLoader /> : group && <UpdateGroupBody group={group} />}
+      {isLoading ? (
+        <FullLoader />
+      ) : group ? (
+        <UpdateGroupBody group={group} />
+      ) : (
+        <FullPlaceHolder
+          text={error ? "Failed getting group details" : "Group not found"}
+        />
+      )}
     </>
   );
 }

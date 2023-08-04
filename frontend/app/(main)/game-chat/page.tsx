@@ -22,13 +22,16 @@ import {
   TooltipProvider,
   TooltipTrigger,
 } from "@/components/ui/tooltip";
+import { truncateText } from "@/lib/utils";
 
 export default function Game() {
   const { data: friends, isLoading } = useFriends();
 
   return (
-    <div className="mt-9 flex h-0 flex-grow flex-col space-y-10 p-4">
+    <div className="mt-9 flex h-0 flex-grow flex-col space-y-10 overflow-y-auto p-4">
       <FakeChatSearch />
+
+      {/* Groups */}
       <div className="space-y-4">
         <div className="flex justify-between">
           <h3 className="text-sm">Your groups</h3>
@@ -42,11 +45,12 @@ export default function Game() {
               </DropdownMenuItem>
             </DropdownMenuContent>
           </DropdownMenu>
-          {/* <MoreVertical className="h-5 w-5" /> */}
         </div>
         <Groups />
       </div>
-      <div className="flex h-0 flex-grow flex-col space-y-4">
+
+      {/* Friend */}
+      <div className="flex  h-0 min-h-[120px] flex-grow flex-col space-y-4">
         <div className="flex items-center justify-between">
           <h3 className="text-sm">Friends</h3>
           <div className="flex items-center space-x-1">
@@ -93,10 +97,14 @@ function GroupItem({
     <TooltipProvider>
       <Tooltip>
         <TooltipTrigger asChild>
-          <div className="relative aspect-square h-20 rounded-full bg-gray-200">
+          <div className="relative flex aspect-square w-20 min-w-[80px] flex-col items-center space-y-2">
             <Link href={`/game-chat/groups/${id}/info`}>
-              <img className="h-full w-full rounded-full" src={avatar} />
+              <img
+                className="h-20 min-h-[80px] w-20 min-w-[80px] rounded-full"
+                src={avatar}
+              />
             </Link>
+            <p className="mx-auto text-sm">{truncateText(name, 8)}</p>
           </div>
         </TooltipTrigger>
         <TooltipContent>

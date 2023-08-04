@@ -20,3 +20,7 @@ export function getServerMessage(error: any, defaultMessage: string) {
   }
   return defaultMessage;
 }
+
+export function truncateText(str: string, maxlength: number) {
+  return str.length > maxlength ? str.slice(0, maxlength - 1) + "…" : str;
+}

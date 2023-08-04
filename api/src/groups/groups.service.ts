@@ -26,6 +26,7 @@ import { subject } from '@casl/ability';
 import { JoinGroupDto } from './dto/join-group.dto';
 import { LeaveGroupDto } from './dto/leave-group.dto';
 import { Group, User, UserGroupRole } from '@prisma/client';
+import { GroupUsersFilterDto } from './dto/group-users-filter-query.dto';
 
 @ApiTags('groups')
 @Injectable()
@@ -99,19 +100,6 @@ export class GroupsService {
     return group;
   }
 
-  async findGroupUsers(groupId: number) {
-    const usersOnGroups = await this.prisma.usersOnGroups.findMany({
-      where: { groupId },
-      include: {
-        user: true,
-      },
-    });
-    return usersOnGroups.map((ug) => ({
-      ...ug.user,
-      role: ug.role,
-    })) satisfies UserGroup[];
-  }
-
   async update(
     user: ActiveUserData,
     groupId: number,
@@ -121,7 +109,7 @@ export class GroupsService {
     user.allow('update', subject('Group', group));
 
     if (updateGroupDto.status === 'PROTECTED' && !updateGroupDto.password) {
-      throw new BadRequestException('You set group password');
+      throw new BadRequestException('You must set a group password');
     }
 
     const updatedGroup = await this.prisma.group.update({
@@ -406,14 +394,27 @@ export class GroupsService {
           contains: term,
         },
       },
+      include: {
+        blockedUsers: true,
+      },
     });
-    return groups.map((g) => {
-      if (g.ownerId === user.sub) {
-        return { ...this.omitPassword(g), role: 'ADMIN' as UserGroupRole };
-      }
-      const roleInGroup = userGroups.find((u) => u.id === g.id)?.role;
-      return { ...this.omitPassword(g), role: roleInGroup };
-    });
+    return groups
+      .filter((g) => !g.blockedUsers.find((bu) => bu.id === user.sub))
+      .map((g) => {
+        if (g.ownerId === user.sub) {
+          return {
+            ...this.omitPassword(g),
+            role: 'ADMIN' as UserGroupRole,
+            blockedUsers: undefined,
+          };
+        }
+        const roleInGroup = userGroups.find((u) => u.id === g.id)?.role;
+        return {
+          ...this.omitPassword(g),
+          role: roleInGroup,
+          blockedUsers: undefined,
+        };
+      });
   }
 
   async findGroups(user: ActiveUserData) {
@@ -453,6 +454,53 @@ export class GroupsService {
       role: UserGroupRole;
       users: User[];
     };
+  }
+
+  async findUsers(
+    user: ActiveUserData,
+    groupId: number,
+    { filter }: GroupUsersFilterDto,
+  ) {
+    const group = await this.prisma.group.findFirst({
+      where: { id: groupId },
+      include: {
+        blockedUsers: filter === 'banned',
+        users: {
+          include: {
+            user: true,
+          },
+        },
+      },
+    });
+    if (!group) throw new NotFoundException('group not found');
+    user.allow('read', subject('Group', group));
+    if (filter === 'banned') return group.blockedUsers;
+
+    const users = group.users.map((ug) => ({
+      ...ug.user,
+      role: ug.role,
+    })) satisfies UserGroup[];
+
+    if (filter === 'admins') {
+      return users.filter((u) => u.role === 'ADMIN');
+    }
+    if (filter === 'members') {
+      return users.filter((u) => u.role === 'MEMBER');
+    }
+    return users;
+  }
+
+  private async findGroupUsers(groupId: number) {
+    const usersOnGroups = await this.prisma.usersOnGroups.findMany({
+      where: { groupId },
+      include: {
+        user: true,
+      },
+    });
+    return usersOnGroups.map((ug) => ({
+      ...ug.user,
+      role: ug.role,
+    })) satisfies UserGroup[];
   }
 
   private omitPassword<T extends { password: string | null | undefined }>(

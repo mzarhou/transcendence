@@ -12,7 +12,11 @@ export default function FriendRequestsLink() {
 
   const friendRequestsCount = data?.length ?? 0;
   return (
-    <Link href="/game-chat/friend-requests" className="relative">
+    <Link
+      href="/game-chat/friend-requests"
+      className="relative"
+      title="Friend requests"
+    >
       <UserPlus />
       {friendRequestsCount !== 0 && (
         <div className="absolute -left-2 top-2 aspect-square w-[18px] rounded-full bg-red-500 text-center text-xs text-white">

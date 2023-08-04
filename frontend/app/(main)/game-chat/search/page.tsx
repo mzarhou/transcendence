@@ -89,9 +89,7 @@ function SearchUsers({ query }: SearchUsersProps) {
       {users?.length ? (
         users.map((u) => <SearchFriendItem key={u.id} user={u} />)
       ) : (
-        <div className="flex h-full items-center justify-center text-2xl text-chat-foreground/30">
-          No user found
-        </div>
+        <FullPlaceHolder text="No user found " />
       )}
     </>
   );
@@ -110,9 +108,7 @@ function SearchGroups({ query }: SearchGroupsProps) {
       {groups?.length ? (
         groups.map((g) => <SearchGroupItem key={g.id} group={g} />)
       ) : (
-        <div className="flex h-full items-center justify-center text-2xl text-chat-foreground/30">
-          No group found
-        </div>
+        <FullPlaceHolder text="No group found" />
       )}
     </>
   );

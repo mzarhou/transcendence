@@ -26,13 +26,11 @@ export default function NotificationsPopup() {
   const notificationsItems =
     notifications.length > 0 ? (
       notifications.map((nt) => (
-        <div
-          key={nt.id}
-          className={cn({
-            "bg-chat-card": !nt.isRead,
-          })}
-        >
+        <div key={nt.id} className="relative">
           <NotificationItem key={nt.id} notification={nt} setOpen={setOpen} />
+          {!nt.isRead && (
+            <div className="absolute right-0 top-1 h-2 w-2 rounded-full bg-primary-foreground dark:bg-primary"></div>
+          )}
         </div>
       ))
     ) : (
@@ -129,5 +127,5 @@ function NotificationItem({
       </div>
     );
   }
-  return <></>;
+  return <div>{nt.data}</div>;
 }

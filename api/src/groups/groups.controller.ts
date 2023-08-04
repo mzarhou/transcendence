@@ -25,6 +25,7 @@ import { KickUserDto } from './dto/kick-user.dto';
 import { JoinGroupDto } from './dto/join-group.dto';
 import { LeaveGroupDto } from './dto/leave-group.dto';
 import { SearchUsersDto } from 'src/chat/dto/search-users.dto';
+import { GroupUsersFilterDto } from './dto/group-users-filter-query.dto';
 
 @ApiBearerAuth()
 @ApiTags('groups')
@@ -163,5 +164,15 @@ export class GroupsController {
     @Param() { id: groupId }: IdDto,
   ) {
     return this.groupsService.show(user, groupId);
+  }
+
+  @ApiOperation({ summary: 'Get group' })
+  @Get('/:id/users')
+  async findUsers(
+    @ActiveUser() user: ActiveUserData,
+    @Param() { id: groupId }: IdDto,
+    @Query() query: GroupUsersFilterDto,
+  ) {
+    return this.groupsService.findUsers(user, groupId, query);
   }
 }

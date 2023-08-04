@@ -52,3 +52,8 @@ export type LeaveGroupType = z.infer<typeof leaveGroupSchema>;
 
 export type GroupWithRole = Group & { role: UserGroupRole };
 export type SearchGroup = Group & { role: UserGroupRole | undefined };
+
+export const groupUsersFilterSchema = z.object({
+  filter: z.enum(["admins", "members", "banned"]),
+});
+export type GroupUsersFilter = z.infer<typeof groupUsersFilterSchema>;

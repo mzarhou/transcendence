@@ -8,6 +8,7 @@ import { SlidersHorizontal, UserPlus, Users } from "lucide-react";
 import Link from "next/link";
 import { ReactNode } from "react";
 import { useUser } from "@/context/user-context";
+import { truncateText } from "@/lib/utils";
 
 type GroupInfoPageProps = {
   params: {
@@ -41,11 +42,16 @@ export function GroupInfoBody({ groupId }: GroupInfoBodyProps) {
         <div className="mx-auto h-20 w-20 rounded-full bg-input-placeholder/30">
           <img src={group.avatar} className="rounded-full" />
         </div>
-        <h4 className="mx-auto">{group.name}</h4>
+        <h4 className="mx-auto" title={group.name}>
+          {truncateText(group?.name ?? "", 20)}
+        </h4>
+        <p className="mx-auto text-sm text-card-foreground/60">
+          {group.status}
+        </p>
       </div>
       {group.role === "ADMIN" && (
         <div className="mt-4 flex justify-center space-x-8">
-          <ActionLink text="Add User" href="#">
+          <ActionLink text="Invite User" href="#">
             <UserPlus className="w-5" />
           </ActionLink>
           {user?.id && group.ownerId === user.id && (
