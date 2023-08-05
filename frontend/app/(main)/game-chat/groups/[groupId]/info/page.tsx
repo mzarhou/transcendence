@@ -4,11 +4,11 @@ import { useGroup } from "@/api-hooks/use-group";
 import GoBackBtn from "../../../components/chat-go-back";
 import FullLoader from "@/components/ui/full-loader";
 import FullPlaceHolder from "@/components/ui/full-placeholder";
-import { SlidersHorizontal, UserPlus, Users } from "lucide-react";
-import Link from "next/link";
-import { ReactNode } from "react";
+import { SlidersHorizontal, Users } from "lucide-react";
 import { useUser } from "@/context/user-context";
 import { truncateText } from "@/lib/utils";
+import { InviteUserAction } from "./components/invite-user-action";
+import { ActionLink } from "./components/action-link";
 
 type GroupInfoPageProps = {
   params: {
@@ -51,9 +51,7 @@ export function GroupInfoBody({ groupId }: GroupInfoBodyProps) {
       </div>
       {group.role === "ADMIN" && (
         <div className="mt-4 flex justify-center space-x-8">
-          <ActionLink text="Invite User" href="#">
-            <UserPlus className="w-5" />
-          </ActionLink>
+          <InviteUserAction group={group} />
           {user?.id && group.ownerId === user.id && (
             <ActionLink text="Settings" href="settings">
               <SlidersHorizontal className="w-5" />
@@ -81,24 +79,5 @@ export function GroupInfoBody({ groupId }: GroupInfoBodyProps) {
     <FullPlaceHolder
       text={error ? "Failed getting group details" : "Group not found"}
     />
-  );
-}
-
-type ActionLinkProps = {
-  text: string;
-  href: string;
-  children: ReactNode;
-};
-export function ActionLink(props: ActionLinkProps) {
-  return (
-    <Link
-      href={props.href}
-      className="flex cursor-pointer flex-col items-center space-y-1"
-    >
-      <div className="flex aspect-square h-14 items-center justify-center rounded-full border px-0 py-0">
-        {props.children}
-      </div>
-      <span className="text-sm">{props.text}</span>
-    </Link>
   );
 }
