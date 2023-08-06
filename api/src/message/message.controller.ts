@@ -3,8 +3,6 @@ import { IdDto } from 'src/common/dto/id-param.dto';
 import { MessageService } from './message.service';
 import { ActiveUser } from 'src/iam/decorators/active-user.decorator';
 import { ActiveUserData } from 'src/iam/interface/active-user-data.interface';
-import { subject } from '@casl/ability';
-import { Message } from '@prisma/client';
 import { ApiBearerAuth, ApiTags } from '@nestjs/swagger';
 
 @ApiBearerAuth()
@@ -30,12 +28,6 @@ export class MessageController {
     @ActiveUser() user: ActiveUserData,
     @Param() { id: messageId }: IdDto,
   ) {
-    const message = await this.messageService.findOne(messageId);
-    user.allow(
-      'update',
-      subject('Message', message),
-      'isRead' as keyof Message,
-    );
-    return this.messageService.readMessage(messageId);
+    return this.messageService.readMessage(user, messageId);
   }
 }

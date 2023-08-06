@@ -320,7 +320,7 @@ export class GroupsService {
       includeUsers: true,
     });
 
-    user.allow('read', subject('Group', group));
+    this.groupsPolicy.canRead(user, group);
     const role = group.users.find((u) => u.id === user.sub)!.role;
 
     return {

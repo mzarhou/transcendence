@@ -1,34 +1,39 @@
-import { Injectable, NotFoundException } from '@nestjs/common';
+import { Injectable } from '@nestjs/common';
 import { MessageDto } from './dto/message.dto';
 import { ActiveUserData } from 'src/iam/interface/active-user-data.interface';
-import { PrismaService } from 'src/prisma/prisma.service';
+// import { PrismaService } from 'src/prisma/prisma.service';
 import { ChatService } from 'src/chat/chat.service';
 import { NotificationsService } from 'src/notifications/notifications.service';
-import { MESSAGE_READ_EVENT } from '@transcendence/common';
+import { MESSAGE_READ_EVENT, MessageType } from '@transcendence/common';
+import { MessagesRepository } from './repositories/messages.repository';
+import { subject } from '@casl/ability';
+import { MessagesPolicy } from './message.policy';
 
 @Injectable()
 export class MessageService {
   constructor(
-    private readonly prisma: PrismaService,
+    private readonly messagesRepository: MessagesRepository,
     private readonly chatService: ChatService,
     private readonly notificationsService: NotificationsService,
+    private readonly messagesPolicy: MessagesPolicy,
   ) {}
 
   async saveMessage(
     sender: ActiveUserData,
     { message, recipientId }: MessageDto,
   ) {
-    return this.prisma.message.create({
-      data: { senderId: sender.sub, recipientId, message },
+    return this.messagesRepository.create({
+      senderId: sender.sub,
+      recipientId,
+      message,
     });
   }
 
-  async readMessage(messageId: number) {
-    const updatedMessage = await this.prisma.message.update({
-      where: { id: messageId },
-      data: {
-        isRead: true,
-      },
+  async readMessage(user: ActiveUserData, messageId: number) {
+    const message = await this.messagesRepository.findOneOrThrow(messageId);
+    this.messagesPolicy.canMarkMessageAsRead(user, message);
+    const updatedMessage = await this.messagesRepository.update(messageId, {
+      isRead: true,
     });
     this.notificationsService.emit(
       [updatedMessage.senderId],
@@ -37,33 +42,10 @@ export class MessageService {
     );
   }
 
-  async findOne(id: number) {
-    const message = await this.prisma.message.findFirst({
-      where: { id },
-    });
-    if (!message) {
-      throw new NotFoundException('message not found');
-    }
-    return message;
-  }
-
   findFriendMessages(user: ActiveUserData, friendId: number) {
-    return this.prisma.message.findMany({
-      where: {
-        OR: [
-          {
-            senderId: friendId,
-            recipientId: user.sub,
-          },
-          {
-            senderId: user.sub,
-            recipientId: friendId,
-          },
-        ],
-      },
-      orderBy: {
-        createdAt: 'asc',
-      },
+    return this.messagesRepository.findAllFriendMessages({
+      userId: user.sub,
+      friendId,
     });
   }
 
@@ -74,14 +56,9 @@ export class MessageService {
   async findUnreadMessages(user: ActiveUserData) {
     const friends = await this.chatService.findFriends(user);
     const friendsIds = friends.map((frd) => frd.id);
-    return this.prisma.message.findMany({
-      where: {
-        recipientId: user.sub,
-        isRead: false,
-        senderId: {
-          in: friendsIds,
-        },
-      },
-    });
+    return this.messagesRepository.findAllFiendsUnreadMessages(
+      user.sub,
+      friendsIds,
+    );
   }
 }
