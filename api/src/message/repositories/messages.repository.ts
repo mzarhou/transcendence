@@ -1,6 +1,6 @@
 import { Injectable } from '@nestjs/common';
 import { MessageType, User, UserWithFriends } from '@transcendence/common';
-import { MakePropsUndefined } from 'src/groups/repositories/goups-base.repository';
+import { MakePropsUndefined } from 'src/groups/repositories/_goups.repository';
 import { MessageDto } from '../dto/message.dto';
 
 export type MessagesFindOneOrThrow = <A extends boolean>(

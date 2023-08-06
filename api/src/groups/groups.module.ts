@@ -4,7 +4,7 @@ import { GroupsController } from './groups.controller';
 import { PrismaModule } from 'src/prisma/prisma.module';
 import { NotificationsModule } from 'src/notifications/notifications.module';
 import { IamModule } from 'src/iam/iam.module';
-import { GroupsRepository } from './repositories/goups-base.repository';
+import { GroupsRepository } from './repositories/_goups.repository';
 import { GroupsPrismaRepository } from './repositories/groups-prisma.repository';
 import { GroupsPolicy } from './groups.policy';
 

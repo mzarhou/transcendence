@@ -27,7 +27,7 @@ import { HashingService } from 'src/iam/hashing/hashing.service';
 import { JoinGroupDto } from './dto/join-group.dto';
 import { LeaveGroupDto } from './dto/leave-group.dto';
 import { GroupUsersFilterDto } from './dto/group-users-filter-query.dto';
-import { GroupsRepository } from './repositories/goups-base.repository';
+import { GroupsRepository } from './repositories/_goups.repository';
 import { GroupsPolicy } from './groups.policy';
 import { GroupWithUsers } from '@transcendence/common';
 

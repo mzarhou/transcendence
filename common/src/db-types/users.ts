@@ -1,6 +1,7 @@
 import { FriendRequest } from "./friend-request";
 import { Group, GroupMessage } from "./group";
 import { MessageType } from "./message";
+import { UserSecrets } from "./user-secrets";
 
 export interface User {
   id: number;
@@ -11,6 +12,10 @@ export interface User {
   isTfaEnabled: boolean;
   createdAt: Date;
   updatedAt: Date;
+}
+
+export interface UserWithSecrets {
+  secrets: UserSecrets | null;
 }
 
 export interface UserWithSentFriendRequests {

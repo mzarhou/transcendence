@@ -6,8 +6,8 @@ import { AuthenticationService } from '../authentication.service';
 import { Provide2faCodeDto } from '../dto/provide-2fa-code.dto';
 import { CryptoService } from './crypto.service';
 import { UsersService } from 'src/users/users.service';
-import { PrismaService } from 'src/prisma/prisma.service';
 import { env } from 'src/env/server';
+import { UsersRepository } from 'src/users/repositories/users.repository';
 
 @Injectable()
 export class OtpAuthenticationService {
@@ -16,7 +16,7 @@ export class OtpAuthenticationService {
     private readonly authService: AuthenticationService,
     private readonly cryptoService: CryptoService,
     private readonly usersService: UsersService,
-    private readonly prisma: PrismaService,
+    private readonly usersRepository: UsersRepository,
   ) {}
 
   async generateSecret(activeUser: ActiveUserData) {
@@ -42,52 +42,38 @@ export class OtpAuthenticationService {
       throw new ForbiddenException(`Invalid code: ${code}`);
     }
 
-    const { id, isTfaEnabled } = await this.prisma.user.findFirstOrThrow({
-      where: { id: activeUser.sub },
-      select: { id: true, isTfaEnabled: true },
-    });
+    const { id, isTfaEnabled } = await this.usersRepository.findOneOrThrow(
+      activeUser.sub,
+    );
     if (isTfaEnabled) {
       throw new ForbiddenException('2FA already enabled');
     }
 
     await this.otpSecretsStorage.invalidate(activeUser.sub);
-    await this.prisma.user.update({
-      where: { id },
-      data: {
-        isTfaEnabled: true,
-        secrets: {
-          update: {
-            tfaSecret: encryptedSecret,
-          },
-        },
-      },
+    await this.usersRepository.update(id, {
+      isTfaEnabled: true,
+      tfaSecret: encryptedSecret,
     });
   }
 
   async disableTfaForUser(activeUser: ActiveUserData, code: string) {
     const { id, secrets, isTfaEnabled } =
-      await this.prisma.user.findFirstOrThrow({
-        where: { id: activeUser.sub },
-        include: { secrets: true },
+      await this.usersRepository.findOneOrThrow(activeUser.sub, {
+        includeSecrets: true,
       });
+
     if (!isTfaEnabled) {
       throw new ForbiddenException(`2FA isn't enabled`);
     }
+
     const tfaSecret = secrets?.tfaSecret;
     if (!tfaSecret || !this.verifyCode(code, tfaSecret)) {
       throw new ForbiddenException(`Invalid code: ${code}`);
     }
 
-    await this.prisma.user.update({
-      where: { id },
-      data: {
-        isTfaEnabled: false,
-        secrets: {
-          update: {
-            tfaSecret: '',
-          },
-        },
-      },
+    await this.usersRepository.update(id, {
+      isTfaEnabled: false,
+      tfaSecret: '',
     });
   }
 
@@ -96,9 +82,8 @@ export class OtpAuthenticationService {
     provide2faCodeDto: Provide2faCodeDto,
     fingerprintHash: string,
   ) {
-    const user = await this.prisma.user.findFirstOrThrow({
-      where: { id: activeUser.sub },
-      include: { secrets: true },
+    const user = await this.usersRepository.findOneOrThrow(activeUser.sub, {
+      includeSecrets: true,
     });
 
     const isValid =
@@ -122,9 +107,7 @@ export class OtpAuthenticationService {
   }
 
   private async is2faEnabled(userId: number) {
-    const user = await this.prisma.user.findFirstOrThrow({
-      where: { id: userId },
-    });
+    const user = await this.usersRepository.findOneOrThrow(userId);
     return user.isTfaEnabled;
   }
 }

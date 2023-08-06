@@ -3,7 +3,7 @@ import {
   GroupsFindOne,
   GroupsFindOneOrThrow,
   GroupsRepository,
-} from './goups-base.repository';
+} from './_goups.repository';
 import { Injectable, NotFoundException } from '@nestjs/common';
 import { CreateGroupDto } from '../dto/create-group.dto';
 import {
