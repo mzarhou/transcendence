@@ -14,7 +14,7 @@ import {
   FormLabel,
   FormMessage,
 } from "@/components/ui/form";
-import { useCreateGroup } from "@/api-hooks/use-create-groups";
+import { useCreateGroup } from "@/api-hooks/groups/use-create-groups";
 import { LoaderButton } from "@/components/ui/loader-button";
 import { useEffect } from "react";
 

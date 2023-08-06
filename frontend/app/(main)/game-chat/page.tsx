@@ -12,7 +12,7 @@ import {
   DropdownMenuItem,
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
-import { useGroups } from "@/api-hooks/use-groups";
+import { useGroups } from "@/api-hooks/groups/use-groups";
 import { GroupWithRole } from "@transcendence/common";
 import FullLoader from "@/components/ui/full-loader";
 import FullPlaceHolder from "@/components/ui/full-placeholder";

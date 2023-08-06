@@ -1,6 +1,6 @@
 "use client";
 
-import { usePostFriendRequest } from "@/api-hooks/use-post-friend-request";
+import { usePostFriendRequest } from "@/api-hooks/friend-requests/use-post-friend-request";
 import { LoaderButton } from "@/components/ui/loader-button";
 import { SearchUser } from "@transcendence/common";
 import { Plus, X } from "lucide-react";
@@ -8,7 +8,7 @@ import {
   AcceptFriendRequestBtn,
   RefuseFriendRequestBtn,
 } from "./friend-request-item";
-import { useDeleteFriendRequest } from "@/api-hooks/use-delete-friend-request";
+import { useDeleteFriendRequest } from "@/api-hooks/friend-requests/use-delete-friend-request";
 import { UnfriendDropdownMenuItem } from "./friend-item";
 import UserItem from "./user-item";
 

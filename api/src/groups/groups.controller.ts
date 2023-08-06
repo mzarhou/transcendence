@@ -154,7 +154,7 @@ export class GroupsController {
   @ApiOperation({ summary: 'Get user groups' })
   @Get()
   async findGroups(@ActiveUser() user: ActiveUserData) {
-    return this.groupsService.findGroups(user);
+    return this.groupsService.findUserGroups(user);
   }
 
   @ApiOperation({ summary: 'Get group' })
@@ -163,7 +163,7 @@ export class GroupsController {
     @ActiveUser() user: ActiveUserData,
     @Param() { id: groupId }: IdDto,
   ) {
-    return this.groupsService.show(user, groupId);
+    return this.groupsService.showGroup(user, groupId);
   }
 
   @ApiOperation({ summary: 'Get group' })
@@ -173,6 +173,6 @@ export class GroupsController {
     @Param() { id: groupId }: IdDto,
     @Query() query: GroupUsersFilterDto,
   ) {
-    return this.groupsService.findUsers(user, groupId, query);
+    return this.groupsService.findGroupUsers(user, groupId, query);
   }
 }

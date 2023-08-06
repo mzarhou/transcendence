@@ -15,9 +15,9 @@ import {
 } from "@/components/ui/form";
 import { LoaderButton } from "@/components/ui/loader-button";
 import { useEffect } from "react";
-import { useUpdateGroup } from "@/api-hooks/use-update-group";
+import { useUpdateGroup } from "@/api-hooks/groups/use-update-group";
 import GoBackBtn from "../../../components/chat-go-back";
-import { GroupType, useGroup } from "@/api-hooks/use-group";
+import { GroupType, useGroup } from "@/api-hooks/groups/use-group";
 import FullLoader from "@/components/ui/full-loader";
 import { useRouter } from "next/navigation";
 import { useUser } from "@/context/user-context";

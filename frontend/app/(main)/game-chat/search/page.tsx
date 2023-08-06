@@ -6,7 +6,7 @@ import SearchFriendItem from "../components/search-friend-item";
 import { useState } from "react";
 import { useDebouncedValue } from "@/hooks/use-debounced-value";
 import GoBackBtn from "../components/chat-go-back";
-import { useSearchGroups } from "@/api-hooks/use-search-groups";
+import { useSearchGroups } from "@/api-hooks/groups/use-search-groups";
 import SearchGroupItem from "./components/search-group-item";
 import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group";
 import {

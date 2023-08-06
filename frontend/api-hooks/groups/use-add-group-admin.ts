@@ -3,7 +3,7 @@ import { api } from "@/lib/api";
 import { useSWRConfig } from "swr";
 import useSWRMutation from "swr/mutation";
 import { getServerMessage } from "@/lib/utils";
-import { groupKey } from "../use-group";
+import { groupKey } from "./use-group";
 import { AddGroupAdminType } from "@transcendence/common";
 
 export const useAddGroupAdmin = (groupId: string) => {

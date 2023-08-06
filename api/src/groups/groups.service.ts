@@ -2,21 +2,24 @@ import {
   BadRequestException,
   ForbiddenException,
   Injectable,
-  NotFoundException,
 } from '@nestjs/common';
 import { CreateGroupDto } from './dto/create-group.dto';
 import { UpdateGroupDto } from './dto/update-group.dto';
 import { ActiveUserData } from 'src/iam/interface/active-user-data.interface';
-import { PrismaService } from 'src/prisma/prisma.service';
 import { AddGroupAdminDto } from './dto/group-admin/add-group-admin.dto';
 import { ApiTags } from '@nestjs/swagger';
 import { BanUserDto } from './dto/ban-user/ban-user.dto';
 import { RemoveGroupAdminDto } from './dto/group-admin/remove-group-admin.dto';
-import { GroupWithUsers, UserGroup } from './group.types';
 import { UnBanUserDto } from './dto/ban-user/unban-user.dto';
 import { KickUserDto } from './dto/kick-user.dto';
 import { NotificationsService } from 'src/notifications/notifications.service';
-import { GROUP_DELETED_EVENT, GROUP_KICKED_EVENT } from '@transcendence/common';
+import {
+  GROUP_DELETED_EVENT,
+  GROUP_KICKED_EVENT,
+  Group,
+  User,
+  UserGroupRole,
+} from '@transcendence/common';
 import { ADD_ADMIN_EVENT } from '@transcendence/common';
 import { GROUP_BANNED_EVENT } from '@transcendence/common';
 import { JOIN_GROUP_EVENT } from '@transcendence/common';
@@ -25,14 +28,17 @@ import { HashingService } from 'src/iam/hashing/hashing.service';
 import { subject } from '@casl/ability';
 import { JoinGroupDto } from './dto/join-group.dto';
 import { LeaveGroupDto } from './dto/leave-group.dto';
-import { Group, User, UserGroupRole } from '@prisma/client';
 import { GroupUsersFilterDto } from './dto/group-users-filter-query.dto';
+import { GroupsRepository } from './repositories/goups-base.repository';
+import { GroupsPolicy } from './groups.policy';
+import { GroupWithUsers } from '@transcendence/common';
 
 @ApiTags('groups')
 @Injectable()
 export class GroupsService {
   constructor(
-    private readonly prisma: PrismaService,
+    private readonly groupsRepository: GroupsRepository,
+    private readonly groupsPolicy: GroupsPolicy,
     private readonly notificationService: NotificationsService,
     private readonly hashingService: HashingService,
   ) {}
@@ -41,63 +47,20 @@ export class GroupsService {
     user: ActiveUserData,
     { name, status, password }: CreateGroupDto,
   ) {
+    this.groupsPolicy.canCreateGroup(user);
+
     const groupPassword =
       status === 'PROTECTED'
         ? await this.hashingService.hash(password!)
         : undefined;
 
-    const [createdGroup, _] = await this.prisma.$transaction([
-      this.prisma.group.create({
-        data: {
-          name,
-          ownerId: user.sub,
-          avatar: 'https://api.dicebear.com/6.x/identicon/svg?seed=' + name,
-          status,
-          password: groupPassword,
-        },
-      }),
-      this.prisma.group.update({
-        where: { name },
-        data: {
-          users: {
-            create: {
-              userId: user.sub,
-              role: 'ADMIN',
-            },
-          },
-        },
-      }),
-    ]);
-    return this.omitPassword(createdGroup);
-  }
-
-  async findOne(
-    id: number,
-    options?: {
-      includeBlockedUsers?: boolean;
-      includeMessages?: boolean;
-      includeUsers?: boolean;
-      includeOwner?: boolean;
-    },
-  ) {
-    const group = await this.prisma.group.findFirst({
-      where: { id },
-      include: {
-        blockedUsers: options?.includeBlockedUsers,
-        messages: options?.includeMessages,
-        owner: options?.includeOwner,
-        users: options?.includeUsers
-          ? {
-              include: {
-                user: true,
-              },
-            }
-          : undefined,
-      },
+    const createdGroup = await this.groupsRepository.create({
+      name,
+      status,
+      password: groupPassword,
+      ownerId: user.sub,
     });
-
-    if (!group) throw new NotFoundException('Group not found');
-    return group;
+    return this.groupsRepository.omitPassword(createdGroup) satisfies Group;
   }
 
   async update(
@@ -105,46 +68,37 @@ export class GroupsService {
     groupId: number,
     updateGroupDto: UpdateGroupDto,
   ) {
-    const group = await this.findOne(groupId);
-    user.allow('update', subject('Group', group));
+    const group = await this.groupsRepository.findOneOrThrow(groupId);
+    this.groupsPolicy.canUpdate(user, group);
 
     if (updateGroupDto.status === 'PROTECTED' && !updateGroupDto.password) {
       throw new BadRequestException('You must set a group password');
     }
 
-    const updatedGroup = await this.prisma.group.update({
-      where: { id: groupId },
-      data: {
-        name: updateGroupDto.name,
-        status: updateGroupDto.status,
-        password:
-          updateGroupDto.status === 'PROTECTED'
-            ? updateGroupDto.password
-            : undefined,
-      },
+    const updatedGroup = await this.groupsRepository.update({
+      ...updateGroupDto,
+      groupId,
     });
-    return this.omitPassword(updatedGroup);
+    return this.groupsRepository.omitPassword(updatedGroup);
   }
 
   async remove(user: ActiveUserData, groupId: number) {
-    const group = await this.findOne(groupId);
-    user.allow('delete', subject('Group', group));
+    const group = await this.groupsRepository.findOneOrThrow(groupId, {
+      includeUsers: true,
+    });
 
-    const groupUsersIds = (await this.findGroupUsers(groupId)).map((u) => u.id);
-    const [, deletedGroup] = await this.prisma.$transaction([
-      this.prisma.usersOnGroups.deleteMany({
-        where: { groupId: groupId },
-      }),
-      this.prisma.group.delete({
-        where: { id: groupId },
-      }),
-    ]);
+    this.groupsPolicy.canDelete(user, group);
+
+    const deletedGroup = await this.groupsRepository.destroy(groupId);
+
+    const groupUsersIds = group.users.map((u) => u.id);
     await this.notificationService.notify(
       groupUsersIds,
       GROUP_DELETED_EVENT,
       `group ${deletedGroup.name} deleted`,
     );
-    return this.omitPassword(deletedGroup);
+
+    return this.groupsRepository.omitPassword(deletedGroup);
   }
 
   async addGroupAdmin(
@@ -152,12 +106,10 @@ export class GroupsService {
     groupId: number,
     { userId: targetUserId }: AddGroupAdminDto,
   ) {
-    const group = await this.findOne(groupId, {
+    const group = await this.groupsRepository.findOneOrThrow(groupId, {
       includeBlockedUsers: true,
     });
-    user.allow('add-admin', subject('Group', group));
-    if (user.sub === targetUserId)
-      throw new BadRequestException('You can not set your self admin');
+    this.groupsPolicy.canAddAdmin(user, group);
 
     const isUserBlocked = group.blockedUsers.find(
       (user) => user.id === targetUserId,
@@ -166,18 +118,17 @@ export class GroupsService {
       throw new BadRequestException('user is blocked');
     }
 
-    const updatedUserGroup = await this.prisma.usersOnGroups.update({
-      where: { userId_groupId: { groupId: group.id, userId: targetUserId } },
-      data: {
-        role: 'ADMIN',
-      },
+    const updatedGroup = await this.groupsRepository.updateUserRole({
+      groupId: group.id,
+      userId: targetUserId,
+      newRole: 'ADMIN',
     });
     await this.notificationService.notify(
       [targetUserId],
       ADD_ADMIN_EVENT,
       `You ${group.name} role changed to admin`,
     );
-    return updatedUserGroup;
+    return { role: updatedGroup.role };
   }
 
   async removeGroupAdmin(
@@ -185,21 +136,20 @@ export class GroupsService {
     groupId: number,
     { userId }: RemoveGroupAdminDto,
   ) {
-    const group = await this.findOne(groupId);
-    user.allow('update', subject('Group', group), 'users.role');
+    const group = await this.groupsRepository.findOneOrThrow(groupId);
+    this.groupsPolicy.canRemoveAdmin(user, group);
 
-    const updatedUserGroup = await this.prisma.usersOnGroups.update({
-      where: { userId_groupId: { groupId: group.id, userId } },
-      data: {
-        role: 'MEMBER',
-      },
+    const { role: newRole } = await this.groupsRepository.updateUserRole({
+      userId,
+      groupId: group.id,
+      newRole: 'MEMBER',
     });
     await this.notificationService.notify(
       [userId],
       ADD_ADMIN_EVENT,
       `You ${group.name} role changed to member`,
     );
-    return updatedUserGroup;
+    return { newRole };
   }
 
   async banUser(
@@ -207,39 +157,23 @@ export class GroupsService {
     groupId: number,
     { userId: targetUserId }: BanUserDto,
   ) {
-    const group = await this.findOne(groupId, {
+    const group = await this.groupsRepository.findOneOrThrow(groupId, {
       includeUsers: true,
     });
 
-    if (this.isUserAdmin(targetUserId, group)) {
-      user.allow('delete', subject('Group', group));
-    } else {
-      user.allow('ban-user', subject('Group', group));
-    }
+    this.groupsPolicy.canBanUser({ user, group, targetUserId });
 
-    const [_, updatedGroup] = await this.prisma.$transaction([
-      /**
-       * remove user
-       */
-      this.prisma.usersOnGroups.delete({
-        where: { userId_groupId: { groupId: groupId, userId: targetUserId } },
-      }),
-      /**
-       * add user to blocked users
-       */
-      this.prisma.group.update({
-        where: { id: groupId },
-        data: {
-          blockedUsers: { connect: { id: targetUserId } },
-        },
-      }),
-    ]);
     await this.notificationService.notify(
       [targetUserId],
       GROUP_BANNED_EVENT,
       `You've been unbanned from ${group.name} group`,
     );
-    return this.omitPassword(updatedGroup);
+
+    const updatedGroup = await this.groupsRepository.banUser({
+      groupId: group.id,
+      userId: targetUserId,
+    });
+    return this.groupsRepository.omitPassword(updatedGroup);
   }
 
   async unbanUser(
@@ -247,28 +181,23 @@ export class GroupsService {
     groupId: number,
     { userId: targetUserId }: UnBanUserDto,
   ) {
-    const group = await this.findOne(groupId, {
+    const group = await this.groupsRepository.findOneOrThrow(groupId, {
       includeBlockedUsers: true,
       includeUsers: true,
     });
-    if (this.isUserAdmin(targetUserId, group)) {
-      user.allow('delete', subject('Group', group));
-    } else {
-      user.allow('unban-user', subject('Group', group));
-    }
 
-    const updateGroup = await this.prisma.group.update({
-      where: { id: group.id },
-      data: {
-        blockedUsers: { disconnect: { id: targetUserId } },
-      },
+    this.groupsPolicy.canUnbanUser({ user, group, targetUserId });
+
+    const updateGroup = await this.groupsRepository.unbanUser({
+      groupId: group.id,
+      userId: targetUserId,
     });
     await this.notificationService.notify(
       [targetUserId],
       GROUP_BANNED_EVENT,
       `You've been unbanned from ${group.name} group, you can now join the group`,
     );
-    return this.omitPassword(updateGroup);
+    return this.groupsRepository.omitPassword(updateGroup);
   }
 
   async kickUser(
@@ -276,28 +205,19 @@ export class GroupsService {
     groupId: number,
     { userId }: KickUserDto,
   ) {
-    const group = await this.findOne(groupId, {
+    const group = await this.groupsRepository.findOneOrThrow(groupId, {
       includeUsers: true,
     });
-    const isTargetUserAdmin = this.isUserAdmin(userId, group);
-    if (isTargetUserAdmin) {
-      user.allow('delete', subject('Group', group), 'users.role');
-    } else {
-      user.allow('kick-user', subject('Group', group));
-    }
-    await this.prisma.usersOnGroups.delete({
-      where: { userId_groupId: { groupId: group.id, userId } },
-    });
+
+    this.groupsPolicy.canKickUser({ user, group, targetUserId: userId });
+
+    await this.groupsRepository.removeUser({ groupId: group.id, userId });
     await this.notificationService.notify(
       [userId],
       GROUP_KICKED_EVENT,
       `You've been kicked out from ${group.name} group`,
     );
-    return this.omitPassword(group);
-  }
-
-  isUserAdmin(userId: number, group: GroupWithUsers) {
-    return !!group.users.find((u) => u.userId === userId && u.role === 'ADMIN');
+    return this.groupsRepository.omitPassword(group);
   }
 
   async joinGroup(
@@ -305,15 +225,18 @@ export class GroupsService {
     groupId: number,
     joinGroupDto?: JoinGroupDto,
   ) {
-    const password = joinGroupDto?.password;
-    const group = await this.findOne(groupId, {
+    const group = await this.groupsRepository.findOneOrThrow(groupId, {
       includeBlockedUsers: true,
     });
 
-    user.allow('join', subject('Group', group));
+    this.groupsPolicy.canJoinGroup(user, group);
+
     if (group.status === 'PRIVATE') {
+      // TODO: implement invitations for private groups
       throw new ForbiddenException('You can not join the group');
     }
+
+    const password = joinGroupDto?.password;
     if (
       group.status === 'PROTECTED' &&
       !(await this.hashingService.compare(password ?? '', group.password!))
@@ -321,22 +244,16 @@ export class GroupsService {
       throw new ForbiddenException('Invalid password');
     }
 
-    await this.prisma.group.update({
-      where: { id: group.id },
-      data: {
-        users: {
-          create: {
-            userId: user.sub,
-          },
-        },
-      },
+    await this.groupsRepository.addUser({
+      groupId: group.id,
+      userId: user.sub,
     });
     await this.notificationService.notify(
       [user.sub],
       JOIN_GROUP_EVENT,
       `You've joined ${group.name} group!`,
     );
-    return this.omitPassword(group);
+    return this.groupsRepository.omitPassword(group);
   }
 
   async leaveGroup(
@@ -344,8 +261,10 @@ export class GroupsService {
     groupId: number,
     { newOwnerId }: LeaveGroupDto,
   ) {
-    const group = await this.findOne(groupId, { includeUsers: true });
-    user.allow('leave', subject('Group', group));
+    const group = await this.groupsRepository.findOneOrThrow(groupId, {
+      includeUsers: true,
+    });
+    this.groupsPolicy.canLeaveGroup(user, group);
 
     const isOwnerLeaving = user.sub === group.ownerId;
 
@@ -353,160 +272,87 @@ export class GroupsService {
       throw new ForbiddenException('You must specify a new owner');
     }
 
-    await this.prisma.$transaction([
-      ...(isOwnerLeaving
-        ? [
-            this.prisma.group.update({
-              where: { id: group.id },
-              data: { ownerId: newOwnerId! },
-            }),
-          ]
-        : []),
-      this.prisma.usersOnGroups.delete({
-        where: {
-          userId_groupId: {
-            userId: user.sub,
-            groupId: group.id,
-          },
-        },
-      }),
-    ]);
+    await this.groupsRepository.leaveGroup({
+      userId: user.sub,
+      groupId: group.id,
+      newOwnerId: isOwnerLeaving ? newOwnerId : undefined,
+    });
     await this.notificationService.notify(
       [user.sub],
       LEAVE_GROUP_EVENT,
       `You've leaved ${group.name} group!`,
     );
-    return this.omitPassword(group);
+    return this.groupsRepository.omitPassword(group);
   }
 
   async search(user: ActiveUserData, term: any) {
-    const userGroups = await this.findGroups(user);
+    const userGroups = await this.findUserGroups(user);
     if (!term || term.length === 0) {
       return [];
     }
 
-    const groups = await this.prisma.group.findMany({
-      where: {
-        status: {
-          not: 'PRIVATE',
-        },
-        name: {
-          contains: term,
-        },
-      },
-      include: {
-        blockedUsers: true,
-      },
-    });
+    const groups = await this.groupsRepository.searchGroups(term);
+
+    // remove private & blocking groups
     return groups
-      .filter((g) => !g.blockedUsers.find((bu) => bu.id === user.sub))
+      .filter(
+        (g) =>
+          g.status !== 'PRIVATE' &&
+          !g.blockedUsers.find((bu) => bu.id === user.sub),
+      )
       .map((g) => {
-        if (g.ownerId === user.sub) {
-          return {
-            ...this.omitPassword(g),
-            role: 'ADMIN' as UserGroupRole,
-            blockedUsers: undefined,
-          };
-        }
         const roleInGroup = userGroups.find((u) => u.id === g.id)?.role;
         return {
-          ...this.omitPassword(g),
+          ...this.groupsRepository.omitPassword(g),
           role: roleInGroup,
           blockedUsers: undefined,
         };
       });
   }
 
-  async findGroups(user: ActiveUserData) {
-    const { groups } = await this.prisma.user.findFirstOrThrow({
-      where: { id: user.sub },
-      include: {
-        groups: {
-          include: {
-            group: true,
-          },
-        },
-      },
-    });
-    return groups.map((g) => ({ ...this.omitPassword(g.group), role: g.role }));
+  async findUserGroups(user: ActiveUserData) {
+    const groups = await this.groupsRepository.findUserGroups(user.sub);
+    return groups.map((g) => this.groupsRepository.omitPassword(g));
   }
 
-  async show(user: ActiveUserData, groupId: number) {
-    const group = await this.prisma.group.findFirst({
-      where: { id: groupId },
-      include: {
-        users: {
-          include: {
-            user: true,
-          },
-        },
-      },
+  async showGroup(user: ActiveUserData, groupId: number) {
+    const group = await this.groupsRepository.findOneOrThrow(groupId, {
+      includeUsers: true,
     });
-    if (!group) throw new NotFoundException('group not found');
+
     user.allow('read', subject('Group', group));
-    const role = group.users.find((u) => u.userId === user.sub)?.role;
-    if (!role) throw new ForbiddenException('Invalid role');
+    const role = group.users.find((u) => u.id === user.sub)!.role;
+
     return {
       ...group,
-      users: group.users.map((u) => ({ ...u.user, role: u.role })),
       role,
-    } satisfies Omit<Group, 'password'> & {
-      role: UserGroupRole;
-      users: User[];
-    };
+    } satisfies Group &
+      GroupWithUsers & {
+        role: UserGroupRole;
+      };
   }
 
-  async findUsers(
+  async findGroupUsers(
     user: ActiveUserData,
     groupId: number,
     { filter }: GroupUsersFilterDto,
   ) {
-    const group = await this.prisma.group.findFirst({
-      where: { id: groupId },
-      include: {
-        blockedUsers: filter === 'banned',
-        users: {
-          include: {
-            user: true,
-          },
-        },
-      },
+    const group = await this.groupsRepository.findOneOrThrow(groupId, {
+      includeUsers: true,
+      includeBlockedUsers: filter === 'banned',
     });
-    if (!group) throw new NotFoundException('group not found');
-    user.allow('read', subject('Group', group));
-    if (filter === 'banned') return group.blockedUsers;
 
-    const users = group.users.map((ug) => ({
-      ...ug.user,
-      role: ug.role,
-    })) satisfies UserGroup[];
+    this.groupsPolicy.canRead(user, group);
 
+    if (filter === 'banned') {
+      return group.blockedUsers;
+    }
     if (filter === 'admins') {
-      return users.filter((u) => u.role === 'ADMIN');
+      return group.users.filter((u) => u.role === 'ADMIN');
     }
     if (filter === 'members') {
-      return users.filter((u) => u.role === 'MEMBER');
+      return group.users.filter((u) => u.role === 'MEMBER');
     }
-    return users;
-  }
-
-  private async findGroupUsers(groupId: number) {
-    const usersOnGroups = await this.prisma.usersOnGroups.findMany({
-      where: { groupId },
-      include: {
-        user: true,
-      },
-    });
-    return usersOnGroups.map((ug) => ({
-      ...ug.user,
-      role: ug.role,
-    })) satisfies UserGroup[];
-  }
-
-  private omitPassword<T extends { password: string | null | undefined }>(
-    group: T,
-  ) {
-    const { password, ...rest } = group;
-    return rest;
+    return group.users;
   }
 }

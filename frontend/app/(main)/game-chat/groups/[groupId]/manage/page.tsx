@@ -1,6 +1,6 @@
 "use client";
 
-import { useGroup } from "@/api-hooks/use-group";
+import { useGroup } from "@/api-hooks/groups/use-group";
 import GoBackBtn from "../../../components/chat-go-back";
 import FullLoader from "@/components/ui/full-loader";
 import { useRouter } from "next/navigation";

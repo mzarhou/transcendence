@@ -1,5 +1,5 @@
 "use client";
-import { GroupType, useGroup } from "@/api-hooks/use-group";
+import { GroupType, useGroup } from "@/api-hooks/groups/use-group";
 import { GroupIdProps } from "../../../group.types";
 import { useUser } from "@/context/user-context";
 import { queryAtom } from "../search-query-atom";

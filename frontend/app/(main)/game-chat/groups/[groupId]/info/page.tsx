@@ -1,6 +1,6 @@
 "use client";
 
-import { useGroup } from "@/api-hooks/use-group";
+import { useGroup } from "@/api-hooks/groups/use-group";
 import GoBackBtn from "../../../components/chat-go-back";
 import FullLoader from "@/components/ui/full-loader";
 import FullPlaceHolder from "@/components/ui/full-placeholder";
@@ -31,7 +31,7 @@ export default function GroupInfoPage({
 type GroupInfoBodyProps = {
   groupId: string;
 };
-export function GroupInfoBody({ groupId }: GroupInfoBodyProps) {
+function GroupInfoBody({ groupId }: GroupInfoBodyProps) {
   const { user } = useUser();
   const { data: group, isLoading, error } = useGroup(groupId);
   if (isLoading) return <FullLoader />;

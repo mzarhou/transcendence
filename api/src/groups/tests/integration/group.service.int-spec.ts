@@ -7,10 +7,12 @@ import { ActiveUserData } from 'src/iam/interface/active-user-data.interface';
 import { PrismaService } from 'src/prisma/prisma.service';
 import { faker } from '@faker-js/faker';
 import { Group, GroupStatus } from '@prisma/client';
+import { GroupsRepository } from 'src/groups/repositories/goups-base.repository';
 
 describe('GroupService int', () => {
   let prisma: PrismaService;
   let groupService: GroupsService;
+  let groupsRepository: GroupsRepository;
   let authService: AuthenticationService;
   let hashingService: HashingService;
 
@@ -21,6 +23,7 @@ describe('GroupService int', () => {
 
     prisma = moduleRef.get(PrismaService);
     groupService = moduleRef.get(GroupsService);
+    groupsRepository = moduleRef.get(GroupsRepository);
     authService = moduleRef.get(AuthenticationService);
     hashingService = moduleRef.get(HashingService);
     await prisma.cleanDb();
@@ -177,7 +180,7 @@ describe('GroupService int', () => {
     }, 30000);
   });
 
-  describe('add group admin', () => {
+  describe('addGroupAdmin', () => {
     let owner: ActiveUserData;
     let group: Group;
 
@@ -193,11 +196,11 @@ describe('GroupService int', () => {
       await groupService.addGroupAdmin(owner, group.id, {
         userId: admin.sub,
       });
-      const { users } = await groupService.findOne(group.id, {
+      const { users } = await groupsRepository.findOneOrThrow(group.id, {
         includeUsers: true,
       });
       const isAdmin = !!users.find(
-        (u) => u.role === 'ADMIN' && u.userId === admin.sub,
+        (u) => u.role === 'ADMIN' && u.id === admin.sub,
       );
       expect(isAdmin).toBeTruthy();
     }, 30000);
@@ -210,11 +213,11 @@ describe('GroupService int', () => {
           userId: admin.sub,
         }),
       ).rejects.toBeDefined();
-      const { users } = await groupService.findOne(group.id, {
+      const { users } = await groupsRepository.findOneOrThrow(group.id, {
         includeUsers: true,
       });
       const isAdmin = !!users.find(
-        (u) => u.role === 'ADMIN' && u.userId === admin.sub,
+        (u) => u.role === 'ADMIN' && u.id === admin.sub,
       );
       expect(isAdmin).toBe(false);
     }, 30000);
@@ -233,17 +236,17 @@ describe('GroupService int', () => {
         groupService.addGroupAdmin(admin, group.id, { userId: targetUser.sub }),
       ).rejects.toBeDefined();
 
-      const { users } = await groupService.findOne(group.id, {
+      const { users } = await groupsRepository.findOneOrThrow(group.id, {
         includeUsers: true,
       });
       const isAdmin = !!users.find(
-        (u) => u.role === 'ADMIN' && u.userId === targetUser.sub,
+        (u) => u.role === 'ADMIN' && u.id === targetUser.sub,
       );
       expect(isAdmin).toBe(false);
     }, 30000);
   });
 
-  describe('remove admin', () => {
+  describe('removeGroupAdmin', () => {
     let owner: ActiveUserData;
     let group: Group;
 
@@ -259,11 +262,11 @@ describe('GroupService int', () => {
       await groupService.removeGroupAdmin(owner, group.id, {
         userId: admin.sub,
       });
-      const { users } = await groupService.findOne(group.id, {
+      const { users } = await groupsRepository.findOneOrThrow(group.id, {
         includeUsers: true,
       });
       const userGroup = users.find(
-        (u) => u.role === 'ADMIN' && u.userId === admin.sub,
+        (u) => u.role === 'ADMIN' && u.id === admin.sub,
       );
       expect(userGroup).toBeFalsy();
     }, 30000);
@@ -285,17 +288,17 @@ describe('GroupService int', () => {
         }),
       ).rejects.toBeDefined();
 
-      const { users } = await groupService.findOne(group.id, {
+      const { users } = await groupsRepository.findOneOrThrow(group.id, {
         includeUsers: true,
       });
       const userGroup = users.find(
-        (u) => u.role === 'ADMIN' && u.userId === targetAdmin.sub,
+        (u) => u.role === 'ADMIN' && u.id === targetAdmin.sub,
       );
       expect(userGroup).toBeTruthy();
     }, 30000);
   });
 
-  describe('ban user', () => {
+  describe('banUser', () => {
     let owner: ActiveUserData;
     let group: Group;
 
@@ -312,13 +315,16 @@ describe('GroupService int', () => {
       await groupService.banUser(owner, group.id, { userId: user.sub });
       await groupService.banUser(owner, group.id, { userId: admin.sub });
 
-      const { users, blockedUsers } = await groupService.findOne(group.id, {
-        includeBlockedUsers: true,
-        includeUsers: true,
-      });
-      const isMember = !!users.find((u) => u.userId === user.sub);
+      const { users, blockedUsers } = await groupsRepository.findOneOrThrow(
+        group.id,
+        {
+          includeBlockedUsers: true,
+          includeUsers: true,
+        },
+      );
+      const isMember = !!users.find((u) => u.id === user.sub);
       const isBanned = !!blockedUsers.find((u) => u.id === user.sub);
-      const isAdminMember = !!users.find((u) => u.userId === admin.sub);
+      const isAdminMember = !!users.find((u) => u.id === admin.sub);
       const isAdminBanned = !!blockedUsers.find((u) => u.id === admin.sub);
       expect(isMember).toBeFalsy();
       expect(isBanned).toBeTruthy();
@@ -344,11 +350,14 @@ describe('GroupService int', () => {
 
       await groupService.banUser(admin, group.id, { userId: user.sub });
 
-      const { users, blockedUsers } = await groupService.findOne(group.id, {
-        includeBlockedUsers: true,
-        includeUsers: true,
-      });
-      const isMember = !!users.find((u) => u.userId === user.sub);
+      const { users, blockedUsers } = await groupsRepository.findOneOrThrow(
+        group.id,
+        {
+          includeBlockedUsers: true,
+          includeUsers: true,
+        },
+      );
+      const isMember = !!users.find((u) => u.id === user.sub);
       const isBanned = !!blockedUsers.find((u) => u.id === user.sub);
       expect(isMember).toBeFalsy();
       expect(isBanned).toBeTruthy();
@@ -377,7 +386,7 @@ describe('GroupService int', () => {
     }, 30000);
   });
 
-  describe('unban user', () => {
+  describe('unbanUser', () => {
     let owner: ActiveUserData;
     let group: Group;
 
@@ -417,7 +426,7 @@ describe('GroupService int', () => {
     }, 30000);
   });
 
-  describe('kick user', () => {
+  describe('kickUser', () => {
     let owner: ActiveUserData;
     let group: Group;
 
@@ -437,10 +446,10 @@ describe('GroupService int', () => {
       await expect(
         groupService.kickUser(user, group.id, { userId: owner.sub }),
       ).rejects.toBeDefined();
-      const { users } = await groupService.findOne(group.id, {
+      const { users } = await groupsRepository.findOneOrThrow(group.id, {
         includeUsers: true,
       });
-      expect(users.find((u) => u.userId === owner.sub)).toBeTruthy();
+      expect(users.find((u) => u.id === owner.sub)).toBeTruthy();
     });
 
     it('owner can kick member/admin', async () => {
@@ -450,16 +459,19 @@ describe('GroupService int', () => {
       await groupService.kickUser(owner, group.id, { userId: user.sub });
       await groupService.kickUser(owner, group.id, { userId: admin.sub });
 
-      const { users, blockedUsers } = await groupService.findOne(group.id, {
-        includeBlockedUsers: true,
-        includeUsers: true,
-      });
-      const isMember = !!users.find((u) => u.userId === user.sub);
+      const { users, blockedUsers } = await groupsRepository.findOneOrThrow(
+        group.id,
+        {
+          includeBlockedUsers: true,
+          includeUsers: true,
+        },
+      );
+      const isMember = !!users.find((u) => u.id === user.sub);
       const isBanned = !!blockedUsers.find((u) => u.id === user.sub);
       expect(isMember).toBeFalsy();
       expect(isBanned).toBeFalsy();
 
-      const isAdminMember = !!users.find((u) => u.userId === user.sub);
+      const isAdminMember = !!users.find((u) => u.id === user.sub);
       const isAdminBanned = !!blockedUsers.find((u) => u.id === user.sub);
       expect(isAdminMember).toBeFalsy();
       expect(isAdminBanned).toBeFalsy();
@@ -471,11 +483,14 @@ describe('GroupService int', () => {
 
       await groupService.kickUser(admin, group.id, { userId: user.sub });
 
-      const { users, blockedUsers } = await groupService.findOne(group.id, {
-        includeBlockedUsers: true,
-        includeUsers: true,
-      });
-      const isMember = !!users.find((u) => u.userId === user.sub);
+      const { users, blockedUsers } = await groupsRepository.findOneOrThrow(
+        group.id,
+        {
+          includeBlockedUsers: true,
+          includeUsers: true,
+        },
+      );
+      const isMember = !!users.find((u) => u.id === user.sub);
       const isBanned = !!blockedUsers.find((u) => u.id === user.sub);
       expect(isMember).toBeFalsy();
       expect(isBanned).toBeFalsy();
@@ -492,17 +507,17 @@ describe('GroupService int', () => {
       await expect(
         groupService.kickUser(user, group.id, { userId: targetUser.sub }),
       ).rejects.toBeDefined();
-      const { users } = await groupService.findOne(group.id, {
+      const { users } = await groupsRepository.findOneOrThrow(group.id, {
         includeUsers: true,
       });
-      const isAdminMember = !!users.find((u) => u.userId === targetAdmin.sub);
-      const isUserMember = !!users.find((u) => u.userId === targetUser.sub);
+      const isAdminMember = !!users.find((u) => u.id === targetAdmin.sub);
+      const isUserMember = !!users.find((u) => u.id === targetUser.sub);
       expect(isAdminMember).toBeTruthy();
       expect(isUserMember).toBeTruthy();
     });
   });
 
-  describe('join', () => {
+  describe('joinGroup', () => {
     let owner: ActiveUserData;
 
     it('should create group owner', async () => {
@@ -514,10 +529,10 @@ describe('GroupService int', () => {
       const publicGroup = await createGroup(owner, 'PUBLIC');
 
       await groupService.joinGroup(user, publicGroup.id);
-      const { users } = await groupService.findOne(publicGroup.id, {
+      const { users } = await groupsRepository.findOneOrThrow(publicGroup.id, {
         includeUsers: true,
       });
-      const isMember = users.find((u) => u.userId === user.sub);
+      const isMember = users.find((u) => u.id === user.sub);
       expect(isMember).toBeTruthy();
     });
 
@@ -529,10 +544,10 @@ describe('GroupService int', () => {
         groupService.joinGroup(user, privateGroup.id),
       ).rejects.toBeDefined();
 
-      const { users } = await groupService.findOne(privateGroup.id, {
+      const { users } = await groupsRepository.findOneOrThrow(privateGroup.id, {
         includeUsers: true,
       });
-      const isMember = users.find((u) => u.userId === user.sub);
+      const isMember = users.find((u) => u.id === user.sub);
       expect(isMember).toBeFalsy();
     });
 
@@ -546,10 +561,13 @@ describe('GroupService int', () => {
         }),
       ).rejects.toBeDefined();
 
-      const { users } = await groupService.findOne(protectedGroup.id, {
-        includeUsers: true,
-      });
-      const isMember = !!users.find((u) => u.userId === user.sub);
+      const { users } = await groupsRepository.findOneOrThrow(
+        protectedGroup.id,
+        {
+          includeUsers: true,
+        },
+      );
+      const isMember = !!users.find((u) => u.id === user.sub);
       expect(isMember).toBeFalsy();
     });
 
@@ -562,15 +580,18 @@ describe('GroupService int', () => {
         groupService.joinGroup(user, protectedGroup.id, { password }),
       ).resolves.toBeDefined();
 
-      const { users } = await groupService.findOne(protectedGroup.id, {
-        includeUsers: true,
-      });
-      const isMember = users.find((u) => u.userId === user.sub);
+      const { users } = await groupsRepository.findOneOrThrow(
+        protectedGroup.id,
+        {
+          includeUsers: true,
+        },
+      );
+      const isMember = users.find((u) => u.id === user.sub);
       expect(isMember).toBeTruthy();
     });
   });
 
-  describe('leave', () => {
+  describe('leaveGroup', () => {
     let owner: ActiveUserData;
     let group: Group;
 
@@ -589,13 +610,11 @@ describe('GroupService int', () => {
         groupService.leaveGroup(owner, group.id, { newOwnerId: user.sub }),
       ).resolves.toBeDefined();
 
-      const newGroup = await groupService.findOne(group.id, {
+      const newGroup = await groupsRepository.findOneOrThrow(group.id, {
         includeUsers: true,
       });
       expect(newGroup.ownerId).toBe(user.sub);
-      expect(newGroup.users.find((u) => u.userId === owner.sub)).toBe(
-        undefined,
-      );
+      expect(newGroup.users.find((u) => u.id === owner.sub)).toBe(undefined);
     });
 
     it('should throw if owner leave without setting a new ownerId', async () => {
@@ -614,12 +633,15 @@ describe('GroupService int', () => {
       await groupService.leaveGroup(admin, group.id, {});
       await groupService.leaveGroup(member, group.id, {});
 
-      const { users, ownerId } = await groupService.findOne(group.id, {
-        includeUsers: true,
-      });
+      const { users, ownerId } = await groupsRepository.findOneOrThrow(
+        group.id,
+        {
+          includeUsers: true,
+        },
+      );
 
-      const isMemberExist = !!users.find((u) => u.userId === member.sub);
-      const isAdminExist = !!users.find((u) => u.userId === admin.sub);
+      const isMemberExist = !!users.find((u) => u.id === member.sub);
+      const isAdminExist = !!users.find((u) => u.id === admin.sub);
       expect(isMemberExist).toBe(false);
       expect(isAdminExist).toBe(false);
       expect(ownerId).toBe(owner.sub);

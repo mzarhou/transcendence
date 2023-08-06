@@ -1,6 +1,6 @@
 "use client";
 
-import { GroupType } from "@/api-hooks/use-group";
+import { GroupType } from "@/api-hooks/groups/use-group";
 import { queryAtom } from "./search-query-atom";
 import { useAtom } from "jotai";
 import { useGroupUsers } from "@/api-hooks/groups/use-group-users";

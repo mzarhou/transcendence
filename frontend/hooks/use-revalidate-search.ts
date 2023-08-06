@@ -1,4 +1,4 @@
-import { searchGroupsKey } from "@/api-hooks/use-search-groups";
+import { searchGroupsKey } from "@/api-hooks/groups/use-search-groups";
 import { searchUsersKey } from "@/api-hooks/use-search-users";
 import { useSWRConfig } from "swr";
 

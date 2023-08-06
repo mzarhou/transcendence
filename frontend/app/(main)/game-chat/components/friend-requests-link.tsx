@@ -1,6 +1,6 @@
 "use client";
 
-import { useFriendRequests } from "@/api-hooks/use-friend-requests";
+import { useFriendRequests } from "@/api-hooks/friend-requests/use-friend-requests";
 import { Loader2, UserPlus } from "lucide-react";
 import Link from "next/link";
 

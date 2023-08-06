@@ -1,4 +1,4 @@
-import { userJoinGroup } from "@/api-hooks/use-join-group";
+import { userJoinGroup } from "@/api-hooks/groups/use-join-group";
 import { Button } from "@/components/ui/button";
 import { Dialog, DialogContent, DialogTrigger } from "@/components/ui/dialog";
 import {

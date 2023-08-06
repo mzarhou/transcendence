@@ -11,6 +11,8 @@ import { Prisma } from '@prisma/client';
 import { NotificationsService } from 'src/notifications/notifications.service';
 import { FRIEND_REQUEST_EVENT } from '@transcendence/common';
 import { FRIEND_REQUEST_ACCEPTED_EVENT } from '@transcendence/common';
+import { FriendRequest } from '@transcendence/common';
+import { FriendRequestWithRequester } from '@transcendence/common';
 
 @Injectable()
 export class FriendRequestService {
@@ -68,8 +70,8 @@ export class FriendRequestService {
     });
   }
 
-  findRecieved(user: ActiveUserData, includeRequester: boolean = true) {
-    return this.prisma.friendRequest.findMany({
+  async findRecieved(user: ActiveUserData, includeRequester: boolean = true) {
+    const friendRequest = await this.prisma.friendRequest.findMany({
       where: {
         recipientId: user.sub,
       },
@@ -77,6 +79,8 @@ export class FriendRequestService {
         requester: includeRequester,
       },
     });
+    return friendRequest satisfies (FriendRequest &
+      FriendRequestWithRequester)[];
   }
 
   async findOne(id: number) {

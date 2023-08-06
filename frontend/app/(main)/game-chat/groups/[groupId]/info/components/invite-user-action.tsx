@@ -1,6 +1,6 @@
 "use client";
 
-import { GroupType } from "@/api-hooks/use-group";
+import { GroupType } from "@/api-hooks/groups/use-group";
 import { useSearchUsers } from "@/api-hooks/use-search-users";
 import ConfirmDialog from "@/components/confirm-dialog";
 import FullPlaceHolder from "@/components/ui/full-placeholder";
