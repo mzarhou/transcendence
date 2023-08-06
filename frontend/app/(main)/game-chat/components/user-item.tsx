@@ -30,12 +30,10 @@ export default function UserItem({
     <div className="relative flex justify-between">
       <div className="flex flex-grow space-x-4">
         <div className="relative flex aspect-square h-[72px] items-center justify-center rounded-full bg-gray-100/10 text-lg">
-          <Image
+          <img
             src={user.avatar}
-            width={72}
-            height={72}
             alt=""
-            className="rounded-full"
+            className="h-[72px] min-h-[72px] w-[72px] min-w-[72px] rounded-full"
           />
         </div>
         <div className="mt-0.5">
