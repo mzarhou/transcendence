@@ -50,6 +50,21 @@ export class FriendRequestsPrismaRepository extends FriendRequestsRepository {
     ) satisfies ReturnType<FriendRequestFindWhere>;
   }) as FriendRequestFindWhere;
 
+  async findUsersFriendRequest(
+    firstUserId: number,
+    secondUserId: number,
+  ): Promise<FriendRequest | null> {
+    const friendRequest = await this.prisma.friendRequest.findFirst({
+      where: {
+        OR: [
+          { recipientId: firstUserId, requesterId: secondUserId },
+          { recipientId: secondUserId, requesterId: firstUserId },
+        ],
+      },
+    });
+    return friendRequest;
+  }
+
   findOneOrThrow: FriendRequestFindOneOrThrow = (async (id, options) => {
     const targetFriendRequest = await this.prisma.friendRequest.findFirst({
       where: {

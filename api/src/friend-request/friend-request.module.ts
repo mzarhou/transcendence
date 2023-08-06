@@ -16,6 +16,6 @@ import { FriendRequestsPrismaRepository } from './repositories/friend-requests-p
       useClass: FriendRequestsPrismaRepository,
     },
   ],
-  exports: [FriendRequestService],
+  exports: [FriendRequestService, FriendRequestsRepository],
 })
 export class FriendRequestModule {}

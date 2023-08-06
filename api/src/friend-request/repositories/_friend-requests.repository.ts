@@ -51,8 +51,16 @@ export abstract class FriendRequestsRepository {
   }): Promise<FriendRequest & FriendRequestWithRequester>;
 
   abstract findWhere: FriendRequestFindWhere;
+
+  abstract findUsersFriendRequest(
+    firstUserId: number,
+    secondUserId: number,
+  ): Promise<FriendRequest | null>;
+
   abstract findOneOrThrow: FriendRequestFindOneOrThrow;
+
   abstract destroy(id: number): Promise<FriendRequest>;
+
   abstract acceptFriendRequest(args: {
     friendRequestId: number;
     requesterId: number;

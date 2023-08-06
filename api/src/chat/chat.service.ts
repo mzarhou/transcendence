@@ -1,14 +1,16 @@
 import { Injectable } from '@nestjs/common';
 import { ActiveUserData } from 'src/iam/interface/active-user-data.interface';
-import { PrismaService } from 'src/prisma/prisma.service';
 import { FriendRequestService } from '../friend-request/friend-request.service';
 import { FriendRequest, User } from '@prisma/client';
 import { SearchUser } from '@transcendence/common';
+import { UsersRepository } from 'src/users/repositories/users.repository';
+import { FriendRequestsRepository } from 'src/friend-request/repositories/_friend-requests.repository';
 
 @Injectable()
 export class ChatService {
   constructor(
-    private readonly prisma: PrismaService,
+    private readonly usersRepository: UsersRepository,
+    private readonly friendRequestsRepository: FriendRequestsRepository,
     private readonly friendRequestService: FriendRequestService,
   ) {}
 
@@ -20,12 +22,12 @@ export class ChatService {
   }
 
   async findFriends(activeUser: ActiveUserData) {
-    const currentUser = await this.prisma.user.findFirstOrThrow({
-      where: { id: activeUser.sub },
-      include: {
-        friends: true,
+    const currentUser = await this.usersRepository.findOneOrThrow(
+      activeUser.sub,
+      {
+        includeFriends: true,
       },
-    });
+    );
     return currentUser.friends;
   }
 
@@ -49,15 +51,9 @@ export class ChatService {
       [...blockedUsers, ...blockingUsers].map((u) => u.id),
     );
 
-    const searchUsers = await this.prisma.user.findMany({
-      where: {
-        id: {
-          notIn: [currentUser.sub, ...notIncludedIds],
-        },
-        name: {
-          contains: searchTerm,
-        },
-      },
+    const searchUsers = await this.usersRepository.search({
+      searchTerm,
+      excludeUsersIds: [currentUser.sub, ...notIncludedIds],
     });
 
     return Promise.all(
@@ -72,119 +68,45 @@ export class ChatService {
   }
 
   async unfriend(targetUserId: number, user: ActiveUserData) {
-    await this.prisma.$transaction(
-      this.unfriendTransactions(targetUserId, user),
-    );
-  }
-
-  private unfriendTransactions(targetUserId: number, user: ActiveUserData) {
-    return [
-      this.prisma.user.update({
-        where: { id: user.sub },
-        data: {
-          friends: {
-            disconnect: { id: targetUserId },
-          },
-        },
-      }),
-      this.prisma.user.update({
-        where: { id: targetUserId },
-        data: {
-          friends: {
-            disconnect: { id: user.sub },
-          },
-        },
-      }),
-    ];
+    await this.usersRepository.unfriend(user.sub, targetUserId);
   }
 
   async blockUser(user: ActiveUserData, targetUserId: number) {
-    const friendRequest = await this.prisma.friendRequest.findFirst({
-      where: {
-        OR: [
-          { recipientId: user.sub, requesterId: targetUserId },
-          { recipientId: targetUserId, requesterId: user.sub },
-        ],
-      },
-      select: { id: true },
-    });
-
-    await this.prisma.$transaction([
-      // remove friend request if exists
-      ...(friendRequest
-        ? [
-            this.prisma.friendRequest.delete({
-              where: { id: friendRequest.id },
-            }),
-          ]
-        : []),
-
-      // unfriend
-      ...this.unfriendTransactions(targetUserId, user),
-
-      // add target user to blocked users
-      this.prisma.user.update({
-        where: { id: user.sub },
-        data: {
-          blockedUsers: { connect: { id: targetUserId } },
-        },
-      }),
-      this.prisma.user.update({
-        where: { id: targetUserId },
-        data: {
-          blockingUsers: { connect: { id: user.sub } },
-        },
-      }),
-    ]);
+    const friendRequest =
+      await this.friendRequestsRepository.findUsersFriendRequest(
+        user.sub,
+        targetUserId,
+      );
+    await this.usersRepository.blockUser(user.sub, targetUserId, friendRequest);
   }
 
   async unblockUser(user: ActiveUserData, targetUserId: number) {
-    await this.prisma.$transaction([
-      this.prisma.user.update({
-        where: { id: user.sub },
-        data: {
-          blockedUsers: {
-            disconnect: { id: targetUserId },
-          },
-        },
-      }),
-      this.prisma.user.update({
-        where: { id: targetUserId },
-        data: {
-          blockingUsers: {
-            disconnect: { id: user.sub },
-          },
-        },
-      }),
-    ]);
+    await this.usersRepository.unblockUser(user.sub, targetUserId);
   }
 
   async findBlockedUsers(activeUser: ActiveUserData) {
-    const currentUser = await this.prisma.user.findFirstOrThrow({
-      where: { id: activeUser.sub },
-      include: {
-        blockedUsers: true,
+    const currentUser = await this.usersRepository.findOneOrThrow(
+      activeUser.sub,
+      {
+        includeBlockedUsers: true,
       },
-    });
+    );
     return currentUser.blockedUsers;
   }
 
   async findBlockingUsers(targetUserId: number) {
-    const currentUser = await this.prisma.user.findFirstOrThrow({
-      where: { id: targetUserId },
-      include: {
-        blockingUsers: true,
+    const currentUser = await this.usersRepository.findOneOrThrow(
+      targetUserId,
+      {
+        includeBlockingUsers: true,
       },
-    });
+    );
     return currentUser.blockingUsers;
   }
 
   async findBlockedUsersByUserId(userId: number) {
-    const currentUser = await this.prisma.user.findFirstOrThrow({
-      where: { id: userId },
-      include: {
-        blockedUsers: true,
-      },
+    const currentUser = await this.usersRepository.findOneOrThrow(userId, {
+      includeBlockedUsers: true,
     });
     return currentUser.blockedUsers;
   }
