@@ -17,7 +17,6 @@ import {
   GROUP_DELETED_EVENT,
   GROUP_KICKED_EVENT,
   Group,
-  User,
   UserGroupRole,
 } from '@transcendence/common';
 import { ADD_ADMIN_EVENT } from '@transcendence/common';

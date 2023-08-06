@@ -7,7 +7,6 @@ import {
 import { Injectable, NotFoundException } from '@nestjs/common';
 import { CreateGroupDto } from '../dto/create-group.dto';
 import {
-  Group,
   GroupWithBlockedUsers,
   GroupWithPassword,
   UserGroupRole,
@@ -26,7 +25,7 @@ export class GroupsPrismaRepository extends GroupsRepository {
     password,
     ownerId,
   }: CreateGroupDto & { ownerId: number }): Promise<GroupWithPassword> {
-    const [createdGroup, _] = await this.prisma.$transaction([
+    const [createdGroup] = await this.prisma.$transaction([
       this.prisma.group.create({
         data: {
           name,
@@ -123,7 +122,7 @@ export class GroupsPrismaRepository extends GroupsRepository {
     groupId: number;
     userId: number;
   }): Promise<GroupWithPassword> {
-    const [_, updatedGroup] = await this.prisma.$transaction([
+    const [, updatedGroup] = await this.prisma.$transaction([
       /**
        * remove user from group
        */

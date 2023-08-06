@@ -9,6 +9,7 @@ import {
   UserGroupRole,
 } from '@transcendence/common';
 import { UpdateGroupDto } from '../dto/update-group.dto';
+import { never } from 'zod';
 
 export type MakePropsUndefined<T> = {
   [P in keyof T]: undefined;
@@ -46,8 +47,7 @@ export type GroupsFindOne = (
 @Injectable()
 export abstract class GroupsRepository {
   omitPassword<T extends { password: string | null | undefined }>(group: T) {
-    const { password, ...rest } = group;
-    return rest;
+    return { ...group, password: never };
   }
 
   abstract create({

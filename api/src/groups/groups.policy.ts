@@ -47,7 +47,7 @@ export class GroupsPolicy {
     throw new ForbiddenException(message);
   }
 
-  canCreateGroup(user: ActiveUserData) {
+  canCreateGroup(_user: ActiveUserData) {
     return true;
   }
 
