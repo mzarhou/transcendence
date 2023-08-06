@@ -144,11 +144,7 @@ export class AuthenticationService {
         throw new UnauthorizedException('Invalide refresh token');
       }
 
-      await this.refreshTokenIdsStorage.invalidate(
-        user.id,
-        fingerprintHash,
-        refreshTokenId,
-      );
+      await this.refreshTokenIdsStorage.invalidate(user.id, fingerprintHash);
       return this.generateTokens(user, fingerprintHash, isTfaCodeProvided);
     } catch (error) {
       if (error instanceof InvalidateRefreshTokenError) {

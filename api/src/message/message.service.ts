@@ -1,12 +1,10 @@
 import { Injectable } from '@nestjs/common';
 import { MessageDto } from './dto/message.dto';
 import { ActiveUserData } from 'src/iam/interface/active-user-data.interface';
-// import { PrismaService } from 'src/prisma/prisma.service';
 import { ChatService } from 'src/chat/chat.service';
 import { NotificationsService } from 'src/notifications/notifications.service';
-import { MESSAGE_READ_EVENT, MessageType } from '@transcendence/common';
+import { MESSAGE_READ_EVENT } from '@transcendence/common';
 import { MessagesRepository } from './repositories/messages.repository';
-import { subject } from '@casl/ability';
 import { MessagesPolicy } from './message.policy';
 
 @Injectable()

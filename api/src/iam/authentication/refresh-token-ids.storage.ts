@@ -25,7 +25,7 @@ export class RefreshTokenIdsStorage {
     return storedTokenId === tokenId;
   }
 
-  async invalidate(userId: number, fingerprintHash: string, tokenId: string) {
+  async invalidate(userId: number, fingerprintHash: string) {
     await this.redisClient.del(this.getKey(userId, fingerprintHash));
   }
 

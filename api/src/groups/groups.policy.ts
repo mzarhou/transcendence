@@ -47,10 +47,6 @@ export class GroupsPolicy {
     throw new ForbiddenException(message);
   }
 
-  canCreateGroup(_user: ActiveUserData) {
-    return true;
-  }
-
   canRead(user: ActiveUserData, group: Group & GroupWithUsers) {
     if (this.isMember(user.sub, group)) return true;
     throw new ForbiddenException('You can not delete the group');

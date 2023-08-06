@@ -36,7 +36,7 @@ export class AccessTokenWithout2faGuard implements CanActivate {
   private extractTokenFromHeaderOrCookie(req: Request) {
     const accessToken: string | undefined = req.cookies?.['accessToken'];
     if (accessToken) return accessToken;
-    const [_, token] = req.headers.authorization?.split(' ') ?? [];
+    const [, token] = req.headers.authorization?.split(' ') ?? [];
     return token;
   }
 }

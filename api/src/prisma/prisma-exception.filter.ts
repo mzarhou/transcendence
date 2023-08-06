@@ -1,9 +1,4 @@
-import {
-  ExceptionFilter,
-  ArgumentsHost,
-  Catch,
-  ConflictException,
-} from '@nestjs/common';
+import { ExceptionFilter, ArgumentsHost, Catch } from '@nestjs/common';
 import { Prisma } from '@prisma/client';
 import { HttpStatusCode } from 'axios';
 import { Response } from 'express';
