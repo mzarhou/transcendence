@@ -1,11 +1,11 @@
 import { Injectable, NotFoundException } from '@nestjs/common';
 import { UpdateUserDto } from './dto/update-user.dto';
 import { ActiveUserData } from 'src/iam/interface/active-user-data.interface';
-import { PrismaService } from 'src/prisma/prisma.service';
+import { UsersRepository } from './repositories/users.repository';
 
 @Injectable()
 export class UsersService {
-  constructor(private readonly prisma: PrismaService) {}
+  constructor(private readonly usersRepository: UsersRepository) {}
 
   async updateProfile(
     activeUser: ActiveUserData,
@@ -13,37 +13,19 @@ export class UsersService {
   ) {
     const noUpdate = Object.keys(updateUserDto).every((k) => !updateUserDto[k]);
     if (noUpdate) {
-      return this.findOne(activeUser.sub);
+      return this.usersRepository.findOneOrThrow(activeUser.sub);
     }
-    await this.prisma.user.update({
-      where: { id: activeUser.sub },
-      data: {
-        name: updateUserDto.name,
-        avatar: updateUserDto.avatar,
-      },
-    });
-    return this.findOne(activeUser.sub);
-  }
-
-  async findOne(id: number) {
-    const user = await this.prisma.user.findFirst({ where: { id } });
-    if (!user) {
-      throw new NotFoundException();
-    }
-    return user;
+    const updatedUser = await this.usersRepository.update(
+      activeUser.sub,
+      updateUserDto,
+    );
+    return updatedUser;
   }
 
   async findFriend(user: ActiveUserData, friendId: number) {
-    const friend = await this.prisma.user.findFirst({
-      where: { id: friendId },
-      include: {
-        friends: true,
-      },
+    const friend = await this.usersRepository.findOneOrThrow(friendId, {
+      includeFriends: true,
     });
-
-    if (!friend) {
-      throw new NotFoundException('Friend not found');
-    }
 
     const isFriend =
       friend.friends.findIndex((frd) => frd.id === user.sub) > -1;
@@ -52,5 +34,9 @@ export class UsersService {
     }
 
     return friend;
+  }
+
+  async findOne(userId: number) {
+    return this.usersRepository.findOneOrThrow(userId);
   }
 }
