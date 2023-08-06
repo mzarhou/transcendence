@@ -1,5 +1,4 @@
 import { ForbiddenException, Injectable } from '@nestjs/common';
-import { ConfigService } from '@nestjs/config';
 import { authenticator } from 'otplib';
 import { OtpSecretsStorage } from './otp-secrets.storage';
 import { ActiveUserData } from 'src/iam/interface/active-user-data.interface';
@@ -13,7 +12,6 @@ import { env } from 'src/env/server';
 @Injectable()
 export class OtpAuthenticationService {
   constructor(
-    private readonly configService: ConfigService,
     private readonly otpSecretsStorage: OtpSecretsStorage,
     private readonly authService: AuthenticationService,
     private readonly cryptoService: CryptoService,
@@ -27,7 +25,7 @@ export class OtpAuthenticationService {
       throw new ForbiddenException('2FA already enabled');
     }
     const secret = authenticator.generateSecret();
-    const appName = this.configService.getOrThrow(env.TFA_APP_NAME);
+    const appName = env.TFA_APP_NAME;
     const uri = authenticator.keyuri(user.email, appName, secret);
 
     const encryptedSecret = this.cryptoService.encrypt(secret);
