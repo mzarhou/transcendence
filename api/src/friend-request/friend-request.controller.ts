@@ -13,7 +13,6 @@ import { CreateFriendRequestDto } from './dto/create-friend-request.dto';
 import { ActiveUser } from 'src/iam/decorators/active-user.decorator';
 import { ActiveUserData } from 'src/iam/interface/active-user-data.interface';
 import { IdDto } from 'src/common/dto/id-param.dto';
-import { subject } from '@casl/ability';
 import { ApiBearerAuth, ApiTags } from '@nestjs/swagger';
 
 @ApiBearerAuth()
@@ -41,25 +40,14 @@ export class FriendRequestController {
     return this.friendRequestService.findRecieved(user);
   }
 
-  @Get(':id')
-  async findOne(@Param() { id }: IdDto, @ActiveUser() user: ActiveUserData) {
-    const friendRequest = await this.friendRequestService.findOne(id);
-    user.allow('read', subject('FriendRequest', friendRequest));
-    return friendRequest;
-  }
-
   @Delete(':id')
   async remove(@Param() { id }: IdDto, @ActiveUser() user: ActiveUserData) {
-    const friendRequest = await this.friendRequestService.findOne(id);
-    user.allow('delete', subject('FriendRequest', friendRequest));
-    return this.friendRequestService.remove(id);
+    return this.friendRequestService.remove(user, id);
   }
 
   @HttpCode(HttpStatus.OK)
   @Post(':id/accept')
   async accept(@Param() { id }: IdDto, @ActiveUser() user: ActiveUserData) {
-    const friendRequest = await this.friendRequestService.findOne(id);
-    user.allow('accept', subject('FriendRequest', friendRequest));
-    return this.friendRequestService.accept(id, user);
+    return this.friendRequestService.accept(user, id);
   }
 }
