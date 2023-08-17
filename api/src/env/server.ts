@@ -1,4 +1,5 @@
 import { z, ZodFormattedError } from 'zod';
+import * as dotenv from 'dotenv';
 
 const envSchema = z.object({
   FRONTEND_URL: z.string(),
@@ -23,6 +24,7 @@ const envSchema = z.object({
   REDISUSER: z.string(),
 });
 
+dotenv.config();
 const _env = envSchema.safeParse(process.env);
 
 const formatErrors = (errors: ZodFormattedError<Map<string, string>, string>) =>

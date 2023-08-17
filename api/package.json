@@ -12,19 +12,13 @@
     "start": "nest start",
     "dev": "nest start --watch",
     "predev": "yarn build:common",
-    "start:debug": "nest start --debug --watch",
-    "prestart:debug": "yarn build:common",
     "start:prod": "run node dist/main",
     "prestart:prod": "yarn build:common",
     "lint": "eslint \"{src,apps,libs,test}/**/*.ts\" --fix",
-    "test": "jest",
-    "test:watch": "jest --watch",
-    "test:cov": "jest --coverage",
-    "test:debug": "node --inspect-brk -r tsconfig-paths/register -r ts-node/register node_modules/.bin/jest --runInBand",
-    "test:e2e": "jest --config ./test/jest-e2e.json",
-    "pretest:int": "dotenv -e .env.test -- prisma migrate reset --force",
+    "test": "jest --watch",
     "test:int": "dotenv -e .env.test -- jest -i --no-cache --watch --config ./jest-int.json",
-    "build:common": "yarn workspace @transcendence/common build"
+    "pretest:int": "dotenv -e .env.test -- prisma migrate reset --force",
+    "build:common": "prisma generate && yarn workspace @transcendence/common build"
   },
   "dependencies": {
     "@casl/ability": "^6.5.0",
