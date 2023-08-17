@@ -17,13 +17,13 @@ import {
 import { SignInDto } from './dto/sign-in.dto';
 import { SignUpDto } from './dto/sign-up.dto';
 import { HashingService } from '../hashing/hashing.service';
-import { PrismaService } from '../../prisma/prisma.service';
 import { User } from '@prisma/client';
 import { AbilityFactory, AppAbility } from '../authorization/ability.factory';
 import { ForbiddenError } from '@casl/ability';
 import { Socket } from 'socket.io';
 import { parse } from 'cookie';
 import { WebsocketException } from 'src/notifications/ws.exception';
+import { UsersRepository } from 'src/users/repositories/users.repository';
 
 @Injectable()
 export class AuthenticationService {
@@ -32,24 +32,21 @@ export class AuthenticationService {
     private readonly jwtConfiguration: ConfigType<typeof jwtConfig>,
     private readonly jwtService: JwtService,
     private readonly refreshTokenIdsStorage: RefreshTokenIdsStorage,
-    private readonly prisma: PrismaService,
+    private readonly usersRepository: UsersRepository,
     private readonly hashingService: HashingService,
     private readonly abilityFactory: AbilityFactory,
   ) {}
 
   async signIn(signInDto: SignInDto, fingerprintHash: string) {
-    const user = await this.prisma.user.findFirst({
-      where: { email: signInDto.email },
-      include: {
-        secrets: true,
-      },
+    const user = await this.usersRepository.findOneBy({
+      email: signInDto.email,
     });
     if (!user) {
       throw new UnauthorizedException(undefined, "User doesn't exists");
     }
     const isEqual = await this.hashingService.compare(
       signInDto.password,
-      user.secrets.password ?? '',
+      user.secrets?.password ?? '',
     );
     if (!isEqual) {
       throw new UnauthorizedException(undefined, "Password doesn't match");
@@ -58,18 +55,13 @@ export class AuthenticationService {
   }
 
   async signUp(signUpDto: SignUpDto) {
-    await this.prisma.user.create({
-      data: {
-        email: signUpDto.email,
-        avatar: `https://avatars.dicebear.com/api/avataaars/${signUpDto.email}.svg`,
-        name: signUpDto.name,
-        secrets: {
-          create: {
-            password: await this.hashingService.hash(signUpDto.password),
-          },
-        },
-      },
+    await this.usersRepository.create({
+      email: signUpDto.email,
+      avatar: `https://avatars.dicebear.com/api/avataaars/${signUpDto.email}.svg`,
+      name: signUpDto.name,
+      password: await this.hashingService.hash(signUpDto.password),
     });
+    return { success: true };
   }
 
   async generateTokens(
@@ -129,7 +121,7 @@ export class AuthenticationService {
           this.jwtConfiguration,
         );
 
-      const user = await this.prisma.user.findFirst({ where: { id: sub } });
+      const user = await this.usersRepository.findOne(sub);
       if (!user) {
         throw new UnauthorizedException();
       }
@@ -140,14 +132,10 @@ export class AuthenticationService {
         refreshTokenId,
       );
       if (!isValid) {
-        throw new UnauthorizedException(undefined, 'Invalide refresh token');
+        throw new UnauthorizedException('Invalide refresh token');
       }
 
-      await this.refreshTokenIdsStorage.invalidate(
-        user.id,
-        fingerprintHash,
-        refreshTokenId,
-      );
+      await this.refreshTokenIdsStorage.invalidate(user.id, fingerprintHash);
       return this.generateTokens(user, fingerprintHash, isTfaCodeProvided);
     } catch (error) {
       if (error instanceof InvalidateRefreshTokenError) {

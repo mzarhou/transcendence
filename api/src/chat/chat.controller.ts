@@ -12,8 +12,9 @@ import { ActiveUser } from 'src/iam/decorators/active-user.decorator';
 import { ActiveUserData } from 'src/iam/interface/active-user-data.interface';
 import { ChatService } from './chat.service';
 import { IdDto } from 'src/common/dto/id-param.dto';
-import { ApiTags } from '@nestjs/swagger';
+import { ApiBearerAuth, ApiTags } from '@nestjs/swagger';
 
+@ApiBearerAuth()
 @ApiTags('Chat')
 @Controller('chat')
 export class ChatController {
@@ -21,7 +22,7 @@ export class ChatController {
 
   @HttpCode(HttpStatus.OK)
   @Get('search')
-  async search2(
+  async search(
     @ActiveUser() user: ActiveUserData,
     @Query() { term }: SearchUsersDto,
   ) {

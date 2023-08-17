@@ -1,5 +1,5 @@
 import {
-  ConflictException,
+  ForbiddenException,
   Injectable,
   UnauthorizedException,
 } from '@nestjs/common';
@@ -7,8 +7,9 @@ import axios from 'axios';
 import z from 'zod';
 import { AuthenticationService } from '../authentication.service';
 import { School42AuthDto } from '../dto/school-42-token.dto';
-import { PrismaService } from 'src/prisma/prisma.service';
 import { Prisma } from '@prisma/client';
+import { UsersRepository } from 'src/users/repositories/users.repository';
+import { faker } from '@faker-js/faker';
 
 export const user42Schema = z.object({
   id: z.number(),
@@ -31,7 +32,7 @@ export const user42Schema = z.object({
 export class School42AuthService {
   constructor(
     private readonly authService: AuthenticationService,
-    private readonly prisma: PrismaService,
+    private readonly usersRepository: UsersRepository,
   ) {}
 
   async authenticate(
@@ -41,24 +42,39 @@ export class School42AuthService {
     try {
       const school42User = await this.get42User(accessToken);
 
-      const user = await this.prisma.user.findFirst({
-        where: { school42Id: school42User.id },
+      const userBy42SchoolId = await this.usersRepository.findOneBy({
+        school42Id: school42User.id,
       });
 
-      if (user) {
-        return this.authService.generateTokens(user, fingerprintHash);
-      } else {
-        const user = await this.prisma.user.create({
-          data: {
-            name: school42User.login,
-            avatar: school42User.image.link,
-            email: school42User.email,
-            school42Id: school42User.id,
-            secrets: {},
-          },
-        });
-        return this.authService.generateTokens(user, fingerprintHash);
+      if (userBy42SchoolId) {
+        return this.authService.generateTokens(
+          userBy42SchoolId,
+          fingerprintHash,
+        );
       }
+
+      const userByEmail = await this.usersRepository.findOneBy({
+        email: school42User.email,
+      });
+
+      if (userByEmail && userByEmail.school42Id) {
+        throw new ForbiddenException('Invalid 42 school ID');
+      }
+
+      if (userByEmail) {
+        const updatedUser = await this.usersRepository.update(userByEmail.id, {
+          school42Id: school42User.id,
+        });
+        return this.authService.generateTokens(updatedUser, fingerprintHash);
+      }
+
+      const createdUser = await this.usersRepository.create({
+        name: faker.internet.userName(),
+        avatar: school42User.image.link,
+        email: school42User.email,
+        school42Id: school42User.id,
+      });
+      return this.authService.generateTokens(createdUser, fingerprintHash);
     } catch (error) {
       if (error instanceof Prisma.PrismaClientKnownRequestError) throw error;
       throw new UnauthorizedException();

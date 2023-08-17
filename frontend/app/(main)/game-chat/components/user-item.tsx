@@ -11,7 +11,6 @@ import { MoreVertical } from "lucide-react";
 import Image from "next/image";
 import { ReactNode } from "react";
 import { useBlockUser } from "@/api-hooks/use-block-user";
-import { MouseEventHandler } from "react";
 
 type UserItemProps = {
   user: User;
@@ -31,19 +30,17 @@ export default function UserItem({
     <div className="relative flex justify-between">
       <div className="flex flex-grow space-x-4">
         <div className="relative flex aspect-square h-[72px] items-center justify-center rounded-full bg-gray-100/10 text-lg">
-          <Image
+          <img
             src={user.avatar}
-            width={72}
-            height={72}
             alt=""
-            className="rounded-full"
+            className="h-[72px] min-h-[72px] w-[72px] min-w-[72px] rounded-full"
           />
         </div>
         <div className="mt-0.5">
           <p>{user.name}</p>
           {/* TODO: update with real data */}
-          <p className="text-sm text-chat-foreground/60">In game</p>
-          <p className="text-sm text-chat-foreground/60">#55</p>
+          <p className="text-chat-foreground/60 text-sm">In game</p>
+          <p className="text-chat-foreground/60 text-sm">#55</p>
         </div>
         <div className="absolute bottom-0 right-2">{children}</div>
       </div>
@@ -54,10 +51,10 @@ export default function UserItem({
               <MoreVertical className="h-6 w-6 cursor-pointer" />
             </DropdownMenuTrigger>
             <DropdownMenuContent align="end">
-              <DropdownMenuItem className="cursor-pointer hover:bg-chat/90">
+              <DropdownMenuItem className="cursor-pointer">
                 Play
               </DropdownMenuItem>
-              <DropdownMenuItem className="cursor-pointer hover:bg-chat/90">
+              <DropdownMenuItem className="cursor-pointer">
                 Profile
               </DropdownMenuItem>
               <BlockUserMenuItem userId={user.id} />
@@ -74,10 +71,7 @@ export function BlockUserMenuItem({ userId }: { userId: number }) {
   const { trigger: blockeUser } = useBlockUser(userId);
 
   return (
-    <DropdownMenuItem
-      className="cursor-pointer hover:bg-chat/90"
-      onClick={blockeUser}
-    >
+    <DropdownMenuItem className="cursor-pointer" onClick={blockeUser}>
       Block
     </DropdownMenuItem>
   );

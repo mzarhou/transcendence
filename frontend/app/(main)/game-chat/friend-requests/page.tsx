@@ -1,6 +1,6 @@
 "use client";
 
-import { useFriendRequests } from "@/api-hooks/use-friend-requests";
+import { useFriendRequests } from "@/api-hooks/friend-requests/use-friend-requests";
 import FullLoader from "@/components/ui/full-loader";
 import { FriendRequestItem } from "../components/friend-request-item";
 import GoBackBtn from "../components/chat-go-back";
@@ -25,7 +25,7 @@ export default function FriendRequestsPage() {
               />
             ))
           ) : (
-            <div className="flex h-full flex-grow items-center justify-center text-lg text-chat-foreground/60">
+            <div className="text-chat-foreground/60 flex h-full flex-grow items-center justify-center text-lg">
               No friend request
             </div>
           )}

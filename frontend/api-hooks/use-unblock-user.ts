@@ -3,6 +3,7 @@ import { api } from "@/lib/api";
 import { useSWRConfig } from "swr";
 import useSWRMutation from "swr/mutation";
 import { blockedUsersKey } from "./use-blocked-users";
+import { getServerMessage } from "@/lib/utils";
 
 export const useUnblockUser = (userId: number) => {
   const { toast } = useToast();
@@ -12,9 +13,9 @@ export const useUnblockUser = (userId: number) => {
     `/chat/unblock/${userId}`,
     async (url) => api.post(url),
     {
-      onError: (_error) => {
+      onError: (error) => {
         toast({
-          description: "Failed to unblock user",
+          description: getServerMessage(error, "Failed to unblock user"),
           variant: "destructive",
         });
       },

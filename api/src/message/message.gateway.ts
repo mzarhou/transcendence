@@ -7,7 +7,7 @@ import {
 import { ChatService } from '../chat/chat.service';
 import { Socket } from 'socket.io';
 import { HttpStatus, UseFilters, UsePipes } from '@nestjs/common';
-import { MessageDto } from '../chat/dto/message.dto';
+import { MessageDto } from './dto/message.dto';
 import { MessageService } from './message.service';
 import { MESSAGE_EVENT } from '@transcendence/common';
 import { ZodValidationPipe } from 'nestjs-zod';

@@ -8,8 +8,6 @@ export const api = axios.create({
   withCredentials: true,
 });
 
-let refreshingToken = false;
-
 api.interceptors.response.use(null, (error: AxiosError) => {
   /**
    * check if 2FA required
@@ -31,16 +29,8 @@ api.interceptors.response.use(null, (error: AxiosError) => {
     return Promise.reject(error);
   }
 
-  console.log("refreshing tokens");
-  refreshingToken = true;
-  if (!refreshingToken) return;
-  return axios
-    .post("/api/auth/refresh-tokens")
-    .then(() => {
-      // rerun original request
-      return axios.request(error.config!);
-    })
-    .finally(() => {
-      refreshingToken = false;
-    });
+  return axios.post("/api/auth/refresh-tokens").then(() => {
+    // rerun original request
+    return axios.request(error.config!);
+  });
 });

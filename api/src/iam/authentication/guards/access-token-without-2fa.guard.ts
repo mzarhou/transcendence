@@ -21,7 +21,7 @@ export class AccessTokenWithout2faGuard implements CanActivate {
     const request: Request = context.switchToHttp().getRequest();
     const token = this.extractTokenFromHeaderOrCookie(request);
     if (!token) {
-      throw new UnauthorizedException(undefined, 'No access token provided');
+      throw new UnauthorizedException('No access token provided');
     }
 
     try {
@@ -29,14 +29,14 @@ export class AccessTokenWithout2faGuard implements CanActivate {
       request[REQUEST_USER_KEY] = payload;
       return payload;
     } catch (error) {
-      throw new UnauthorizedException(undefined, 'Invalid access token');
+      throw new UnauthorizedException('Invalid access token');
     }
   }
 
   private extractTokenFromHeaderOrCookie(req: Request) {
     const accessToken: string | undefined = req.cookies?.['accessToken'];
     if (accessToken) return accessToken;
-    const [_, token] = req.headers.authorization?.split(' ') ?? [];
+    const [, token] = req.headers.authorization?.split(' ') ?? [];
     return token;
   }
 }

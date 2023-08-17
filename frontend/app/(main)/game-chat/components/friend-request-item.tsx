@@ -1,19 +1,22 @@
 "use client";
 
-import { FriendRequest } from "@transcendence/common";
 import UserItem from "./user-item";
 import { LoaderButton } from "@/components/ui/loader-button";
 import { Check, X } from "lucide-react";
-import { useAcceptFriendRequest } from "@/api-hooks/user-accept-friend-request";
-import { useDeleteFriendRequest } from "@/api-hooks/use-delete-friend-request";
+import { useAcceptFriendRequest } from "@/api-hooks/friend-requests/user-accept-friend-request";
+import {
+  FriendRequestWithRequester,
+  FriendRequest,
+} from "@transcendence/common";
+import { useDeleteFriendRequest } from "@/api-hooks/friend-requests/use-delete-friend-request";
 
 type FriendRequestItemProps = {
-  friendRequest: FriendRequest;
+  friendRequest: FriendRequest & FriendRequestWithRequester;
 };
 export function FriendRequestItem({ friendRequest }: FriendRequestItemProps) {
   return (
     <div>
-      <UserItem user={friendRequest.requester!}>
+      <UserItem user={friendRequest.requester}>
         <AcceptFriendRequestBtn friendRequestId={friendRequest.id} />
         <RefuseFriendRequestBtn friendRequestId={friendRequest.id} />
       </UserItem>

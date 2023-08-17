@@ -49,7 +49,7 @@ export default function FriendItem({
           {isFriendConnected(friend.id) && (
             <div
               className={cn(
-                "absolute  bottom-1.5 right-0.5 h-4 w-4 rounded-full border-2 border-chat bg-green-400",
+                "absolute  bottom-1.5 right-0.5 h-4 w-4 rounded-full border-2 border-card bg-green-400",
                 {
                   "bottom-0 right-0 h-3 w-3": size === "sm",
                   "": size === "sm",
@@ -66,8 +66,8 @@ export default function FriendItem({
           <p>{friend.name}</p>
           {size === "default" && (
             <>
-              <p className="text-sm text-chat-foreground/60">In game</p>
-              <p className="text-sm text-chat-foreground/60">#60</p>
+              <p className="text-chat-foreground/60 text-sm">In game</p>
+              <p className="text-chat-foreground/60 text-sm">#60</p>
             </>
           )}
         </div>
@@ -82,10 +82,8 @@ export default function FriendItem({
             />
           </DropdownMenuTrigger>
           <DropdownMenuContent align="end">
-            <DropdownMenuItem className="cursor-pointer hover:bg-chat/90">
-              Play
-            </DropdownMenuItem>
-            <DropdownMenuItem className="cursor-pointer hover:bg-chat/90">
+            <DropdownMenuItem className="cursor-pointer">Play</DropdownMenuItem>
+            <DropdownMenuItem className="cursor-pointer">
               Profile
             </DropdownMenuItem>
             <BlockUserMenuItem userId={friend.id} />
@@ -110,10 +108,7 @@ export function UnfriendDropdownMenuItem({ friendId }: FriendIdProp) {
     targetUserId: friendId,
   });
   return (
-    <DropdownMenuItem
-      className="cursor-pointer hover:bg-chat/90"
-      onClick={unfriend}
-    >
+    <DropdownMenuItem className="cursor-pointer" onClick={unfriend}>
       Unfriend
     </DropdownMenuItem>
   );

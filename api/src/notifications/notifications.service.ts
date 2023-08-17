@@ -7,28 +7,22 @@ import {
   FriendConnectedData,
 } from '@transcendence/common';
 import { ChatService } from 'src/chat/chat.service';
-import { PrismaService } from 'src/prisma/prisma.service';
+import { NotificationsRepository } from './repositories/notifications.repository';
 
 @Injectable()
 export class NotificationsService {
   constructor(
     private readonly clientsStorage: NotificationsClientsStorage,
     private readonly clientStorage: NotificationsClientsStorage,
+    private readonly notificationsRepository: NotificationsRepository,
     @Inject(forwardRef(() => ChatService))
     private readonly chatService: ChatService,
-    private readonly prisma: PrismaService,
   ) {}
 
   async notify(usersIds: number[], event: string, data: any) {
     await Promise.all(
       usersIds.map((recipientId) =>
-        this.prisma.notifications.create({
-          data: {
-            event,
-            data: JSON.stringify(data),
-            recipientId,
-          },
-        }),
+        this.notificationsRepository.create(recipientId, event, data),
       ),
     );
     this.clientStorage.emit(usersIds, event, data);
@@ -78,28 +72,14 @@ export class NotificationsService {
   }
 
   async findNotifications(user: ActiveUserData) {
-    const data = await this.prisma.notifications.findMany({
-      where: { recipientId: user.sub },
-      orderBy: [{ createdAt: 'desc' }],
-    });
-    return data.map((notification) => ({
-      ...notification,
-      data: JSON.parse(notification.data),
-    }));
+    return this.notificationsRepository.findUserNotifications(user.sub);
   }
 
   async clearAll(user: ActiveUserData) {
-    await this.prisma.notifications.deleteMany({
-      where: { recipientId: user.sub },
-    });
+    await this.notificationsRepository.deleteAll(user.sub);
   }
 
   async readAll(user: ActiveUserData) {
-    await this.prisma.notifications.updateMany({
-      where: { isRead: false, recipientId: user.sub },
-      data: {
-        isRead: true,
-      },
-    });
+    await this.notificationsRepository.readAll(user.sub);
   }
 }

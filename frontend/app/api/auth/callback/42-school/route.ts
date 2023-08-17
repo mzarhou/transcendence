@@ -18,6 +18,7 @@ async function getAccessToken(code: string): Promise<string | null> {
     });
     return authData.access_token;
   } catch (err) {
+    console.log("Failed getting 42 access token");
     return null;
   }
 }
@@ -47,7 +48,8 @@ export async function GET(req: NextRequest) {
     return setCookies(response, tokens);
   } catch (error) {
     if (error instanceof AxiosError) {
-      return new Response(JSON.stringify(error.toJSON()), { status: 400 });
+      console.log(error.response?.data);
+      return new Response("Failed", { status: 400 });
     }
     if (error instanceof ZodError) {
       return new Response("Response shape invalid", { status: 400 });

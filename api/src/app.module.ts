@@ -12,6 +12,7 @@ import { ChatModule } from './chat/chat.module';
 import { NotificationsModule } from './notifications/notifications.module';
 import { MessageModule } from './message/message.module';
 import { FriendRequestModule } from './friend-request/friend-request.module';
+import { GroupsModule } from './groups/groups.module';
 
 @Module({
   imports: [
@@ -24,6 +25,7 @@ import { FriendRequestModule } from './friend-request/friend-request.module';
     NotificationsModule,
     MessageModule,
     FriendRequestModule,
+    GroupsModule,
   ],
   controllers: [AppController],
   providers: [

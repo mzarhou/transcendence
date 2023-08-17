@@ -97,7 +97,7 @@ function NavUserPopup() {
               style={{ backgroundImage: `url("${user?.avatar}")` }}
             ></div>
           </span>
-          <div className="icon-container icon-md ml-2 text-gray-500">
+          <div className="icon-container icon-md ml-2">
             <LucideChevronDown className="h-full w-full" />
           </div>
         </Button>

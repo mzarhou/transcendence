@@ -18,22 +18,27 @@ export const LoaderButton: FC<LoaderButtonProps> = ({
   return (
     <Button
       className={cn(
-        { "relative inline-flex items-center justify-center": isLoading },
+        {
+          "relative overflow-hidden": isLoading,
+        },
         className
       )}
       type="submit"
       disabled={isLoading}
       {...props}
     >
-      <Loader2
-        className={cn(
-          "absolute opacity-0",
-          {
-            "animate-spin opacity-100": isLoading,
-          },
-          iconClassName
-        )}
-      />
+      {isLoading && (
+        <div className="absolute inset-0 flex items-center justify-center">
+          <Loader2
+            className={cn(
+              {
+                "animate-spin": isLoading,
+              },
+              iconClassName
+            )}
+          />
+        </div>
+      )}
       {children}
     </Button>
   );

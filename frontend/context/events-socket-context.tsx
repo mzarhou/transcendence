@@ -30,7 +30,7 @@ import { useSWRConfig } from "swr";
 import { getMessagesKey } from "@/api-hooks/use-messages";
 import { useAtom } from "jotai";
 import { connectedFriendsAtom } from "@/stores/connected-users-atom";
-import { friendRequestsKey } from "@/api-hooks/use-friend-requests";
+import { friendRequestsKey } from "@/api-hooks/friend-requests/use-friend-requests";
 import { unreadMessagesKey } from "@/api-hooks/use-unread-messages";
 import { env } from "@/env/client.mjs";
 import { notificationsKey } from "@/api-hooks/use-notifications";

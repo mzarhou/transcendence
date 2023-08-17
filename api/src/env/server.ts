@@ -1,4 +1,5 @@
 import { z, ZodFormattedError } from 'zod';
+import * as dotenv from 'dotenv';
 
 const envSchema = z.object({
   FRONTEND_URL: z.string(),
@@ -7,22 +8,23 @@ const envSchema = z.object({
 
   APP_SECRET: z.string(),
 
-  PORT: z.string().regex(/\d+/).transform(Number).optional(),
+  PORT: z.string().regex(/^\d+$/).transform(Number).optional(),
 
   JWT_SECRET: z.string(),
   JWT_TOKEN_AUDIENCE: z.string(),
   JWT_TOKEN_ISSUER: z.string(),
-  JWT_ACCESS_TOKEN_TTL: z.string().regex(/\d+/).transform(Number),
-  JWT_REFRESH_TOKEN_TTL: z.string().regex(/\d+/).transform(Number),
+  JWT_ACCESS_TOKEN_TTL: z.string().regex(/^\d+$/).transform(Number),
+  JWT_REFRESH_TOKEN_TTL: z.string().regex(/^\d+$/).transform(Number),
 
   TFA_APP_NAME: z.string(),
 
   REDISHOST: z.string(),
   REDISPASSWORD: z.string(),
-  REDISPORT: z.string().regex(/\d+/).transform(Number),
+  REDISPORT: z.string().regex(/^\d+$/).transform(Number),
   REDISUSER: z.string(),
 });
 
+dotenv.config();
 const _env = envSchema.safeParse(process.env);
 
 const formatErrors = (errors: ZodFormattedError<Map<string, string>, string>) =>

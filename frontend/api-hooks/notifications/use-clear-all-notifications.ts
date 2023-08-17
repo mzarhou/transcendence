@@ -3,22 +3,26 @@ import { api } from "@/lib/api";
 import { useSWRConfig } from "swr";
 import useSWRMutation from "swr/mutation";
 import { notificationsKey } from "./use-notifications";
+import { getServerMessage } from "@/lib/utils";
 
-export const useReadAllNotifications = () => {
+export const useClearAllNotifications = () => {
   const { toast } = useToast();
   const { mutate } = useSWRConfig();
   const { trigger, ...rest } = useSWRMutation(
-    "/notifications/read-all",
-    async (url) => api.patch(url),
+    "/notifications/clear-all",
+    async (url) => api.delete(url),
     {
-      onError: (_error) => {
+      onError: (error) => {
         toast({
-          description: "Failed to read all notifications",
+          description: getServerMessage(
+            error,
+            "Failed to clear all notifications"
+          ),
           variant: "destructive",
         });
       },
       onSuccess: () => {
-        mutate(notificationsKey);
+        mutate(notificationsKey, [], { revalidate: false });
       },
     }
   );

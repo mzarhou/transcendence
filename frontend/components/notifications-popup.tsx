@@ -5,18 +5,19 @@ import { Popover, PopoverContent } from "./ui/popover";
 import { PopoverTrigger } from "@radix-ui/react-popover";
 import { Button } from "./ui/button";
 import { Dispatch, SetStateAction, useMemo, useState } from "react";
-import { useNotifications } from "@/api-hooks/use-notifications";
-import { cn } from "@/lib/utils";
+import { useNotifications } from "@/api-hooks/notifications/use-notifications";
+import { useReadAllNotifications } from "@/api-hooks/notifications/use-read-all-notifications";
+import { useClearAllNotifications } from "@/api-hooks/notifications/use-clear-all-notifications";
 import Link from "next/link";
 import {
   FRIEND_REQUEST_EVENT,
   FRIEND_REQUEST_ACCEPTED_EVENT,
   FriendRequest,
   Notification,
+  FriendRequestWithRequester,
+  FriendRequestWithRecipient,
 } from "@transcendence/common";
-import { useClearAllNotifications } from "@/api-hooks/use-clear-all-notifications";
 import { LoaderButton } from "./ui/loader-button";
-import { useReadAllNotifications } from "@/api-hooks/use-read-all-notifications";
 import { NoticationsBadge } from "./ui/notifications-badge";
 
 export default function NotificationsPopup() {
@@ -26,13 +27,11 @@ export default function NotificationsPopup() {
   const notificationsItems =
     notifications.length > 0 ? (
       notifications.map((nt) => (
-        <div
-          key={nt.id}
-          className={cn({
-            "bg-chat-card": !nt.isRead,
-          })}
-        >
+        <div key={nt.id} className="relative">
           <NotificationItem key={nt.id} notification={nt} setOpen={setOpen} />
+          {!nt.isRead && (
+            <div className="absolute right-0 top-1 h-2 w-2 rounded-full bg-primary-foreground dark:bg-primary"></div>
+          )}
         </div>
       ))
     ) : (
@@ -108,7 +107,7 @@ function NotificationItem({
   setOpen: Dispatch<SetStateAction<boolean>>;
 }) {
   if (nt.event === FRIEND_REQUEST_EVENT) {
-    const data = nt.data as FriendRequest;
+    const data = nt.data as FriendRequest & FriendRequestWithRequester;
     return (
       <Link
         href="/game-chat/friend-requests"
@@ -116,18 +115,18 @@ function NotificationItem({
         onClick={() => setOpen(false)}
       >
         <span> You have new friend request from</span>
-        <span className="font-extrabold">{data.requester?.name}</span>
+        <span className="font-extrabold">{data.requester.name}</span>
       </Link>
     );
   }
   if (nt.event === FRIEND_REQUEST_ACCEPTED_EVENT) {
-    const data = nt.data as FriendRequest;
+    const data = nt.data as FriendRequest & FriendRequestWithRecipient;
     return (
       <div className="space-x-1">
-        <span className="font-extrabold">{data.recipient?.name}</span>
+        <span className="font-extrabold">{data.recipient.name}</span>
         <span>accept you friend request</span>
       </div>
     );
   }
-  return <></>;
+  return <div>{nt.data}</div>;
 }

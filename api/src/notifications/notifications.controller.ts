@@ -2,8 +2,9 @@ import { Controller, Delete, Get, Patch } from '@nestjs/common';
 import { NotificationsService } from './notifications.service';
 import { ActiveUser } from 'src/iam/decorators/active-user.decorator';
 import { ActiveUserData } from 'src/iam/interface/active-user-data.interface';
-import { ApiTags } from '@nestjs/swagger';
+import { ApiBearerAuth, ApiTags } from '@nestjs/swagger';
 
+@ApiBearerAuth()
 @ApiTags('notifications')
 @Controller('notifications')
 export class NotificationsController {

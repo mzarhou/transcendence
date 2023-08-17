@@ -6,6 +6,8 @@ import { IamModule } from 'src/iam/iam.module';
 import { ChatModule } from 'src/chat/chat.module';
 import { NotificationsController } from './notifications.controller';
 import { PrismaModule } from 'src/prisma/prisma.module';
+import { NotificationsRepository } from './repositories/notifications.repository';
+import { NotificationsPrismaRepository } from './repositories/notifications-prisma.repository';
 
 @Module({
   imports: [PrismaModule, IamModule, forwardRef(() => ChatModule)],
@@ -15,6 +17,10 @@ import { PrismaModule } from 'src/prisma/prisma.module';
     NotificationsClientsStorage,
     NotificationsGateway,
     NotificationsService,
+    {
+      provide: NotificationsRepository,
+      useClass: NotificationsPrismaRepository,
+    },
   ],
   exports: [NotificationsService],
 })

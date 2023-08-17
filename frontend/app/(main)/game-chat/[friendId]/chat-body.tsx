@@ -103,7 +103,7 @@ function ChatMessages({ friendId }: { friendId: number }) {
       ) : (
         <FullPlaceHolder
           text="No messages found"
-          className="text-chat-foreground/30"
+          className="text-card-foreground/30"
         />
       )}
     </div>

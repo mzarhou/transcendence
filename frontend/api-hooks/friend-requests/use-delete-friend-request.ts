@@ -1,32 +1,30 @@
 import { useToast } from "@/components/ui/use-toast";
-import { useRevalidateSearch } from "@/hooks/use-revalidate-search";
+import { useRevalidateUsersSearch } from "@/hooks/use-revalidate-search";
 import { api } from "@/lib/api";
-import { AxiosError } from "axios";
+import { getServerMessage } from "@/lib/utils";
 import { useSWRConfig } from "swr";
 import useSWRMutation from "swr/mutation";
 
-export const useAcceptFriendRequest = (friendRequestId: number) => {
+export const useDeleteFriendRequest = (friendRequestId: number) => {
   const { toast } = useToast();
   const { mutate } = useSWRConfig();
-  const { revalidateSearch } = useRevalidateSearch();
+  const { revalidateSearch } = useRevalidateUsersSearch();
 
   const { trigger, ...rest } = useSWRMutation(
-    `/chat/friend-request/${friendRequestId}/accept`,
-    async (url) => api.post(url),
+    `/chat/friend-request/${friendRequestId}`,
+    async (url) => api.delete(url),
     {
       onError: (error) => {
-        let message = "Failed to accept friend request";
-        if (error instanceof AxiosError) {
-          message = error.message;
-        }
         toast({
-          description: message,
+          description: getServerMessage(
+            error,
+            "Failed to delete friend request"
+          ),
           variant: "destructive",
         });
       },
       onSuccess: () => {
-        toast({ description: "Friend request accepted" });
-        mutate("/chat/friends");
+        toast({ description: "Friend request deleted" });
         mutate("/chat/friend-request/received");
         revalidateSearch();
       },

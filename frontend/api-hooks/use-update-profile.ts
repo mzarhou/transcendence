@@ -5,31 +5,23 @@ import { UpdateUserType } from "@transcendence/common";
 import { AxiosError } from "axios";
 import { useSWRConfig } from "swr";
 import useSWRMutation from "swr/mutation";
+import { getServerMessage } from "@/lib/utils";
 
 export const useUpdateProfile = () => {
   const { toast } = useToast();
   const { mutate } = useSWRConfig();
-  const { user } = useUser();
 
   const { trigger, ...rest } = useSWRMutation(
     `/users/me`,
-    async (url, { arg }: { arg: UpdateUserType }) => {
-      if (!user) return;
-      return api.patch(url, arg).catch((err) => {
-        if (err instanceof AxiosError) {
-          throw err.message;
-        }
-        throw "Unkown error";
-      });
-    },
+    async (url, { arg }: { arg: UpdateUserType }) => api.patch(url, arg),
     {
       onSuccess: () => {
         toast({ description: "Profile Updated" });
         mutate("/users/me");
       },
-      onError: (_error) => {
+      onError: (error) => {
         toast({
-          description: "Failed to update profile",
+          description: getServerMessage(error, "Failed to update profile"),
           variant: "destructive",
         });
       },
