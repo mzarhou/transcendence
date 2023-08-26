@@ -13,6 +13,8 @@ import twitter from "/public/images/twitter.png";
 import { NavBar } from "@/components/navbar";
 import { UserProvider } from "@/context/user-context";
 import { useTheme } from "next-themes";
+import Link from 'next/link'
+import { buttonVariants } from '@/components/ui/button'
 
 export default function Home() {
   const { theme } = useTheme();
@@ -23,21 +25,23 @@ export default function Home() {
         <NavBar />
       </div>
       <main className="container mx-auto px-6 pb-24 pt-20 lg:pt-40">
-        <div className="flex flex-col items-center  justify-between space-y-8 lg:flex-row ">
-          <div className="space-y-8 text-center text-foreground lg:inline-block lg:w-[40%] lg:text-left">
-            <h1 className="text-[clamp(2rem,4vw,4rem)] font-semibold">
-              WELCOME TO FT_TRANSCENDENCE
+      <div className="flex flex-col items-center  justify-between space-y-8 lg:flex-row ">
+          <div className="space-y-8 text-center text-foreground lg:inline-block lg:w-[43%] lg:text-left">
+            <h1 className="text-[clamp(2rem,4vw,4rem)] font-semibold leading-tight">
+              Welcome to PingPong!
             </h1>
-            <p className="font-inter text-lg lg:text-xl">
-              Lorem Ipsum is simply dummy text of the printing and typesetting
-              industry. Lorem Ipsum has been the industry's standard dummy text
-              ever since the 1500s.
+            <p className="font-inter text-lg opacity-70 lg:text-xl">
+              Serve, rally, chat, and conquer in our dynamic online pingpong
+              game. Play against friends and foes worldwide. Instant fun awaits!
             </p>
+            <Link href="/login" className={buttonVariants({ size: "lg" })}>
+              Get Started
+            </Link>
           </div>
           <Image
-            src={theme === 'dark' ? darkimg : landingpageimg}
+            src={theme === "dark" ? darkimg : landingpageimg}
             alt="landing page image"
-            className="lg:block"
+            className="w-[50%] lg:block"
           />
         </div>
         <div className="mt-56">
@@ -188,9 +192,6 @@ export default function Home() {
           </div>
         </div>
       </main>
-      {/* <div className="mb-24 mt-12 px-5 md:px-8">
-        <main className="mx-auto max-w-container"></main>
-      </div> */}
     </UserProvider>
   );
 }
