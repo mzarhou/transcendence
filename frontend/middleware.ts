@@ -98,7 +98,7 @@ export async function middleware(request: NextRequest) {
   const pathname = new URL(request.url).pathname;
   const { user, newTokens } = await getUserFromRequest(request);
 
-  const guestRoutes = ["/signup", "/login"];
+  const guestRoutes = ["/signup", "/login", "/"];
   const isGuestRoute = guestRoutes.some((route) => pathname.startsWith(route));
 
   if (isGuestRoute && user) {
