@@ -45,27 +45,33 @@ export async function refreshTokens(request: NextRequest) {
     if (forwardHeaders[k]) headers.set(k, forwardHeaders[k]!);
   });
 
-  const response = await fetch(
-    env.NEXT_PUBLIC_API_URL + "/authentication/refresh-tokens",
-    {
-      method: "POST",
-      body: JSON.stringify({
-        refreshToken: refreshToken,
-      }),
-      headers,
-    }
-  );
+  try {
+    const response = await fetch(
+      env.NEXT_PUBLIC_API_URL + "/authentication/refresh-tokens",
+      {
+        method: "POST",
+        body: JSON.stringify({
+          refreshToken: refreshToken,
+        }),
+        headers,
+      }
+    );
 
-  if (!response.ok) {
-    log("middleware: refreshing tokens... ❌");
+    if (!response.ok) {
+      throw new Error("middleware: refreshing tokens... ❌");
+    }
+
+    const parseResult = tokensResponseSchema.safeParse(await response.json());
+    if (!parseResult.success) {
+      throw new Error("middleware: parsing failed... ❌");
+    }
+
+    log("middleware: refreshing tokens... ✅");
+    return parseResult.data;
+  } catch (error) {
+    log((error as any).message);
     return null;
   }
-
-  const parseResult = tokensResponseSchema.safeParse(await response.json());
-  if (!parseResult.success) return null;
-
-  log("middleware: refreshing tokens... ✅");
-  return parseResult.data;
 }
 
 type UserAuthData = {
@@ -98,10 +104,12 @@ export async function middleware(request: NextRequest) {
   const pathname = new URL(request.url).pathname;
   const { user, newTokens } = await getUserFromRequest(request);
 
-  const guestRoutes = ["/signup", "/login", "/"];
-  const isGuestRoute = guestRoutes.some((route) => pathname.startsWith(route));
+  // "" -> landing page
+  const guestRoutes = ["signup", "login", ""];
+  const isGuestRoute = guestRoutes.includes(pathname.trim().split("/")[1]);
 
   if (isGuestRoute && user) {
+    console.log("redirecting to game chat");
     return NextResponse.redirect(new URL("/game-chat", request.url));
   }
   if (!isGuestRoute && !user) {
@@ -115,7 +123,7 @@ export async function middleware(request: NextRequest) {
 
 export const config = {
   matcher: [
-    "/((?!api|auth.jpg|_next/static|_next/image|favicon.ico).*)",
+    "/((?!api|auth.jpg|logo.png|images|_next/static|_next/image|favicon.ico).*)",
     "/api/auth/refresh-tokens",
   ],
 };
