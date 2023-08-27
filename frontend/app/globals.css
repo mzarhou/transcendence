@@ -43,6 +43,8 @@
 
     --warning: 43 91% 75%;
     --warning-foreground: 43 92% 30%;
+
+    --drop-shadow: 26 80% 80%;
   }
 
   .dark {
@@ -86,6 +88,8 @@
 
     --warning: 43 80% 50%;
     --warning-foreground: 42 80% 90%;
+
+    --drop-shadow: 221 82% 80%;
   }
 }
 

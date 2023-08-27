@@ -79,6 +79,9 @@ module.exports = {
         "accordion-down": "accordion-down 0.2s ease-out",
         "accordion-up": "accordion-up 0.2s ease-out",
       },
+      dropShadow: {
+        'lp-cards': "0px 5px 15px hsl(var(--drop-shadow))",
+      },
     },
   },
   plugins: [require("tailwindcss-animate")],
