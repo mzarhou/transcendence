@@ -26,7 +26,6 @@ export class FriendRequestController {
     @ActiveUser() user: ActiveUserData,
     @Body() createFriendRequestDto: CreateFriendRequestDto,
   ) {
-    user.allow('create', 'FriendRequest');
     return this.friendRequestService.create(user, createFriendRequestDto);
   }
 

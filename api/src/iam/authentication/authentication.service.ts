@@ -18,8 +18,6 @@ import { SignInDto } from './dto/sign-in.dto';
 import { SignUpDto } from './dto/sign-up.dto';
 import { HashingService } from '../hashing/hashing.service';
 import { User } from '@prisma/client';
-import { AbilityFactory, AppAbility } from '../authorization/ability.factory';
-import { ForbiddenError } from '@casl/ability';
 import { Socket } from 'socket.io';
 import { parse } from 'cookie';
 import { WebsocketException } from 'src/notifications/ws.exception';
@@ -34,7 +32,6 @@ export class AuthenticationService {
     private readonly refreshTokenIdsStorage: RefreshTokenIdsStorage,
     private readonly usersRepository: UsersRepository,
     private readonly hashingService: HashingService,
-    private readonly abilityFactory: AbilityFactory,
   ) {}
 
   async signIn(signInDto: SignInDto, fingerprintHash: string) {
@@ -72,7 +69,7 @@ export class AuthenticationService {
     const refreshTokenId = randomUUID();
 
     const [accessToken, refreshToken] = await Promise.all([
-      this.signToken<Omit<ActiveUserData, 'sub' | 'allow'>>(
+      this.signToken<Omit<ActiveUserData, 'sub'>>(
         user,
         this.jwtConfiguration.accessTokenTtl,
         {
@@ -149,17 +146,11 @@ export class AuthenticationService {
   }
 
   async getUserFromToken(token: string): Promise<ActiveUserData> {
-    const _payload = await this.jwtService.verifyAsync<
-      Omit<ActiveUserData, 'allow'>
-    >(token, this.jwtConfiguration);
-
-    const ability = this.abilityFactory.defineForUser(_payload);
-    return {
-      ..._payload,
-      allow: (...args: Parameters<AppAbility['can']>) => {
-        ForbiddenError.from(ability).throwUnlessCan(...args);
-      },
-    };
+    const payload = await this.jwtService.verifyAsync<ActiveUserData>(
+      token,
+      this.jwtConfiguration,
+    );
+    return payload;
   }
 
   async getUserFromSocket(socket: Socket) {

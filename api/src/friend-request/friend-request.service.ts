@@ -10,11 +10,13 @@ import { FRIEND_REQUEST_EVENT } from '@transcendence/common';
 import { FRIEND_REQUEST_ACCEPTED_EVENT } from '@transcendence/common';
 import { FriendRequestsRepository } from './repositories/_friend-requests.repository';
 import { subject } from '@casl/ability';
+import { FriendRequestPolicy } from './friend-request.policy';
 
 @Injectable()
 export class FriendRequestService {
   constructor(
     private readonly friendRequestsRepository: FriendRequestsRepository,
+    private readonly friendRequestsPolicy: FriendRequestPolicy,
     private readonly notificationsService: NotificationsService,
   ) {}
 
@@ -23,11 +25,7 @@ export class FriendRequestService {
     createFriendRequestDto: CreateFriendRequestDto,
   ) {
     const { targetUserId } = createFriendRequestDto;
-    if (targetUserId === user.sub) {
-      throw new BadRequestException(
-        "You can't send friend request to your self",
-      );
-    }
+    this.friendRequestsPolicy.canCreate(user, targetUserId);
 
     const receivedFriendRequests = await this.findRecieved(user);
     const pendingFriendRequest =
@@ -71,7 +69,7 @@ export class FriendRequestService {
     const friendRequest = await this.friendRequestsRepository.findOneOrThrow(
       id,
     );
-    user.allow('delete', subject('FriendRequest', friendRequest));
+    this.friendRequestsPolicy.canDelete(user, friendRequest);
     await this.friendRequestsRepository.destroy(id);
   }
 
@@ -79,11 +77,11 @@ export class FriendRequestService {
     const friendRequest = await this.friendRequestsRepository.findOneOrThrow(
       id,
     );
-    user.allow('accept', subject('FriendRequest', friendRequest));
 
-    if (friendRequest.recipientId !== user.sub) {
-      throw new ForbiddenException('You can not accept this friend request');
-    }
+    this.friendRequestsPolicy.canUpdate(user, {
+      action: 'accept',
+      friendRequest,
+    });
 
     const acceptedFriendRequest =
       await this.friendRequestsRepository.acceptFriendRequest({
