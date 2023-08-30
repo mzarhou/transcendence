@@ -8,10 +8,10 @@ import {
   Query,
 } from '@nestjs/common';
 import { SearchUsersDto } from './dto/search-users.dto';
-import { ActiveUser } from 'src/iam/decorators/active-user.decorator';
-import { ActiveUserData } from 'src/iam/interface/active-user-data.interface';
+import { ActiveUser } from '@src/iam/decorators/active-user.decorator';
+import { ActiveUserData } from '@src/iam/interface/active-user-data.interface';
 import { ChatService } from './chat.service';
-import { IdDto } from 'src/common/dto/id-param.dto';
+import { IdDto } from '@src/+common/dto/id-param.dto';
 import { ApiBearerAuth, ApiTags } from '@nestjs/swagger';
 
 @ApiBearerAuth()

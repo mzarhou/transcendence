@@ -13,9 +13,9 @@ import {
 import { GroupsService } from './groups.service';
 import { CreateGroupDto } from './dto/create-group.dto';
 import { UpdateGroupDto } from './dto/update-group.dto';
-import { ActiveUser } from 'src/iam/decorators/active-user.decorator';
-import { ActiveUserData } from 'src/iam/interface/active-user-data.interface';
-import { IdDto } from 'src/common/dto/id-param.dto';
+import { ActiveUser } from '@src/iam/decorators/active-user.decorator';
+import { ActiveUserData } from '@src/iam/interface/active-user-data.interface';
+import { IdDto } from '@src/+common/dto/id-param.dto';
 import { AddGroupAdminDto } from './dto/group-admin/add-group-admin.dto';
 import { BanUserDto } from './dto/ban-user/ban-user.dto';
 import { UnBanUserDto } from './dto/ban-user/unban-user.dto';
@@ -24,7 +24,7 @@ import { ApiBearerAuth, ApiOperation, ApiTags } from '@nestjs/swagger';
 import { KickUserDto } from './dto/kick-user.dto';
 import { JoinGroupDto } from './dto/join-group.dto';
 import { LeaveGroupDto } from './dto/leave-group.dto';
-import { SearchUsersDto } from 'src/chat/dto/search-users.dto';
+import { SearchUsersDto } from '@src/chat/dto/search-users.dto';
 import { GroupUsersFilterDto } from './dto/group-users-filter-query.dto';
 
 @ApiBearerAuth()

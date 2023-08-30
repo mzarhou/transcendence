@@ -7,7 +7,7 @@ import { IamModule } from './iam/iam.module';
 import { APP_PIPE } from '@nestjs/core';
 import { ZodValidationPipe } from 'nestjs-zod';
 import { RedisModule } from './redis/redis.module';
-import { PrismaModule } from './prisma/prisma.module';
+import { PrismaModule } from './+prisma/prisma.module';
 import { ChatModule } from './chat/chat.module';
 import { NotificationsModule } from './notifications/notifications.module';
 import { MessageModule } from './message/message.module';

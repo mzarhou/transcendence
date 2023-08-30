@@ -5,14 +5,14 @@ import {
 } from '@nestjs/common';
 import { CreateGroupDto } from './dto/create-group.dto';
 import { UpdateGroupDto } from './dto/update-group.dto';
-import { ActiveUserData } from 'src/iam/interface/active-user-data.interface';
+import { ActiveUserData } from '@src/iam/interface/active-user-data.interface';
 import { AddGroupAdminDto } from './dto/group-admin/add-group-admin.dto';
 import { ApiTags } from '@nestjs/swagger';
 import { BanUserDto } from './dto/ban-user/ban-user.dto';
 import { RemoveGroupAdminDto } from './dto/group-admin/remove-group-admin.dto';
 import { UnBanUserDto } from './dto/ban-user/unban-user.dto';
 import { KickUserDto } from './dto/kick-user.dto';
-import { NotificationsService } from 'src/notifications/notifications.service';
+import { NotificationsService } from '@src/notifications/notifications.service';
 import {
   GROUP_DELETED_EVENT,
   GROUP_KICKED_EVENT,
@@ -23,7 +23,7 @@ import { ADD_ADMIN_EVENT } from '@transcendence/common';
 import { GROUP_BANNED_EVENT } from '@transcendence/common';
 import { JOIN_GROUP_EVENT } from '@transcendence/common';
 import { LEAVE_GROUP_EVENT } from '@transcendence/common';
-import { HashingService } from 'src/iam/hashing/hashing.service';
+import { HashingService } from '@src/iam/hashing/hashing.service';
 import { JoinGroupDto } from './dto/join-group.dto';
 import { LeaveGroupDto } from './dto/leave-group.dto';
 import { GroupUsersFilterDto } from './dto/group-users-filter-query.dto';

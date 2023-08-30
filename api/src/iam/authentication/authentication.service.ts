@@ -20,8 +20,8 @@ import { HashingService } from '../hashing/hashing.service';
 import { User } from '@prisma/client';
 import { Socket } from 'socket.io';
 import { parse } from 'cookie';
-import { WebsocketException } from 'src/notifications/ws.exception';
-import { UsersRepository } from 'src/users/repositories/users.repository';
+import { WebsocketException } from '@src/notifications/ws.exception';
+import { UsersRepository } from '@src/users/repositories/users.repository';
 
 @Injectable()
 export class AuthenticationService {

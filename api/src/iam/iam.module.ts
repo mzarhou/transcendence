@@ -14,12 +14,12 @@ import { OtpAuthenticationService } from './authentication/otp/otp-authenticatio
 import { AccessTokenWithout2faGuard } from './authentication/guards/access-token-without-2fa.guard';
 import { OtpAuthenticationController } from './authentication/otp/otp-authentication.controller';
 import { OtpSecretsStorage } from './authentication/otp/otp-secrets.storage';
-import { RedisModule } from 'src/redis/redis.module';
+import { RedisModule } from '@src/redis/redis.module';
 import { CryptoService } from './authentication/otp/crypto.service';
 import { BcryptService } from './hashing/bcrypt.service';
 import { HashingService } from './hashing/hashing.service';
-import { PrismaModule } from 'src/prisma/prisma.module';
-import { UsersModule } from 'src/users/users.module';
+import { PrismaModule } from '@src/+prisma/prisma.module';
+import { UsersModule } from '@src/users/users.module';
 
 const Fingerprint = require('express-fingerprint');
 

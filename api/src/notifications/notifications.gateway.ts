@@ -5,12 +5,12 @@ import {
 } from '@nestjs/websockets';
 import { NotificationsClientsStorage } from './notifications-clients.storage';
 import { NotificationsService } from './notifications.service';
-import { AuthenticationService } from 'src/iam/authentication/authentication.service';
+import { AuthenticationService } from '@src/iam/authentication/authentication.service';
 import { Logger } from '@nestjs/common';
 import { Socket } from 'socket.io';
 import { WebsocketException } from './ws.exception';
 import { ERROR_EVENT } from '@transcendence/common';
-import { env } from 'src/env/server';
+import { env } from '@src/+env/server';
 
 @WebSocketGateway({
   cors: {

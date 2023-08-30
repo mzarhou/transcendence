@@ -12,10 +12,10 @@ import { MessageService } from './message.service';
 import { MESSAGE_EVENT } from '@transcendence/common';
 import { ZodValidationPipe } from 'nestjs-zod';
 import { WebsocketExceptionFilter } from '../notifications/ws-exception.filter';
-import { AuthenticationService } from 'src/iam/authentication/authentication.service';
-import { WebsocketException } from 'src/notifications/ws.exception';
-import { NotificationsService } from 'src/notifications/notifications.service';
-import { env } from 'src/env/server';
+import { AuthenticationService } from '@src/iam/authentication/authentication.service';
+import { WebsocketException } from '@src/notifications/ws.exception';
+import { NotificationsService } from '@src/notifications/notifications.service';
+import { env } from '@src/+env/server';
 
 @UsePipes(new ZodValidationPipe())
 @UseFilters(new WebsocketExceptionFilter())

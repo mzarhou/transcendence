@@ -5,7 +5,7 @@ import {
   UnauthorizedException,
 } from '@nestjs/common';
 import { Request } from 'express';
-import { REQUEST_USER_KEY } from 'src/iam/iam.constants';
+import { REQUEST_USER_KEY } from '@src/iam/iam.constants';
 import { AuthenticationService } from '../authentication.service';
 
 @Injectable()

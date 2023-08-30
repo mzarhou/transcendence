@@ -1,10 +1,10 @@
 import { Injectable } from '@nestjs/common';
-import { ActiveUserData } from 'src/iam/interface/active-user-data.interface';
+import { ActiveUserData } from '@src/iam/interface/active-user-data.interface';
 import { FriendRequestService } from '../friend-request/friend-request.service';
 import { FriendRequest, User } from '@prisma/client';
 import { SearchUser } from '@transcendence/common';
-import { UsersRepository } from 'src/users/repositories/users.repository';
-import { FriendRequestsRepository } from 'src/friend-request/repositories/_friend-requests.repository';
+import { UsersRepository } from '@src/users/repositories/users.repository';
+import { FriendRequestsRepository } from '@src/friend-request/repositories/_friend-requests.repository';
 
 @Injectable()
 export class ChatService {

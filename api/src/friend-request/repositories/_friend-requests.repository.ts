@@ -4,7 +4,7 @@ import {
   FriendRequestWithRecipient,
   FriendRequestWithRequester,
 } from '@transcendence/common';
-import { MakePropsUndefined } from 'src/groups/repositories/_goups.repository';
+import { MakePropsUndefined } from '@src/groups/repositories/_goups.repository';
 
 export type FriendRequestFindWhere = <
   A extends true | false,

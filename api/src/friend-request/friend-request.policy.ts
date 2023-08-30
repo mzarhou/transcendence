@@ -1,7 +1,7 @@
 import { Injectable } from '@nestjs/common';
 import { FriendRequest } from '@transcendence/common';
-import { PolicyBase } from 'src/common/dto/base.policy';
-import { ActiveUserData } from 'src/iam/interface/active-user-data.interface';
+import { PolicyBase } from '@src/+common/dto/base.policy';
+import { ActiveUserData } from '@src/iam/interface/active-user-data.interface';
 
 @Injectable()
 export class FriendRequestPolicy extends PolicyBase {

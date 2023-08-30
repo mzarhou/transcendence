@@ -1,13 +1,13 @@
 import { ForbiddenException, Injectable } from '@nestjs/common';
 import { authenticator } from 'otplib';
 import { OtpSecretsStorage } from './otp-secrets.storage';
-import { ActiveUserData } from 'src/iam/interface/active-user-data.interface';
+import { ActiveUserData } from '@src/iam/interface/active-user-data.interface';
 import { AuthenticationService } from '../authentication.service';
 import { Provide2faCodeDto } from '../dto/provide-2fa-code.dto';
 import { CryptoService } from './crypto.service';
-import { UsersService } from 'src/users/users.service';
-import { env } from 'src/env/server';
-import { UsersRepository } from 'src/users/repositories/users.repository';
+import { UsersService } from '@src/users/users.service';
+import { env } from '@src/+env/server';
+import { UsersRepository } from '@src/users/repositories/users.repository';
 
 @Injectable()
 export class OtpAuthenticationService {

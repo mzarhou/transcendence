@@ -1,9 +1,9 @@
 import { Controller, Get, Body, Patch, Param } from '@nestjs/common';
 import { UsersService } from './users.service';
 import { UpdateUserDto } from './dto/update-user.dto';
-import { ActiveUser } from 'src/iam/decorators/active-user.decorator';
-import { ActiveUserData } from 'src/iam/interface/active-user-data.interface';
-import { IdDto } from 'src/common/dto/id-param.dto';
+import { ActiveUser } from '@src/iam/decorators/active-user.decorator';
+import { ActiveUserData } from '@src/iam/interface/active-user-data.interface';
+import { IdDto } from '@src/+common/dto/id-param.dto';
 import { ApiBearerAuth, ApiTags } from '@nestjs/swagger';
 
 @ApiBearerAuth()

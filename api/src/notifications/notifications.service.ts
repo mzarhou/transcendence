@@ -1,12 +1,12 @@
 import { Inject, Injectable, forwardRef } from '@nestjs/common';
 import { NotificationsClientsStorage } from './notifications-clients.storage';
-import { ActiveUserData } from 'src/iam/interface/active-user-data.interface';
+import { ActiveUserData } from '@src/iam/interface/active-user-data.interface';
 import {
   FRIEND_CONNECTED,
   FRIEND_DISCONNECTED,
   FriendConnectedData,
 } from '@transcendence/common';
-import { ChatService } from 'src/chat/chat.service';
+import { ChatService } from '@src/chat/chat.service';
 import { NotificationsRepository } from './repositories/notifications.repository';
 
 @Injectable()

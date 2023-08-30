@@ -1,5 +1,5 @@
 import { ForbiddenException } from '@nestjs/common';
-import { ActiveUserData } from 'src/iam/interface/active-user-data.interface';
+import { ActiveUserData } from '@src/iam/interface/active-user-data.interface';
 
 export abstract class PolicyBase {
   throwUnlessCan(can: Boolean, message?: string) {

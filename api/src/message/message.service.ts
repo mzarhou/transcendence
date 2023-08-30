@@ -1,8 +1,8 @@
 import { Injectable } from '@nestjs/common';
 import { MessageDto } from './dto/message.dto';
-import { ActiveUserData } from 'src/iam/interface/active-user-data.interface';
-import { ChatService } from 'src/chat/chat.service';
-import { NotificationsService } from 'src/notifications/notifications.service';
+import { ActiveUserData } from '@src/iam/interface/active-user-data.interface';
+import { ChatService } from '@src/chat/chat.service';
+import { NotificationsService } from '@src/notifications/notifications.service';
 import { MESSAGE_READ_EVENT } from '@transcendence/common';
 import { MessagesRepository } from './repositories/messages.repository';
 import { MessagesPolicy } from './message.policy';

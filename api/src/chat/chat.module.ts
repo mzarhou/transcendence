@@ -1,9 +1,9 @@
 import { Module } from '@nestjs/common';
-import { PrismaModule } from 'src/prisma/prisma.module';
+import { PrismaModule } from '@src/+prisma/prisma.module';
 import { ChatController } from './chat.controller';
 import { ChatService } from './chat.service';
-import { FriendRequestModule } from 'src/friend-request/friend-request.module';
-import { UsersModule } from 'src/users/users.module';
+import { FriendRequestModule } from '@src/friend-request/friend-request.module';
+import { UsersModule } from '@src/users/users.module';
 
 @Module({
   imports: [PrismaModule, FriendRequestModule, UsersModule],

@@ -1,6 +1,6 @@
 import { Test } from '@nestjs/testing';
-import { AppModule } from 'src/app.module';
-import { PrismaService } from 'src/prisma/prisma.service';
+import { AppModule } from '@src/app.module';
+import { PrismaService } from '@src/+prisma/prisma.service';
 import { AuthenticationService } from '../../authentication.service';
 import { faker } from '@faker-js/faker';
 

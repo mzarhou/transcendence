@@ -8,7 +8,7 @@ import z from 'zod';
 import { AuthenticationService } from '../authentication.service';
 import { School42AuthDto } from '../dto/school-42-token.dto';
 import { Prisma } from '@prisma/client';
-import { UsersRepository } from 'src/users/repositories/users.repository';
+import { UsersRepository } from '@src/users/repositories/users.repository';
 import { faker } from '@faker-js/faker';
 
 export const user42Schema = z.object({

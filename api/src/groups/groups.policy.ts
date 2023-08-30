@@ -4,7 +4,7 @@ import {
   GroupWithBlockedUsers,
   GroupWithUsers,
 } from '@transcendence/common';
-import { ActiveUserData } from 'src/iam/interface/active-user-data.interface';
+import { ActiveUserData } from '@src/iam/interface/active-user-data.interface';
 
 @Injectable()
 export class GroupsPolicy {

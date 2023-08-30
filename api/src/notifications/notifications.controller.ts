@@ -1,7 +1,7 @@
 import { Controller, Delete, Get, Patch } from '@nestjs/common';
 import { NotificationsService } from './notifications.service';
-import { ActiveUser } from 'src/iam/decorators/active-user.decorator';
-import { ActiveUserData } from 'src/iam/interface/active-user-data.interface';
+import { ActiveUser } from '@src/iam/decorators/active-user.decorator';
+import { ActiveUserData } from '@src/iam/interface/active-user-data.interface';
 import { ApiBearerAuth, ApiTags } from '@nestjs/swagger';
 
 @ApiBearerAuth()

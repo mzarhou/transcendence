@@ -1,7 +1,7 @@
 import { NestFactory } from '@nestjs/core';
 import * as cookieParser from 'cookie-parser';
-import { AppModule } from './app.module';
-import { env } from './env/server';
+import { AppModule } from '@src/app.module';
+import { env } from './+env/server';
 import { DocumentBuilder, SwaggerModule } from '@nestjs/swagger';
 import { patchNestJsSwagger } from 'nestjs-zod';
 

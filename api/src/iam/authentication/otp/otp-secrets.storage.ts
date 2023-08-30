@@ -1,5 +1,5 @@
 import { Injectable } from '@nestjs/common';
-import { RedisClient } from 'src/redis/redis.module';
+import { RedisClient } from '@src/redis/redis.module';
 
 @Injectable()
 export class OtpSecretsStorage {
