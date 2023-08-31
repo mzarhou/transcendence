@@ -41,6 +41,7 @@ export class WebsocketGateway
   ) {}
 
   afterInit(server: Server): void {
+    this.service.setServer(server);
     this.subscription = this.service.getEventSubject$().subscribe({
       next: (event) => this.handleEvent(server, event),
       error: (err) => server.emit('exception', err.toString()),
@@ -51,14 +52,6 @@ export class WebsocketGateway
     this.subscription.unsubscribe();
   }
 
-  private roomSocketsCount(room: string) {
-    return this.server.sockets.adapter.rooms.get(room)?.size ?? 0;
-  }
-
-  private isUserConnected(userId: number) {
-    return this.roomSocketsCount(userId.toString()) > 0;
-  }
-
   async handleConnection(socket: Socket) {
     /**
      * filters aren't applied to connection handlers (only to @SubscribeMessage())
@@ -66,7 +59,7 @@ export class WebsocketGateway
     try {
       const user = await this.authService.getUserFromSocket(socket);
       this.logger.log(`new user connected with id ${socket.id}`);
-      if (!this.isUserConnected(user.sub)) {
+      if (!this.service.isUserConnected(user.sub)) {
         this.service.addEvent([], CONNECTION_STATUS.CONNECTED, user);
       }
       socket.join(user.sub.toString());
@@ -89,14 +82,13 @@ export class WebsocketGateway
     try {
       const user = await this.authService.getUserFromSocket(socket);
       this.logger.log(`user ${socket.id} disconnected`);
-      if (!this.isUserConnected(user.sub)) {
+      if (!this.service.isUserConnected(user.sub)) {
         this.service.addEvent([], CONNECTION_STATUS.DISCONNECTED, user);
       }
     } catch (error) {}
   }
 
   handleEvent(server: Server, event: WebsocketEvent) {
-    console.log({ event });
     if (
       event.name === CONNECTION_STATUS.CONNECTED ||
       event.name === CONNECTION_STATUS.DISCONNECTED
@@ -105,7 +97,7 @@ export class WebsocketGateway
     }
 
     for (const userId of event.usersIds) {
-      if (!this.isUserConnected(userId)) continue;
+      if (!this.service.isUserConnected(userId)) continue;
       server.to(userId.toString()).emit(event.name, event.data);
     }
   }
