@@ -51,21 +51,19 @@ export class ChatGateway implements OnGatewayInit, OnApplicationShutdown {
     user: ActiveUserData,
   ) {
     const friends = (await this.service.findFriends(user)).map((f) => f.id);
-    const connectedFriends =
-      this.websocketService.filterConnectedUsers(friends);
 
     /** let user know all connected friends */
     if (event === 'connected') {
-      for (const friendId of connectedFriends) {
+      for (const friendId of friends) {
         this.websocketService.addEvent([user.sub], FRIEND_CONNECTED, {
           friendId,
         } satisfies FriendConnectedData);
       }
-      this.websocketService.addEvent(connectedFriends, FRIEND_CONNECTED, {
+      this.websocketService.addEvent(friends, FRIEND_CONNECTED, {
         friendId: user.sub,
       } satisfies FriendConnectedData);
     } else {
-      this.websocketService.addEvent(connectedFriends, FRIEND_DISCONNECTED, {
+      this.websocketService.addEvent(friends, FRIEND_DISCONNECTED, {
         friendId: user.sub,
       } satisfies FriendConnectedData);
     }

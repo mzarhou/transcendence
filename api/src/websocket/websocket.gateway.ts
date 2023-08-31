@@ -3,13 +3,13 @@ import {
   OnGatewayDisconnect,
   OnGatewayInit,
   WebSocketGateway,
+  WebSocketServer,
 } from '@nestjs/websockets';
 import { WebsocketService } from './websocket.service';
 import { Server, Socket } from 'socket.io';
 import { Subscription } from 'rxjs';
 import { Logger, OnApplicationShutdown } from '@nestjs/common';
 import { WebsocketEvent } from './weboscket-event.interface';
-import { WebsocketClientsStorage } from './websocket-clients.storage';
 import { AuthenticationService } from '@src/iam/authentication/authentication.service';
 import { CONNECTION_STATUS } from './websocket.enum';
 import { WebsocketException } from '@src/notifications/ws.exception';
@@ -29,13 +29,14 @@ export class WebsocketGateway
     OnApplicationShutdown,
     OnGatewayDisconnect
 {
-  private readonly logger = new Logger(WebsocketGateway.name);
+  @WebSocketServer()
+  server!: Server;
 
+  private readonly logger = new Logger(WebsocketGateway.name);
   private subscription!: Subscription;
 
   constructor(
     private readonly service: WebsocketService,
-    private readonly storage: WebsocketClientsStorage,
     private readonly authService: AuthenticationService,
   ) {}
 
@@ -50,6 +51,14 @@ export class WebsocketGateway
     this.subscription.unsubscribe();
   }
 
+  private roomSocketsCount(room: string) {
+    return this.server.sockets.adapter.rooms.get(room)?.size ?? 0;
+  }
+
+  private isUserConnected(userId: number) {
+    return this.roomSocketsCount(userId.toString()) > 0;
+  }
+
   async handleConnection(socket: Socket) {
     /**
      * filters aren't applied to connection handlers (only to @SubscribeMessage())
@@ -57,10 +66,10 @@ export class WebsocketGateway
     try {
       const user = await this.authService.getUserFromSocket(socket);
       this.logger.log(`new user connected with id ${socket.id}`);
-      if (!this.storage.isConnected(user.sub)) {
+      if (!this.isUserConnected(user.sub)) {
         this.service.addEvent([], CONNECTION_STATUS.CONNECTED, user);
       }
-      this.storage.addClient(user.sub, socket);
+      socket.join(user.sub.toString());
     } catch (error) {
       this.logger.warn(`failed to connect user ${socket.id}`);
       if (error instanceof WebsocketException) {
@@ -76,15 +85,15 @@ export class WebsocketGateway
      */
     try {
       const user = await this.authService.getUserFromSocket(socket);
-      this.storage.removeClient(user.sub, socket);
       this.logger.log(`user ${socket.id} disconnected`);
-      if (!this.storage.isConnected(user.sub)) {
+      if (!this.isUserConnected(user.sub)) {
         this.service.addEvent([], CONNECTION_STATUS.DISCONNECTED, user);
       }
     } catch (error) {}
   }
 
-  handleEvent(_server: Server, event: WebsocketEvent) {
+  handleEvent(server: Server, event: WebsocketEvent) {
+    console.log({ event });
     if (
       event.name === CONNECTION_STATUS.CONNECTED ||
       event.name === CONNECTION_STATUS.DISCONNECTED
@@ -92,13 +101,9 @@ export class WebsocketGateway
       return;
     }
 
-    const connectedClients = this.storage.getConnectedClients();
     for (const userId of event.usersIds) {
-      const sockets = connectedClients.get(userId);
-      if (!sockets) return;
-      for (const socket of sockets) {
-        socket.emit(event.name, event.data);
-      }
+      if (!this.isUserConnected(userId)) continue;
+      server.to(userId.toString()).emit(event.name, event.data);
     }
   }
 }
