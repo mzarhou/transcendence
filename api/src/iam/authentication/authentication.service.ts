@@ -20,8 +20,8 @@ import { HashingService } from '../hashing/hashing.service';
 import { User } from '@prisma/client';
 import { Socket } from 'socket.io';
 import { parse } from 'cookie';
-import { WebsocketException } from '@src/notifications/ws.exception';
 import { UsersRepository } from '@src/users/repositories/users.repository';
+import { WsException } from '@nestjs/websockets';
 
 @Injectable()
 export class AuthenticationService {
@@ -161,12 +161,10 @@ export class AuthenticationService {
       const headers = socket.handshake.headers;
       accessToken ??= headers.authorization?.split(' ')[1];
 
-      return this.getUserFromToken(accessToken ?? '');
+      const user = await this.getUserFromToken(accessToken ?? '');
+      return user;
     } catch (error) {
-      throw new WebsocketException({
-        message: 'Invalid credentials',
-        statusCode: HttpStatus.UNAUTHORIZED,
-      });
+      throw new WsException('Invalid credentials');
     }
   }
 }

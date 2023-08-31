@@ -3,22 +3,23 @@ import {
   MessageBody,
   SubscribeMessage,
   WebSocketGateway,
+  WsException,
 } from '@nestjs/websockets';
 import { ChatService } from '../chat/chat.service';
 import { Socket } from 'socket.io';
-import { HttpStatus, UseFilters, UsePipes } from '@nestjs/common';
+import { UseFilters, UseGuards, UsePipes } from '@nestjs/common';
 import { MessageDto } from './dto/message.dto';
 import { MessageService } from './message.service';
 import { MESSAGE_EVENT } from '@transcendence/common';
 import { ZodValidationPipe } from 'nestjs-zod';
-import { WebsocketExceptionFilter } from '../notifications/ws-exception.filter';
-import { AuthenticationService } from '@src/iam/authentication/authentication.service';
-import { WebsocketException } from '@src/notifications/ws.exception';
 import { env } from '@src/+env/server';
 import { WebsocketService } from '@src/websocket/websocket.service';
+import { WsAuthGuard } from '@src/iam/authentication/guards/ws-auth.guard';
+import { ActiveUserData } from '@src/iam/interface/active-user-data.interface';
+import { ZodWsExceptionFilter } from '@src/websocket/zod-ws-exception.filter';
 
 @UsePipes(new ZodValidationPipe())
-@UseFilters(new WebsocketExceptionFilter())
+@UseFilters(new ZodWsExceptionFilter())
 @WebSocketGateway({
   cors: {
     origin: env.FRONTEND_URL,
@@ -28,30 +29,23 @@ import { WebsocketService } from '@src/websocket/websocket.service';
 export class MessageGateway {
   constructor(
     private readonly chatService: ChatService,
-    private readonly authService: AuthenticationService,
     private readonly messageService: MessageService,
     private readonly websocketService: WebsocketService,
   ) {}
 
+  @UseGuards(WsAuthGuard)
   @SubscribeMessage(MESSAGE_EVENT)
   async newMessage(
     @ConnectedSocket() senderClient: Socket,
     @MessageBody() { message, recipientId }: MessageDto,
   ) {
-    const sender = await this.authService.getUserFromSocket(senderClient);
-    if (!sender) {
-      throw new WebsocketException({
-        message: 'Sending Messase: Invalid credentials',
-        statusCode: HttpStatus.UNAUTHORIZED,
-      });
-    }
-
+    const sender: ActiveUserData = senderClient.data.user;
     const isRecipientFriend = await this.chatService.isFriendOf(
       sender,
       recipientId,
     );
     if (!isRecipientFriend) {
-      throw new WebsocketException('Sending Messase: Invalid user');
+      throw new WsException('Sending Messase: Invalid user');
     }
 
     try {
@@ -69,7 +63,7 @@ export class MessageGateway {
         createdMessage,
       );
     } catch (error) {
-      throw new WebsocketException('Sending Messase: Something went wrong!');
+      throw new WsException('Sending Messase: Something went wrong!');
     }
   }
 }

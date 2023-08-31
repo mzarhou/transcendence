@@ -4,6 +4,7 @@ import {
   OnGatewayInit,
   WebSocketGateway,
   WebSocketServer,
+  WsException,
 } from '@nestjs/websockets';
 import { WebsocketService } from './websocket.service';
 import { Server, Socket } from 'socket.io';
@@ -12,7 +13,6 @@ import { Logger, OnApplicationShutdown } from '@nestjs/common';
 import { WebsocketEvent } from './weboscket-event.interface';
 import { AuthenticationService } from '@src/iam/authentication/authentication.service';
 import { CONNECTION_STATUS } from './websocket.enum';
-import { WebsocketException } from '@src/notifications/ws.exception';
 import { ERROR_EVENT } from '@transcendence/common';
 import { env } from '@src/+env/server';
 
@@ -72,8 +72,11 @@ export class WebsocketGateway
       socket.join(user.sub.toString());
     } catch (error) {
       this.logger.warn(`failed to connect user ${socket.id}`);
-      if (error instanceof WebsocketException) {
-        socket.emit(ERROR_EVENT, error.getError());
+      if (error instanceof WsException) {
+        socket.emit(ERROR_EVENT, {
+          status: ERROR_EVENT,
+          message: error.getError(),
+        });
       }
       socket.disconnect();
     }

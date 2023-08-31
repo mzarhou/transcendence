@@ -19,6 +19,7 @@ import { CryptoService } from './authentication/otp/crypto.service';
 import { BcryptService } from './hashing/bcrypt.service';
 import { HashingService } from './hashing/hashing.service';
 import { UsersModule } from '@src/users/users.module';
+import { WsAuthGuard } from './authentication/guards/ws-auth.guard';
 
 const Fingerprint = require('express-fingerprint');
 
@@ -36,6 +37,7 @@ const Fingerprint = require('express-fingerprint');
       provide: APP_GUARD,
       useClass: AuthenticationGuard,
     },
+    WsAuthGuard,
     AccessTokenGuard,
     AccessTokenWithout2faGuard,
     RefreshTokenIdsStorage,
@@ -52,12 +54,7 @@ const Fingerprint = require('express-fingerprint');
     AuthenticationController,
     OtpAuthenticationController,
   ],
-  exports: [
-    AuthenticationService,
-    AccessTokenGuard,
-    AccessTokenWithout2faGuard,
-    HashingService,
-  ],
+  exports: [AuthenticationService, HashingService],
 })
 export class IamModule implements NestModule {
   configure(consumer: MiddlewareConsumer) {
