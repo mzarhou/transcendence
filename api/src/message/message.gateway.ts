@@ -14,8 +14,8 @@ import { ZodValidationPipe } from 'nestjs-zod';
 import { WebsocketExceptionFilter } from '../notifications/ws-exception.filter';
 import { AuthenticationService } from '@src/iam/authentication/authentication.service';
 import { WebsocketException } from '@src/notifications/ws.exception';
-import { NotificationsService } from '@src/notifications/notifications.service';
 import { env } from '@src/+env/server';
+import { WebsocketService } from '@src/websocket/websocket.service';
 
 @UsePipes(new ZodValidationPipe())
 @UseFilters(new WebsocketExceptionFilter())
@@ -30,7 +30,7 @@ export class MessageGateway {
     private readonly chatService: ChatService,
     private readonly authService: AuthenticationService,
     private readonly messageService: MessageService,
-    private readonly notificationsService: NotificationsService,
+    private readonly websocketService: WebsocketService,
   ) {}
 
   @SubscribeMessage(MESSAGE_EVENT)
@@ -63,7 +63,7 @@ export class MessageGateway {
       /**
        * send message to sender/recipient if he is connected
        */
-      this.notificationsService.emit(
+      this.websocketService.addEvent(
         [sender.sub, recipientId],
         MESSAGE_EVENT,
         createdMessage,

@@ -13,6 +13,7 @@ import { NotificationsModule } from './notifications/notifications.module';
 import { MessageModule } from './message/message.module';
 import { FriendRequestModule } from './friend-request/friend-request.module';
 import { GroupsModule } from './groups/groups.module';
+import { WebsocketModule } from './websocket/websocket.module';
 
 @Module({
   imports: [
@@ -26,6 +27,7 @@ import { GroupsModule } from './groups/groups.module';
     MessageModule,
     FriendRequestModule,
     GroupsModule,
+    WebsocketModule,
   ],
   controllers: [AppController],
   providers: [

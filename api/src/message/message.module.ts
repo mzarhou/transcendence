@@ -21,6 +21,6 @@ import { MessagesPolicy } from './message.policy';
       useClass: MessagesPrismaRepository,
     },
   ],
-  imports: [PrismaModule, IamModule, NotificationsModule, ChatModule],
+  imports: [IamModule, ChatModule],
 })
 export class MessageModule {}

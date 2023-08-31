@@ -4,7 +4,7 @@ import { Socket } from 'socket.io';
 // TODO: store clients in redis
 
 @Injectable()
-export class NotificationsClientsStorage {
+export class WebsocketClientsStorage {
   private readonly connectedClients: Map<number, Socket[]> = new Map();
 
   addClient(userId: number, socket: Socket) {
@@ -36,13 +36,7 @@ export class NotificationsClientsStorage {
     return sockets?.length ?? 0;
   }
 
-  emit(usersIds: number[], event: string, ...data: any[]) {
-    for (const userId of usersIds) {
-      const sockets = this.connectedClients.get(userId);
-      if (!sockets) return;
-      for (const socket of sockets) {
-        socket.emit(event, ...data);
-      }
-    }
+  getConnectedClients() {
+    return this.connectedClients;
   }
 }

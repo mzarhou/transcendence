@@ -18,14 +18,12 @@ import { RedisModule } from '@src/redis/redis.module';
 import { CryptoService } from './authentication/otp/crypto.service';
 import { BcryptService } from './hashing/bcrypt.service';
 import { HashingService } from './hashing/hashing.service';
-import { PrismaModule } from '@src/+prisma/prisma.module';
 import { UsersModule } from '@src/users/users.module';
 
 const Fingerprint = require('express-fingerprint');
 
 @Module({
   imports: [
-    PrismaModule,
     RedisModule,
     UsersModule,
     ConfigModule.forFeature(jwtConfig),
