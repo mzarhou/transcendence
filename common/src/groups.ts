@@ -12,7 +12,7 @@ export const baseCreateGroupSchema = z.object({
 
 export const createGroupSchema = baseCreateGroupSchema.refine(
   (data) => data.status !== "PROTECTED" || data.password !== undefined,
-  errorMessage
+  errorMessage,
 );
 export type CreateGroupType = z.infer<typeof createGroupSchema>;
 
@@ -57,3 +57,20 @@ export const groupUsersFilterSchema = z.object({
   filter: z.enum(["admins", "members", "banned"]),
 });
 export type GroupUsersFilter = z.infer<typeof groupUsersFilterSchema>;
+
+export const sendGroupMessageSchema = z.object({
+  groupId: z.number().positive(),
+  message: z.string().min(1).max(2000),
+});
+export type SendGroupMessageType = z.infer<typeof sendGroupMessageSchema>;
+
+export const muteUserSchema = z.object({
+  userId: z.number().positive(),
+  period: z
+    .number()
+    .positive()
+    .min(10)
+    .max(86400)
+    .describe("period in seconds, 10 - 86400 (24h)"),
+});
+export type MuteUserType = z.infer<typeof muteUserSchema>;

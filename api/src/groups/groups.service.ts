@@ -30,6 +30,8 @@ import { GroupUsersFilterDto } from './dto/group-users-filter-query.dto';
 import { GroupsRepository } from './repositories/_goups.repository';
 import { GroupsPolicy } from './groups.policy';
 import { GroupWithUsers } from '@transcendence/common';
+import { MuteUserDto } from './dto/mute-user.dto';
+import { GroupsMutedUsersStorage } from './groups-muted-users.storage';
 
 @ApiTags('groups')
 @Injectable()
@@ -39,6 +41,7 @@ export class GroupsService {
     private readonly groupsPolicy: GroupsPolicy,
     private readonly notificationService: NotificationsService,
     private readonly hashingService: HashingService,
+    private readonly mutedUsersStorage: GroupsMutedUsersStorage,
   ) {}
 
   async create(
@@ -328,6 +331,13 @@ export class GroupsService {
       };
   }
 
+  async findGroupById(groupId: number) {
+    const group = await this.groupsRepository.findOneOrThrow(groupId, {
+      includeUsers: true,
+    });
+    return group;
+  }
+
   async findGroupUsers(
     user: ActiveUserData,
     groupId: number,
@@ -350,5 +360,28 @@ export class GroupsService {
       return group.users.filter((u) => u.role === 'MEMBER');
     }
     return group.users;
+  }
+
+  async muteUser(
+    user: ActiveUserData,
+    groupId: number,
+    muteUserDto: MuteUserDto,
+  ) {
+    const group = await this.groupsRepository.findOneOrThrow(groupId, {
+      includeUsers: true,
+    });
+
+    this.groupsPolicy.canMuteUser({
+      user,
+      targetUserId: muteUserDto.userId,
+      group,
+    });
+
+    await this.mutedUsersStorage.add({
+      userId: muteUserDto.userId,
+      groupId,
+      time: muteUserDto.period,
+    });
+    return { success: true };
   }
 }

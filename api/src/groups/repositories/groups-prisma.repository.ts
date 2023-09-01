@@ -50,6 +50,16 @@ export class GroupsPrismaRepository extends GroupsRepository {
     return createdGroup;
   }
 
+  createMessage(data: { message: string; senderId: number; groupId: number }) {
+    return this.prisma.groupMessage.create({
+      data: {
+        message: data.message,
+        senderId: data.senderId,
+        groupId: data.groupId,
+      },
+    });
+  }
+
   findOne: GroupsFindOne = (async (id, options) => {
     const group = await this.prisma.group.findFirst({
       where: { id },

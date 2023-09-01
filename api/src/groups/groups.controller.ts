@@ -26,6 +26,7 @@ import { JoinGroupDto } from './dto/join-group.dto';
 import { LeaveGroupDto } from './dto/leave-group.dto';
 import { SearchUsersDto } from '@src/chat/dto/search-users.dto';
 import { GroupUsersFilterDto } from './dto/group-users-filter-query.dto';
+import { MuteUserDto } from './dto/mute-user.dto';
 
 @ApiBearerAuth()
 @ApiTags('groups')
@@ -174,5 +175,16 @@ export class GroupsController {
     @Query() query: GroupUsersFilterDto,
   ) {
     return this.groupsService.findGroupUsers(user, groupId, query);
+  }
+
+  @ApiOperation({ summary: 'Mute a user' })
+  @HttpCode(HttpStatus.OK)
+  @Post('/:id/mute')
+  async muteUser(
+    @ActiveUser() user: ActiveUserData,
+    @Param() { id: groupId }: IdDto,
+    @Body() muteUserDto: MuteUserDto,
+  ) {
+    return this.groupsService.muteUser(user, groupId, muteUserDto);
   }
 }

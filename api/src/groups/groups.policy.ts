@@ -5,9 +5,12 @@ import {
   GroupWithUsers,
 } from '@transcendence/common';
 import { ActiveUserData } from '@src/iam/interface/active-user-data.interface';
+import { GroupsMutedUsersStorage } from './groups-muted-users.storage';
 
 @Injectable()
 export class GroupsPolicy {
+  constructor(private readonly mutedUsersStorage: GroupsMutedUsersStorage) {}
+
   private isOwnerOrAdmin(user: ActiveUserData, group: Group & GroupWithUsers) {
     if (user.sub === group.ownerId) return true;
     return !!group.users.find((u) => u.id === user.sub && u.role === 'ADMIN');
@@ -134,5 +137,25 @@ export class GroupsPolicy {
 
   canLeaveGroup(user: ActiveUserData, group: Group & GroupWithUsers) {
     return this.requireMember(user.sub, group, 'You are not a member');
+  }
+
+  async canSendMessage(user: ActiveUserData, group: Group & GroupWithUsers) {
+    this.canRead(user, group);
+    const isMuted = await this.mutedUsersStorage.isUserMuted({
+      userId: user.sub,
+      groupId: group.id,
+    });
+    if (isMuted) {
+      throw new ForbiddenException('You ara muted');
+    }
+    return true;
+  }
+
+  canMuteUser(data: {
+    user: ActiveUserData;
+    group: Group & GroupWithUsers;
+    targetUserId: number;
+  }) {
+    return this.canBanUser(data);
   }
 }

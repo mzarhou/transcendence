@@ -29,15 +29,15 @@ export type GroupsFindOneOrThrow = <
     includeOwner?: D;
   },
 ) => Promise<
-  | (GroupWithPassword &
-      (A extends true
-        ? GroupWithBlockedUsers
-        : MakePropsUndefined<GroupWithBlockedUsers>)) &
-      (B extends true
-        ? GroupWithMessages
-        : MakePropsUndefined<GroupWithMessages>) &
-      (C extends true ? GroupWithUsers : MakePropsUndefined<GroupWithUsers>) &
-      (D extends true ? GroupWithOwner : MakePropsUndefined<GroupWithOwner>)
+  (GroupWithPassword &
+    (A extends true
+      ? GroupWithBlockedUsers
+      : MakePropsUndefined<GroupWithBlockedUsers>)) &
+    (B extends true
+      ? GroupWithMessages
+      : MakePropsUndefined<GroupWithMessages>) &
+    (C extends true ? GroupWithUsers : MakePropsUndefined<GroupWithUsers>) &
+    (D extends true ? GroupWithOwner : MakePropsUndefined<GroupWithOwner>)
 >;
 
 export type GroupsFindOne = (
@@ -58,6 +58,12 @@ export abstract class GroupsRepository {
   }: CreateGroupDto & {
     ownerId: number;
   }): Promise<GroupWithPassword>;
+
+  abstract createMessage(data: {
+    message: string;
+    senderId: number;
+    groupId: number;
+  });
 
   abstract findOne: GroupsFindOne;
   abstract findOneOrThrow: GroupsFindOneOrThrow;

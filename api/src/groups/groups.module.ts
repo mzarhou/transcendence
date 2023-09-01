@@ -6,9 +6,12 @@ import { IamModule } from '@src/iam/iam.module';
 import { GroupsRepository } from './repositories/_goups.repository';
 import { GroupsPrismaRepository } from './repositories/groups-prisma.repository';
 import { GroupsPolicy } from './groups.policy';
+import { GroupsGateway } from './groups.gateway';
+import { GroupsMutedUsersStorage } from './groups-muted-users.storage';
+import { RedisModule } from '@src/redis/redis.module';
 
 @Module({
-  imports: [NotificationsModule, IamModule],
+  imports: [NotificationsModule, IamModule, RedisModule],
   controllers: [GroupsController],
   providers: [
     GroupsPolicy,
@@ -17,6 +20,8 @@ import { GroupsPolicy } from './groups.policy';
       provide: GroupsRepository,
       useClass: GroupsPrismaRepository,
     },
+    GroupsGateway,
+    GroupsMutedUsersStorage,
   ],
 })
 export class GroupsModule {}

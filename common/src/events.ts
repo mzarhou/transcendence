@@ -29,3 +29,13 @@ export const GROUP_UNBANNED_EVENT = "group_unbanned_event";
 export const GROUP_KICKED_EVENT = "group_kicked_event";
 export const JOIN_GROUP_EVENT = "join_group_event";
 export const LEAVE_GROUP_EVENT = "leave_group_event";
+
+export const GROUP_MESSAGE_EVENT = "group_message";
+export const GROUP_USER_CONNECTED_EVENT = "group_user_connected";
+export type GroupUserConnectedData = {
+  userId: number;
+  groupId: number;
+};
+
+export const GROUP_USER_DISCONNECTED_EVENT = "group_user_disconnected";
+export type GroupUserDisconnectedData = GroupUserConnectedData;

@@ -14,8 +14,12 @@ export class WebsocketService {
 
   constructor() {}
 
-  addEvent(usersIds: number[], eventName: string, eventData: unknown): void {
-    this.subject.next({ usersIds, name: eventName, data: eventData });
+  addEvent(
+    rooms: string[] | number[],
+    eventName: string,
+    eventData: unknown,
+  ): void {
+    this.subject.next({ rooms, name: eventName, data: eventData });
   }
 
   getEventSubject$(): Observable<WebsocketEvent> {
@@ -30,5 +34,12 @@ export class WebsocketService {
     const socketsCount =
       this.server.sockets.adapter.rooms.get(userId.toString())?.size ?? 0;
     return socketsCount > 0;
+  }
+
+  async leaveRoom(userId: number, room: string) {
+    const sockets = await this.server.in(userId.toString()).fetchSockets();
+    for (const socket of sockets) {
+      socket.leave(room);
+    }
   }
 }
