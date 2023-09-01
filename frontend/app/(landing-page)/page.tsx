@@ -48,7 +48,7 @@ export default function Home() {
           <h1 className="font-jockey text-center text-4xl font-semibold text-foreground md:text-6xl">
             TEAM
           </h1>
-          <div className="gap2 mx-auto mt-10 flex max-w-6xl flex-wrap justify-between gap-8 px-6 xl:gap-10">
+          <div className="mx-auto mt-10 flex max-w-6xl flex-wrap justify-between gap-8 px-6 xl:gap-10">
             <div className="mx-auto h-96 w-56 rounded-lg bg-card pt-10 hover:drop-shadow-lp-cards">
               <Image
                 src={ababouel}

@@ -1,5 +1,7 @@
 import { Button } from "@/components/ui/button";
 import { ChevronLeft } from "lucide-react";
+import FakeChatSearch from "../components/fake-chat-search";
+import FriendsCards from "./components/friends-cards";
 
 export default function Profile() {
   return (
@@ -22,6 +24,8 @@ export default function Profile() {
           <h2 className="text-lg xl:text-2xl">Friends</h2>
           <div className="my-auto h-px w-full bg-foreground/20"></div>
         </div>
+        <FakeChatSearch className="mt-10" />
+        <FriendsCards />
       </div>
     </>
   );
