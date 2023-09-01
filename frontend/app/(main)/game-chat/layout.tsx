@@ -6,6 +6,7 @@ import { MessagesSquare } from "lucide-react";
 import { ReactNode } from "react";
 import Game from "./_game/index";
 import Profile from "./_game/profile";
+import GameSettings from "./_game/game-settings";
 
 type Props = {
   children: ReactNode;
@@ -35,7 +36,8 @@ export default function GameLayout({ children }: Props) {
         <div className="h-full flex-grow space-x-4 md:flex">
           <div className="flex h-full flex-grow justify-center overflow-y-auto rounded-md border px-[clamp(2rem,7vw,120px)] ">
             {/* <Game /> */}
-            <Profile />
+            {/* <Profile /> */}
+            <GameSettings />
           </div>
           <div className="relative hidden h-full w-full overflow-y-hidden md:block md:max-w-sm">
             {chatPopup}
