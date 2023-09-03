@@ -14,15 +14,18 @@ import { UnBanUserDto } from './dto/ban-user/unban-user.dto';
 import { KickUserDto } from './dto/kick-user.dto';
 import { NotificationsService } from '@src/notifications/notifications.service';
 import {
-  GROUP_DELETED_EVENT,
-  GROUP_KICKED_EVENT,
+  ADD_ADMIN_NOTIFICATION,
+  GROUP_BANNED_NOTIFICATION,
+  GROUP_DELETED_NOTIFICATION,
+  GROUP_KICKED_NOTIFICATION,
+  GROUP_NOTIFICATION_PAYLOAD,
+  GROUP_UNBANNED_NOTIFICATION,
   Group,
+  JOIN_GROUP_NOTIFICATION,
+  LEAVE_GROUP_NOTIFICATION,
+  REMOVE_ADMIN_NOTIFICATION,
   UserGroupRole,
 } from '@transcendence/common';
-import { ADD_ADMIN_EVENT } from '@transcendence/common';
-import { GROUP_BANNED_EVENT } from '@transcendence/common';
-import { JOIN_GROUP_EVENT } from '@transcendence/common';
-import { LEAVE_GROUP_EVENT } from '@transcendence/common';
 import { HashingService } from '@src/iam/hashing/hashing.service';
 import { JoinGroupDto } from './dto/join-group.dto';
 import { LeaveGroupDto } from './dto/leave-group.dto';
@@ -32,7 +35,6 @@ import { GroupsPolicy } from './groups.policy';
 import { GroupWithUsers } from '@transcendence/common';
 import { MuteUserDto } from './dto/mute-user.dto';
 import { GroupsMutedUsersStorage } from './groups-muted-users.storage';
-import { PaginationQueryDto } from '@src/+common/dto/pagination-query';
 
 @ApiTags('groups')
 @Injectable()
@@ -94,8 +96,11 @@ export class GroupsService {
     const groupUsersIds = group.users.map((u) => u.id);
     await this.notificationService.notify(
       groupUsersIds,
-      GROUP_DELETED_EVENT,
-      `group ${deletedGroup.name} deleted`,
+      GROUP_DELETED_NOTIFICATION,
+      {
+        message: `group ${deletedGroup.name} deleted`,
+        groupId: deletedGroup.id,
+      } satisfies GROUP_NOTIFICATION_PAYLOAD,
     );
 
     return this.groupsRepository.omitPassword(deletedGroup);
@@ -125,8 +130,11 @@ export class GroupsService {
     });
     await this.notificationService.notify(
       [targetUserId],
-      ADD_ADMIN_EVENT,
-      `You ${group.name} role changed to admin`,
+      ADD_ADMIN_NOTIFICATION,
+      {
+        message: `You ${group.name} role changed to admin`,
+        groupId: group.id,
+      } satisfies GROUP_NOTIFICATION_PAYLOAD,
     );
     return { role: updatedGroup.role };
   }
@@ -139,17 +147,17 @@ export class GroupsService {
     const group = await this.groupsRepository.findOneOrThrow(groupId);
     this.groupsPolicy.canRemoveAdmin(user, group);
 
-    const { role: newRole } = await this.groupsRepository.updateUserRole({
+    await this.groupsRepository.updateUserRole({
       userId,
       groupId: group.id,
       newRole: 'MEMBER',
     });
-    await this.notificationService.notify(
-      [userId],
-      ADD_ADMIN_EVENT,
-      `You ${group.name} role changed to member`,
-    );
-    return { newRole };
+
+    await this.notificationService.notify([userId], REMOVE_ADMIN_NOTIFICATION, {
+      message: `You ${group.name} role changed to member`,
+      groupId: group.id,
+    } satisfies GROUP_NOTIFICATION_PAYLOAD);
+    return { success: true };
   }
 
   async banUser(
@@ -165,8 +173,11 @@ export class GroupsService {
 
     await this.notificationService.notify(
       [targetUserId],
-      GROUP_BANNED_EVENT,
-      `You've been unbanned from ${group.name} group`,
+      GROUP_BANNED_NOTIFICATION,
+      {
+        message: `You've been unbanned from ${group.name} group`,
+        groupId: group.id,
+      } satisfies GROUP_NOTIFICATION_PAYLOAD,
     );
 
     const updatedGroup = await this.groupsRepository.banUser({
@@ -194,8 +205,11 @@ export class GroupsService {
     });
     await this.notificationService.notify(
       [targetUserId],
-      GROUP_BANNED_EVENT,
-      `You've been unbanned from ${group.name} group, you can now join the group`,
+      GROUP_UNBANNED_NOTIFICATION,
+      {
+        message: `You've been unbanned from ${group.name} group, you can now join the group`,
+        groupId: group.id,
+      } satisfies GROUP_NOTIFICATION_PAYLOAD,
     );
     return this.groupsRepository.omitPassword(updateGroup);
   }
@@ -212,11 +226,10 @@ export class GroupsService {
     this.groupsPolicy.canKickUser({ user, group, targetUserId: userId });
 
     await this.groupsRepository.removeUser({ groupId: group.id, userId });
-    await this.notificationService.notify(
-      [userId],
-      GROUP_KICKED_EVENT,
-      `You've been kicked out from ${group.name} group`,
-    );
+    await this.notificationService.notify([userId], GROUP_KICKED_NOTIFICATION, {
+      message: `You've been kicked out from ${group.name} group`,
+      groupId: group.id,
+    } satisfies GROUP_NOTIFICATION_PAYLOAD);
     return this.groupsRepository.omitPassword(group);
   }
 
@@ -248,11 +261,10 @@ export class GroupsService {
       groupId: group.id,
       userId: user.sub,
     });
-    await this.notificationService.notify(
-      [user.sub],
-      JOIN_GROUP_EVENT,
-      `You've joined ${group.name} group!`,
-    );
+    await this.notificationService.notify([user.sub], JOIN_GROUP_NOTIFICATION, {
+      message: `You've joined ${group.name} group!`,
+      groupId: group.id,
+    } satisfies GROUP_NOTIFICATION_PAYLOAD);
     return this.groupsRepository.omitPassword(group);
   }
 
@@ -279,10 +291,13 @@ export class GroupsService {
     });
     await this.notificationService.notify(
       [user.sub],
-      LEAVE_GROUP_EVENT,
-      `You've leaved ${group.name} group!`,
+      LEAVE_GROUP_NOTIFICATION,
+      {
+        message: `You've leaved ${group.name} group!`,
+        groupId: group.id,
+      } satisfies GROUP_NOTIFICATION_PAYLOAD,
     );
-    return this.groupsRepository.omitPassword(group);
+    return { success: true };
   }
 
   async search(user: ActiveUserData, term: any) {

@@ -42,4 +42,18 @@ export class WebsocketService {
       socket.leave(room);
     }
   }
+
+  async joinRoom(userId: number, room: string) {
+    const sockets = await this.server.in(userId.toString()).fetchSockets();
+    for (const socket of sockets) {
+      socket.join(room);
+    }
+  }
+
+  async deleteRoom(room: string) {
+    const sockets = await this.server.in(room).fetchSockets();
+    for (const socket of sockets) {
+      socket.leave(room);
+    }
+  }
 }

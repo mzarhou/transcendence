@@ -38,6 +38,15 @@ import { notificationsKey } from "@/api-hooks/notifications/use-notifications";
 import { GROUP_MESSAGE_EVENT } from "@transcendence/common";
 import { GroupMessage } from "@transcendence/common";
 import { getGroupMessagesKey } from "@/api-hooks/groups/use-group-messages";
+import { GROUP_DELETED_NOTIFICATION } from "@transcendence/common";
+import { ADD_ADMIN_NOTIFICATION } from "@transcendence/common";
+import { REMOVE_ADMIN_NOTIFICATION } from "@transcendence/common";
+import { GROUP_BANNED_NOTIFICATION } from "@transcendence/common";
+import { GROUP_UNBANNED_NOTIFICATION } from "@transcendence/common";
+import { GROUP_KICKED_NOTIFICATION } from "@transcendence/common";
+import { JOIN_GROUP_NOTIFICATION } from "@transcendence/common";
+import { LEAVE_GROUP_NOTIFICATION } from "@transcendence/common";
+import { GROUP_NOTIFICATION_PAYLOAD } from "@transcendence/common";
 
 const EventsSocketContext = createContext<Socket | null>(null);
 
@@ -99,6 +108,20 @@ function useSocket_() {
             });
           },
         );
+        [
+          GROUP_DELETED_NOTIFICATION,
+          ADD_ADMIN_NOTIFICATION,
+          REMOVE_ADMIN_NOTIFICATION,
+          GROUP_BANNED_NOTIFICATION,
+          GROUP_UNBANNED_NOTIFICATION,
+          GROUP_KICKED_NOTIFICATION,
+          JOIN_GROUP_NOTIFICATION,
+          LEAVE_GROUP_NOTIFICATION,
+        ].forEach((event) => {
+          _socket.on(event, (_data: GROUP_NOTIFICATION_PAYLOAD) => {
+            mutate(notificationsKey);
+          });
+        });
         _socket.on(
           GROUP_MESSAGE_EVENT,
           (message: GroupMessage & GroupMessageWithSender) => {

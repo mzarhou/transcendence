@@ -52,7 +52,7 @@ export class GroupsPolicy {
 
   canRead(user: ActiveUserData, group: Group & GroupWithUsers) {
     if (this.isMember(user.sub, group)) return true;
-    throw new ForbiddenException('You can not delete the group');
+    throw new ForbiddenException('You can not read group info');
   }
 
   canDelete(user: ActiveUserData, group: Group) {

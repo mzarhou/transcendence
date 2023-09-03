@@ -12,8 +12,14 @@ import {
 import { Server } from 'socket.io';
 import { env } from '@src/+env/server';
 import {
+  GROUP_BANNED_NOTIFICATION,
+  GROUP_DELETED_NOTIFICATION,
+  GROUP_KICKED_NOTIFICATION,
+  GROUP_NOTIFICATION_PAYLOAD,
   GROUP_USER_DISCONNECTED_EVENT,
   GroupUserDisconnectedData,
+  JOIN_GROUP_NOTIFICATION,
+  LEAVE_GROUP_NOTIFICATION,
 } from '@transcendence/common';
 import { ActiveUserData } from '@src/iam/interface/active-user-data.interface';
 import { GROUP_USER_CONNECTED_EVENT } from '@transcendence/common';
@@ -50,6 +56,31 @@ export class GroupsGateway implements OnGatewayInit, OnApplicationShutdown {
           this.onUserConnected(event.data as ActiveUserData);
         } else if (event.name === CONNECTION_STATUS.DISCONNECTED) {
           this.onUserDisconnect(event.data as ActiveUserData);
+        } else if (event.name === GROUP_DELETED_NOTIFICATION) {
+          const { groupId } = event.data as GROUP_NOTIFICATION_PAYLOAD;
+          this.websocketService.deleteRoom(
+            this.groupChatService.getGroupRoomKey(groupId),
+          );
+        } else if (
+          [
+            GROUP_BANNED_NOTIFICATION,
+            LEAVE_GROUP_NOTIFICATION,
+            GROUP_KICKED_NOTIFICATION,
+          ].includes(event.name)
+        ) {
+          const userId = parseInt(event.rooms[0].toString());
+          const data = event.data as GROUP_NOTIFICATION_PAYLOAD;
+          this.websocketService.leaveRoom(
+            userId,
+            this.groupChatService.getGroupRoomKey(data.groupId),
+          );
+        } else if (event.name === JOIN_GROUP_NOTIFICATION) {
+          const userId = parseInt(event.rooms[0].toString());
+          const { groupId } = event.data as GROUP_NOTIFICATION_PAYLOAD;
+          this.websocketService.joinRoom(
+            userId,
+            this.groupChatService.getGroupRoomKey(groupId),
+          );
         }
       },
     });
