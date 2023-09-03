@@ -3,15 +3,18 @@ import {
   GroupsFindOne,
   GroupsFindOneOrThrow,
   GroupsRepository,
-} from './_goups.repository';
+} from './_groups.repository';
 import { Injectable, NotFoundException } from '@nestjs/common';
 import { CreateGroupDto } from '../dto/create-group.dto';
 import {
+  GroupMessage,
+  GroupMessageWithSender,
   GroupWithBlockedUsers,
   GroupWithPassword,
   UserGroupRole,
 } from '@transcendence/common';
 import { UpdateGroupDto } from '../dto/update-group.dto';
+import { PaginationQueryDto } from '@src/+common/dto/pagination-query';
 
 @Injectable()
 export class GroupsPrismaRepository extends GroupsRepository {
@@ -56,6 +59,9 @@ export class GroupsPrismaRepository extends GroupsRepository {
         message: data.message,
         senderId: data.senderId,
         groupId: data.groupId,
+      },
+      include: {
+        sender: true,
       },
     });
   }
@@ -241,6 +247,23 @@ export class GroupsPrismaRepository extends GroupsRepository {
       },
       include: {
         blockedUsers: true,
+      },
+    });
+  }
+
+  async findGroupMessages(
+    groupId: number,
+    { take, skip }: PaginationQueryDto,
+  ): Promise<(GroupMessage & GroupMessageWithSender)[]> {
+    return this.prisma.groupMessage.findMany({
+      take,
+      skip,
+      where: { groupId },
+      orderBy: {
+        createdAt: 'asc',
+      },
+      include: {
+        sender: true,
       },
     });
   }

@@ -7,7 +7,7 @@ import { ActiveUserData } from '@src/iam/interface/active-user-data.interface';
 import { PrismaService } from '@src/+prisma/prisma.service';
 import { faker } from '@faker-js/faker';
 import { Group, GroupStatus } from '@prisma/client';
-import { GroupsRepository } from '@src/groups/repositories/_goups.repository';
+import { GroupsRepository } from '@src/groups/repositories/_groups.repository';
 
 describe('GroupService int', () => {
   let prisma: PrismaService;

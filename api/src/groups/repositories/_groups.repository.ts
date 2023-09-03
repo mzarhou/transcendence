@@ -1,6 +1,8 @@
 import { Injectable } from '@nestjs/common';
 import { CreateGroupDto } from '../dto/create-group.dto';
 import {
+  GroupMessage,
+  GroupMessageWithSender,
   GroupWithBlockedUsers,
   GroupWithMessages,
   GroupWithOwner,
@@ -10,6 +12,7 @@ import {
 } from '@transcendence/common';
 import { UpdateGroupDto } from '../dto/update-group.dto';
 import { never } from 'zod';
+import { PaginationQueryDto } from '@src/+common/dto/pagination-query';
 
 export type MakePropsUndefined<T> = {
   [P in keyof T]: undefined;
@@ -63,7 +66,7 @@ export abstract class GroupsRepository {
     message: string;
     senderId: number;
     groupId: number;
-  });
+  }): Promise<GroupMessage & GroupMessageWithSender>;
 
   abstract findOne: GroupsFindOne;
   abstract findOneOrThrow: GroupsFindOneOrThrow;
@@ -109,4 +112,9 @@ export abstract class GroupsRepository {
   abstract searchGroups(
     searchTerm: string,
   ): Promise<(GroupWithPassword & GroupWithBlockedUsers)[]>;
+
+  abstract findGroupMessages(
+    groupId: number,
+    { take, skip }: PaginationQueryDto,
+  ): Promise<(GroupMessage & GroupMessageWithSender)[]>;
 }

@@ -24,9 +24,10 @@ import {
   ERROR_EVENT,
   WsErrorData,
   MESSAGE_READ_EVENT,
+  GroupMessageWithSender,
 } from "@transcendence/common";
 import { useToast } from "@/components/ui/use-toast";
-import { useSWRConfig } from "swr";
+import { useSWRConfig, Cache } from "swr";
 import { getMessagesKey } from "@/api-hooks/use-messages";
 import { useAtom } from "jotai";
 import { connectedFriendsAtom } from "@/stores/connected-users-atom";
@@ -34,6 +35,9 @@ import { friendRequestsKey } from "@/api-hooks/friend-requests/use-friend-reques
 import { unreadMessagesKey } from "@/api-hooks/use-unread-messages";
 import { env } from "@/env/client.mjs";
 import { notificationsKey } from "@/api-hooks/notifications/use-notifications";
+import { GROUP_MESSAGE_EVENT } from "@transcendence/common";
+import { GroupMessage } from "@transcendence/common";
+import { getGroupMessagesKey } from "@/api-hooks/groups/use-group-messages";
 
 const EventsSocketContext = createContext<Socket | null>(null);
 
@@ -73,7 +77,7 @@ function useSocket_() {
     if (!_socket.hasListeners("connect")) {
       _socket.on("connect", () => {
         _socket.on(ERROR_EVENT, async (data: WsErrorData) =>
-          onError(_socket, data)
+          onError(_socket, data),
         );
         _socket.on(MESSAGE_EVENT, (data: MessageType) => onMessage(data));
         _socket.on(MESSAGE_READ_EVENT, (data: MessageType) => {
@@ -93,7 +97,17 @@ function useSocket_() {
               mutate(friendRequestsKey);
               mutate(notificationsKey);
             });
-          }
+          },
+        );
+        _socket.on(
+          GROUP_MESSAGE_EVENT,
+          (message: GroupMessage & GroupMessageWithSender) => {
+            message.message = "optimistic";
+            mutate(
+              getGroupMessagesKey(message.groupId.toString()),
+              (data: any) => [...(data ?? []), message],
+            );
+          },
         );
       });
     }
@@ -116,7 +130,7 @@ const useOnMessage = () => {
       mutate(getMessagesKey(friendId));
       mutate(unreadMessagesKey);
     },
-    [currentUser]
+    [currentUser],
   );
   return onMessage;
 };
@@ -148,7 +162,7 @@ const useOnFriendConnected = () => {
 
   const onFriendConnected = useCallback(({ friendId }: FriendConnectedData) => {
     setConnectedFriends(
-      (oldFriendsSet) => new Set(oldFriendsSet.add(friendId))
+      (oldFriendsSet) => new Set(oldFriendsSet.add(friendId)),
     );
   }, []);
   return onFriendConnected;
@@ -164,7 +178,7 @@ const useOnFriendDisconnected = () => {
         return new Set(oldFriendsSet);
       });
     },
-    []
+    [],
   );
 
   return onFriendDisconnected;

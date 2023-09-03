@@ -1,17 +1,5 @@
-import {
-  OnApplicationShutdown,
-  UseFilters,
-  UseGuards,
-  UsePipes,
-} from '@nestjs/common';
-import {
-  ConnectedSocket,
-  MessageBody,
-  OnGatewayInit,
-  SubscribeMessage,
-  WebSocketGateway,
-  WsException,
-} from '@nestjs/websockets';
+import { OnApplicationShutdown, UseFilters, UsePipes } from '@nestjs/common';
+import { OnGatewayInit, WebSocketGateway } from '@nestjs/websockets';
 import { ZodWsExceptionFilter } from '@src/websocket/zod-ws-exception.filter';
 import { ZodValidationPipe } from 'nestjs-zod';
 import { Subscription } from 'rxjs';
@@ -21,20 +9,16 @@ import {
   CONNECTION_STATUS,
   NewSocketData,
 } from '@src/websocket/websocket.enum';
-import { Server, Socket } from 'socket.io';
+import { Server } from 'socket.io';
 import { env } from '@src/+env/server';
 import {
-  GROUP_MESSAGE_EVENT,
   GROUP_USER_DISCONNECTED_EVENT,
   GroupUserDisconnectedData,
 } from '@transcendence/common';
-import { SendGroupMessageDto } from './dto/group-message';
-import { WsAuthGuard } from '@src/iam/authentication/guards/ws-auth.guard';
 import { ActiveUserData } from '@src/iam/interface/active-user-data.interface';
-import { GroupsPolicy } from './groups.policy';
-import { GroupsRepository } from './repositories/_goups.repository';
 import { GROUP_USER_CONNECTED_EVENT } from '@transcendence/common';
 import { GroupUserConnectedData } from '@transcendence/common';
+import { GroupChatService } from './group-chat/group-chat.service';
 
 @UsePipes(new ZodValidationPipe())
 @UseFilters(new ZodWsExceptionFilter())
@@ -50,8 +34,7 @@ export class GroupsGateway implements OnGatewayInit, OnApplicationShutdown {
   constructor(
     private readonly websocketService: WebsocketService,
     private readonly service: GroupsService,
-    private readonly policy: GroupsPolicy,
-    private readonly repository: GroupsRepository,
+    private readonly groupChatService: GroupChatService,
   ) {}
 
   onApplicationShutdown(_signal?: string | undefined) {
@@ -75,7 +58,7 @@ export class GroupsGateway implements OnGatewayInit, OnApplicationShutdown {
   async onNewSocketConnected({ user, socket }: NewSocketData) {
     const userGroups = await this.service.findUserGroups(user);
     for (const group of userGroups) {
-      socket.join(this.getGroupRoomKey(group.id));
+      socket.join(this.groupChatService.getGroupRoomKey(group.id));
     }
   }
 
@@ -83,7 +66,7 @@ export class GroupsGateway implements OnGatewayInit, OnApplicationShutdown {
     const userGroups = await this.service.findUserGroups(user);
     for (const group of userGroups) {
       this.websocketService.addEvent(
-        [this.getGroupRoomKey(group.id)],
+        [this.groupChatService.getGroupRoomKey(group.id)],
         GROUP_USER_CONNECTED_EVENT,
         {
           userId: user.sub,
@@ -97,7 +80,7 @@ export class GroupsGateway implements OnGatewayInit, OnApplicationShutdown {
     const userGroups = await this.service.findUserGroups(user);
     for (const group of userGroups) {
       this.websocketService.addEvent(
-        [this.getGroupRoomKey(group.id)],
+        [this.groupChatService.getGroupRoomKey(group.id)],
         GROUP_USER_DISCONNECTED_EVENT,
         {
           userId: user.sub,
@@ -105,36 +88,5 @@ export class GroupsGateway implements OnGatewayInit, OnApplicationShutdown {
         } satisfies GroupUserDisconnectedData,
       );
     }
-  }
-
-  @UseGuards(WsAuthGuard)
-  @SubscribeMessage(GROUP_MESSAGE_EVENT)
-  async handleMessage(
-    @ConnectedSocket() socket: Socket,
-    @MessageBody() { groupId, message }: SendGroupMessageDto,
-  ) {
-    const user = socket.data.user as ActiveUserData;
-    try {
-      const group = await this.service.findGroupById(groupId);
-      await this.policy.canSendMessage(user, group);
-
-      const createdMessage = await this.repository.createMessage({
-        groupId: group.id,
-        message,
-        senderId: user.sub,
-      });
-
-      this.websocketService.addEvent(
-        [this.getGroupRoomKey(group.id)],
-        GROUP_MESSAGE_EVENT,
-        createdMessage,
-      );
-    } catch (error) {
-      throw new WsException('You cannot send message to this group');
-    }
-  }
-
-  private getGroupRoomKey(groupId: number) {
-    return `groups.${groupId}`;
   }
 }

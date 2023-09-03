@@ -69,7 +69,9 @@ function GroupInfoBody({ groupId }: GroupInfoBodyProps) {
             <img src={u.avatar} className="h-12 w-12 rounded-full" />
             <div className="flex flex-grow justify-between border-b">
               <p className="">~{u.name}</p>
-              <p className="mt-1 text-xs text-card-foreground/50">{u.role}</p>
+              <p className="mt-1 text-xs text-card-foreground/50">
+                {group.ownerId === u.id ? "OWNER" : u.role}
+              </p>
             </div>
           </div>
         ))}

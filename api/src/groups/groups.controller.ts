@@ -27,6 +27,7 @@ import { LeaveGroupDto } from './dto/leave-group.dto';
 import { SearchUsersDto } from '@src/chat/dto/search-users.dto';
 import { GroupUsersFilterDto } from './dto/group-users-filter-query.dto';
 import { MuteUserDto } from './dto/mute-user.dto';
+import { PaginationQueryDto } from '@src/+common/dto/pagination-query';
 
 @ApiBearerAuth()
 @ApiTags('groups')

@@ -98,7 +98,7 @@ function GroupItem({
       <Tooltip>
         <TooltipTrigger asChild>
           <div className="relative flex aspect-square w-20 min-w-[80px] flex-col items-center space-y-2">
-            <Link href={`/game-chat/groups/${id}/info`}>
+            <Link href={`/game-chat/groups/${id}`}>
               <img
                 className="h-20 min-h-[80px] w-20 min-w-[80px] rounded-full"
                 src={avatar}
