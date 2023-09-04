@@ -47,6 +47,7 @@ import { GROUP_KICKED_NOTIFICATION } from "@transcendence/common";
 import { JOIN_GROUP_NOTIFICATION } from "@transcendence/common";
 import { LEAVE_GROUP_NOTIFICATION } from "@transcendence/common";
 import { GROUP_NOTIFICATION_PAYLOAD } from "@transcendence/common";
+import { groupsKey } from "@/api-hooks/groups/use-groups";
 
 const EventsSocketContext = createContext<Socket | null>(null);
 
@@ -122,6 +123,12 @@ function useSocket_() {
             mutate(notificationsKey);
           });
         });
+        _socket.on(
+          GROUP_DELETED_NOTIFICATION,
+          (_data: GROUP_NOTIFICATION_PAYLOAD) => {
+            mutate(groupsKey);
+          },
+        );
         _socket.on(
           GROUP_MESSAGE_EVENT,
           (message: GroupMessage & GroupMessageWithSender) => {
