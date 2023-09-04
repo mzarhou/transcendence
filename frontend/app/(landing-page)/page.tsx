@@ -2,7 +2,7 @@
 
 import Image from "next/image";
 import landingpageimg from "/public/images/landing-page-image.png";
-import darkimg from "public/images/darkimg-lp.png"
+import darkimg from "public/images/darkimg-lp.png";
 import ababouel from "/public/images/ababouel.jpeg";
 import mzarhou from "/public/images/mzarhou.jpeg";
 import fechcha from "/public/images/fech-cha.jpeg";
@@ -13,8 +13,8 @@ import twitter from "/public/images/twitter.png";
 import { NavBar } from "@/components/navbar";
 import { UserProvider } from "@/context/user-context";
 import { useTheme } from "next-themes";
-import Link from 'next/link'
-import { buttonVariants } from '@/components/ui/button'
+import Link from "next/link";
+import { buttonVariants } from "@/components/ui/button";
 
 export default function Home() {
   const { theme } = useTheme();
@@ -25,7 +25,7 @@ export default function Home() {
         <NavBar />
       </div>
       <main className="container mx-auto px-6 pb-24 pt-20 lg:pt-40">
-      <div className="flex flex-col items-center  justify-between space-y-8 lg:flex-row ">
+        <div className="flex flex-col items-center  justify-between space-y-8 lg:flex-row ">
           <div className="space-y-8 text-center text-foreground lg:inline-block lg:w-[43%] lg:text-left">
             <h1 className="text-[clamp(2rem,4vw,4rem)] font-semibold leading-tight">
               Welcome to PingPong!
@@ -61,27 +61,30 @@ export default function Home() {
                 ababouel
               </h2>
               <div className="flex">
-                <Image
-                  src={github}
-                  alt="github logo"
-                  width="44"
-                  height="44"
-                  className="ml-6 mt-20"
-                />
-                <Image
-                  src={linkedin}
-                  alt="linkedin logo"
-                  width="44"
-                  height="44"
-                  className="ml-6 mt-20"
-                />
-                <Image
-                  src={twitter}
-                  alt="twitter logo"
-                  width="44"
-                  height="44"
-                  className="ml-6 mt-20"
-                />
+                <a href="https://github.com/ababouel" className="ml-6 mt-20">
+                  <Image
+                    src={github}
+                    alt="github logo"
+                    width="44"
+                    height="44"
+                  />
+                </a>
+                <a className="ml-6 mt-20">
+                  <Image
+                    src={linkedin}
+                    alt="linkedin logo"
+                    width="44"
+                    height="44"
+                  />
+                </a>
+                <a className="ml-6 mt-20">
+                  <Image
+                    src={twitter}
+                    alt="twitter logo"
+                    width="44"
+                    height="44"
+                  />
+                </a>
               </div>
             </div>
             <div className="mx-auto h-96 w-56 rounded-lg bg-card pt-10 hover:drop-shadow-lp-cards">
@@ -96,27 +99,30 @@ export default function Home() {
                 mzarhou
               </h2>
               <div className="flex">
-                <Image
-                  src={github}
-                  alt="github logo"
-                  width="44"
-                  height="44"
-                  className="ml-6 mt-20"
-                />
-                <Image
-                  src={linkedin}
-                  alt="linkedin logo"
-                  width="44"
-                  height="44"
-                  className="ml-6 mt-20"
-                />
-                <Image
-                  src={twitter}
-                  alt="twitter logo"
-                  width="44"
-                  height="44"
-                  className="ml-6 mt-20"
-                />
+                <a href="https://github.com/DravX" className="ml-6 mt-20">
+                  <Image
+                    src={github}
+                    alt="github logo"
+                    width="44"
+                    height="44"
+                  />
+                </a>
+                <a className="ml-6 mt-20">
+                  <Image
+                    src={linkedin}
+                    alt="linkedin logo"
+                    width="44"
+                    height="44"
+                  />
+                </a>
+                <a className="ml-6 mt-20">
+                  <Image
+                    src={twitter}
+                    alt="twitter logo"
+                    width="44"
+                    height="44"
+                  />
+                </a>
               </div>
             </div>
             <div className="mx-auto h-96 w-56 rounded-lg bg-card pt-10 hover:drop-shadow-lp-cards">
@@ -131,27 +137,30 @@ export default function Home() {
                 fech-cha
               </h2>
               <div className="flex">
-                <Image
-                  src={github}
-                  alt="github logo"
-                  width="44"
-                  height="44"
-                  className="ml-6 mt-20"
-                />
-                <Image
-                  src={linkedin}
-                  alt="linkedin logo"
-                  width="44"
-                  height="44"
-                  className="ml-6 mt-20"
-                />
-                <Image
-                  src={twitter}
-                  alt="twitter logo"
-                  width="44"
-                  height="44"
-                  className="ml-6 mt-20"
-                />
+                <a href="https://github.com/Farouk-Data" className="ml-6 mt-20">
+                  <Image
+                    src={github}
+                    alt="github logo"
+                    width="44"
+                    height="44"
+                  />
+                </a>
+                <a className="ml-6 mt-20">
+                  <Image
+                    src={linkedin}
+                    alt="linkedin logo"
+                    width="44"
+                    height="44"
+                  />
+                </a>
+                <a className="ml-6 mt-20">
+                  <Image
+                    src={twitter}
+                    alt="twitter logo"
+                    width="44"
+                    height="44"
+                  />
+                </a>
               </div>
             </div>
             <div className="mx-auto h-96 w-56 rounded-lg bg-card pt-10 hover:drop-shadow-lp-cards">
@@ -166,27 +175,30 @@ export default function Home() {
                 sismaili
               </h2>
               <div className="flex">
-                <Image
-                  src={github}
-                  alt="github logo"
-                  width="44"
-                  height="44"
-                  className="ml-6 mt-20"
-                />
-                <Image
-                  src={linkedin}
-                  alt="linkedin logo"
-                  width="44"
-                  height="44"
-                  className="ml-6 mt-20"
-                />
-                <Image
-                  src={twitter}
-                  alt="twitter logo"
-                  width="44"
-                  height="44"
-                  className="ml-6 mt-20"
-                />
+                <a href="https://github.com/Souhail37" className="ml-6 mt-20">
+                  <Image
+                    src={github}
+                    alt="github logo"
+                    width="44"
+                    height="44"
+                  />
+                </a>
+                <a className="ml-6 mt-20">
+                  <Image
+                    src={linkedin}
+                    alt="linkedin logo"
+                    width="44"
+                    height="44"
+                  />
+                </a>
+                <a className="ml-6 mt-20">
+                  <Image
+                    src={twitter}
+                    alt="twitter logo"
+                    width="44"
+                    height="44"
+                  />
+                </a>
               </div>
             </div>
           </div>
