@@ -23,7 +23,7 @@ function CardsData(props: {
 }) {
   return (
     <>
-      <div className="mx-auto h-[254px] w-[223px] rounded-lg border-2 border-border pt-10 hover:drop-shadow-lp-cards">
+      <div className="mx-auto h-[254px] w-[223px] rounded-lg border-2 border-border pt-5 hover:drop-shadow-lp-cards">
         <div className="flex justify-evenly">
           <Image
             src={props.profile}
@@ -35,19 +35,27 @@ function CardsData(props: {
             <h2 className="text-md">{props.rank}</h2>
           </div>
         </div>
-        <div className="flex justify-center space-x-5 mt-10 mx-auto">
-          <div className="text-md text-foreground text-center">
-            <h2>Matches<br />played</h2>
+        <div className="mx-auto py-5 flex justify-center space-x-5">
+          <div className="text-md text-center text-foreground">
+            <h2>
+              Matches
+              <br />
+              played
+            </h2>
             <h2>10</h2>
           </div>
-          <div className="text-md text-foreground text-center">
+          <div className="text-md text-center text-foreground">
             <h2>Wins</h2>
             <h2>5</h2>
           </div>
-          <div className="text-md text-foreground text-center">
+          <div className="text-md text-center text-foreground">
             <h2>Loses</h2>
             <h2>5</h2>
           </div>
+        </div>
+        <div className="text-center">
+          <h2>Last Match</h2>
+          <h2>10-5</h2>
         </div>
       </div>
     </>
