@@ -25,6 +25,9 @@ import {
   WsErrorData,
   MESSAGE_READ_EVENT,
   GroupMessageWithSender,
+  GROUP_USER_CONNECTED_EVENT,
+  GroupUserConnectedData,
+  GROUP_USER_DISCONNECTED_EVENT,
 } from "@transcendence/common";
 import { useToast } from "@/components/ui/use-toast";
 import { useSWRConfig, Cache } from "swr";
@@ -48,6 +51,7 @@ import { JOIN_GROUP_NOTIFICATION } from "@transcendence/common";
 import { LEAVE_GROUP_NOTIFICATION } from "@transcendence/common";
 import { GROUP_NOTIFICATION_PAYLOAD } from "@transcendence/common";
 import { groupsKey } from "@/api-hooks/groups/use-groups";
+import { groupKey } from "@/api-hooks/groups/use-group";
 
 const EventsSocketContext = createContext<Socket | null>(null);
 
@@ -129,10 +133,16 @@ function useSocket_() {
             mutate(groupsKey);
           },
         );
+        [GROUP_USER_CONNECTED_EVENT, GROUP_USER_DISCONNECTED_EVENT].forEach(
+          (event) => {
+            _socket.on(event, (data: GroupUserConnectedData) => {
+              mutate(groupKey(data.groupId + ""));
+            });
+          },
+        );
         _socket.on(
           GROUP_MESSAGE_EVENT,
           (message: GroupMessage & GroupMessageWithSender) => {
-            message.message = "optimistic";
             mutate(
               getGroupMessagesKey(message.groupId.toString()),
               (data: any) => [...(data ?? []), message],

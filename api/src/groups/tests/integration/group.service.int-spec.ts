@@ -607,7 +607,7 @@ describe('GroupService int', () => {
       const user = await createMember({ ...group, password: '' });
 
       await expect(
-        groupService.leaveGroup(owner, group.id, { newOwnerId: user.sub }),
+        groupService.ownerLeaveGroup(owner, group.id, { newOwnerId: user.sub }),
       ).resolves.toBeDefined();
 
       const newGroup = await groupsRepository.findOneOrThrow(group.id, {
@@ -622,7 +622,7 @@ describe('GroupService int', () => {
       const group = await createGroup(owner, 'PUBLIC');
 
       await expect(
-        groupService.leaveGroup(owner, group.id, {}),
+        groupService.leaveGroup(owner, group.id),
       ).rejects.toBeDefined();
     });
 
@@ -630,8 +630,8 @@ describe('GroupService int', () => {
       const member = await createMember(group);
       const admin = await createAdmin(group, owner);
 
-      await groupService.leaveGroup(admin, group.id, {});
-      await groupService.leaveGroup(member, group.id, {});
+      await groupService.leaveGroup(admin, group.id);
+      await groupService.leaveGroup(member, group.id);
 
       const { users, ownerId } = await groupsRepository.findOneOrThrow(
         group.id,

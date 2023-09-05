@@ -74,12 +74,25 @@ export class GroupsGateway implements OnGatewayInit, OnApplicationShutdown {
             userId,
             this.groupChatService.getGroupRoomKey(data.groupId),
           );
+          this.websocketService.addEvent(
+            [this.groupChatService.getGroupRoomKey(data.groupId)],
+            GROUP_USER_CONNECTED_EVENT,
+            {
+              userId,
+              groupId: data.groupId,
+            } satisfies GroupUserConnectedData,
+          );
         } else if (event.name === JOIN_GROUP_NOTIFICATION) {
           const userId = parseInt(event.rooms[0].toString());
           const { groupId } = event.data as GROUP_NOTIFICATION_PAYLOAD;
           this.websocketService.joinRoom(
             userId,
             this.groupChatService.getGroupRoomKey(groupId),
+          );
+          this.websocketService.addEvent(
+            [this.groupChatService.getGroupRoomKey(groupId)],
+            GROUP_USER_CONNECTED_EVENT,
+            { groupId, userId } satisfies GroupUserDisconnectedData,
           );
         }
       },

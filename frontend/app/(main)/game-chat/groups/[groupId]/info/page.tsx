@@ -9,6 +9,7 @@ import { useUser } from "@/context/user-context";
 import { truncateText } from "@/lib/utils";
 import { InviteUserAction } from "./components/invite-user-action";
 import { ActionLink } from "./components/action-link";
+import { LeaveGroupAction } from "./components/leave-group-action";
 
 type GroupInfoPageProps = {
   params: {
@@ -49,19 +50,24 @@ function GroupInfoBody({ groupId }: GroupInfoBodyProps) {
           {group.status}
         </p>
       </div>
-      {group.role === "ADMIN" && (
-        <div className="mt-4 flex justify-center space-x-8">
-          <InviteUserAction group={group} />
-          {user?.id && group.ownerId === user.id && (
-            <ActionLink text="Settings" href="settings">
-              <SlidersHorizontal className="w-5" />
+      <div className="mt-4 flex justify-center space-x-8">
+        {group.role === "ADMIN" && (
+          <>
+            <InviteUserAction group={group} />
+            {user?.id && group.ownerId === user.id && (
+              <ActionLink text="Settings" href="settings">
+                <SlidersHorizontal className="w-5" />
+              </ActionLink>
+            )}
+            <ActionLink text="Users" href="manage">
+              <Users className="w-5" />
             </ActionLink>
-          )}
-          <ActionLink text="Users" href="manage">
-            <Users className="w-5" />
-          </ActionLink>
-        </div>
-      )}
+          </>
+        )}
+        {group.users.length > 1 && (
+          <LeaveGroupAction group={group} className="" />
+        )}
+      </div>
       <p className="mt-8 text-sm text-card-foreground/80">Members:</p>
       <div className="mt-4 space-y-4">
         {group.users.map((u) => (

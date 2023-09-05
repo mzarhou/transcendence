@@ -64,7 +64,6 @@ function ChatInput({ friendId }: { friendId: number }) {
       recipientId: friendId,
     };
 
-    console.log({ data });
     socket?.emit(MESSAGE_EVENT, data);
     form.reset();
   };

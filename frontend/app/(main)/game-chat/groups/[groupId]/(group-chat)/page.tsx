@@ -4,7 +4,7 @@ import GoBackBtn from "../../../components/chat-go-back";
 import { Input } from "@/components/ui/input";
 import { FormEventHandler, useEffect, useRef, useState } from "react";
 import { Button } from "@/components/ui/button";
-import { SendHorizonal } from "lucide-react";
+import { Info, SendHorizonal } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { useSendGroupMessage } from "@/api-hooks/groups/use-send-group-message";
 import { GroupMessage, GroupMessageWithSender } from "@transcendence/common";
@@ -30,7 +30,6 @@ export default function GroupChatPage({
     try {
       const groupId = parseInt(params.groupId);
       // Mutate cache directly
-      const messageId = messages[messages.length - 1]?.id ?? 0;
       mutate(
         [
           ...messages,
@@ -64,11 +63,17 @@ export default function GroupChatPage({
 
   return (
     <>
-      <GoBackBtn full={false}>
+      <div className="flex items-center justify-between pr-4">
+        <GoBackBtn full={false}>
+          <Link href={`${params.groupId}/info`}>
+            <h3 className="sm">{group?.name}</h3>
+          </Link>
+        </GoBackBtn>
         <Link href={`${params.groupId}/info`}>
-          <h3 className="sm">{group?.name}</h3>
+          <Info />
         </Link>
-      </GoBackBtn>
+      </div>
+
       <div className="flex h-0 flex-col flex-grow">
         <div
           ref={wrapperRef}

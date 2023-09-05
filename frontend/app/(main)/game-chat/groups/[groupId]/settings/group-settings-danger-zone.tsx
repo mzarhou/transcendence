@@ -12,7 +12,7 @@ export default function GroupSettingsDangerZone({
   className?: string;
   group: Group;
 }) {
-  const { trigger, isMutating } = useDeleteGroup(group.id);
+  const { trigger, isMutating } = useDeleteGroup(group.id + "");
 
   const deleteGroup = () => {
     try {

@@ -40,7 +40,7 @@ export async function GET(req: NextRequest) {
       },
       {
         headers: getForwardHeaders(req),
-      }
+      },
     );
 
     const tokens = tokensResponseSchema.parse(data);
@@ -48,7 +48,6 @@ export async function GET(req: NextRequest) {
     return setCookies(response, tokens);
   } catch (error) {
     if (error instanceof AxiosError) {
-      console.log(error.response?.data);
       return new Response("Failed", { status: 400 });
     }
     if (error instanceof ZodError) {

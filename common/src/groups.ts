@@ -45,10 +45,10 @@ export const joinGroupSchema = z.object({
 });
 export type JoinGroupType = z.infer<typeof joinGroupSchema>;
 
-export const leaveGroupSchema = z.object({
-  newOwnerId: z.number().positive().optional(),
+export const ownerLeaveGroupSchema = z.object({
+  newOwnerId: z.number().positive(),
 });
-export type LeaveGroupType = z.infer<typeof leaveGroupSchema>;
+export type OwnerLeaveGroupType = z.infer<typeof ownerLeaveGroupSchema>;
 
 export type GroupWithRole = Group & { role: UserGroupRole };
 export type SearchGroup = Group & { role: UserGroupRole | undefined };

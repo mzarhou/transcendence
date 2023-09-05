@@ -11,9 +11,10 @@ import { GroupsMutedUsersStorage } from './groups-muted-users.storage';
 import { RedisModule } from '@src/redis/redis.module';
 import { GroupChatService } from './group-chat/group-chat.service';
 import { GroupChatController } from './group-chat/group-chat.controller';
+import { UsersModule } from '@src/users/users.module';
 
 @Module({
-  imports: [NotificationsModule, IamModule, RedisModule],
+  imports: [NotificationsModule, IamModule, RedisModule, UsersModule],
   controllers: [GroupsController, GroupChatController],
   providers: [
     GroupsPolicy,

@@ -28,13 +28,14 @@ import {
 } from '@transcendence/common';
 import { HashingService } from '@src/iam/hashing/hashing.service';
 import { JoinGroupDto } from './dto/join-group.dto';
-import { LeaveGroupDto } from './dto/leave-group.dto';
+import { OwnerLeaveGroupDto } from './dto/owner-leave-group.dto';
 import { GroupUsersFilterDto } from './dto/group-users-filter-query.dto';
 import { GroupsRepository } from './repositories/_groups.repository';
 import { GroupsPolicy } from './groups.policy';
 import { GroupWithUsers } from '@transcendence/common';
 import { MuteUserDto } from './dto/mute-user.dto';
 import { GroupsMutedUsersStorage } from './groups-muted-users.storage';
+import { UsersService } from '@src/users/users.service';
 
 @ApiTags('groups')
 @Injectable()
@@ -45,6 +46,7 @@ export class GroupsService {
     private readonly notificationService: NotificationsService,
     private readonly hashingService: HashingService,
     private readonly mutedUsersStorage: GroupsMutedUsersStorage,
+    private readonly usersService: UsersService,
   ) {}
 
   async create(
@@ -268,32 +270,66 @@ export class GroupsService {
     return this.groupsRepository.omitPassword(group);
   }
 
-  async leaveGroup(
-    user: ActiveUserData,
-    groupId: number,
-    { newOwnerId }: LeaveGroupDto,
-  ) {
+  async leaveGroup(user: ActiveUserData, groupId: number) {
     const group = await this.groupsRepository.findOneOrThrow(groupId, {
       includeUsers: true,
     });
-    this.groupsPolicy.canLeaveGroup(user, group);
-
-    const isOwnerLeaving = user.sub === group.ownerId;
-
-    if (isOwnerLeaving && newOwnerId === undefined) {
-      throw new ForbiddenException('You must specify a new owner');
+    if (group.ownerId === user.sub) {
+      throw new ForbiddenException('Invalid route');
     }
-
+    this.groupsPolicy.canLeaveGroup(user, group);
     await this.groupsRepository.leaveGroup({
       userId: user.sub,
       groupId: group.id,
-      newOwnerId: isOwnerLeaving ? newOwnerId : undefined,
     });
     await this.notificationService.notify(
       [user.sub],
       LEAVE_GROUP_NOTIFICATION,
       {
-        message: `You've leaved ${group.name} group!`,
+        message: `You've left ${group.name} group!`,
+        groupId: group.id,
+      } satisfies GROUP_NOTIFICATION_PAYLOAD,
+    );
+    return { success: true };
+  }
+
+  async ownerLeaveGroup(
+    user: ActiveUserData,
+    groupId: number,
+    { newOwnerId }: OwnerLeaveGroupDto,
+  ) {
+    const group = await this.groupsRepository.findOneOrThrow(groupId, {
+      includeUsers: true,
+    });
+    if (group.ownerId !== user.sub) {
+      throw new ForbiddenException('Invalid route');
+    }
+    try {
+      if (user.sub === newOwnerId) {
+        throw new Error('Invalid new owner');
+      }
+      this.groupsPolicy.canRead({ sub: newOwnerId } as ActiveUserData, group);
+    } catch (error) {
+      throw new ForbiddenException('Invalid new owner');
+    }
+    await this.groupsRepository.leaveGroup({
+      userId: user.sub,
+      groupId: group.id,
+      newOwnerId,
+    });
+    await this.notificationService.notify(
+      [user.sub],
+      LEAVE_GROUP_NOTIFICATION,
+      {
+        message: `You've left ${group.name} group!`,
+        groupId: group.id,
+      } satisfies GROUP_NOTIFICATION_PAYLOAD,
+    );
+    await this.notificationService.notify(
+      [newOwnerId],
+      ADD_ADMIN_NOTIFICATION,
+      {
+        message: `Your are now owner of ${group.name} group!`,
         groupId: group.id,
       } satisfies GROUP_NOTIFICATION_PAYLOAD,
     );

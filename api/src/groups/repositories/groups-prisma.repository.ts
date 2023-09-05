@@ -211,6 +211,17 @@ export class GroupsPrismaRepository extends GroupsRepository {
               where: { id: groupId },
               data: { ownerId: newOwnerId },
             }),
+            this.prisma.usersOnGroups.update({
+              where: {
+                userId_groupId: {
+                  userId: newOwnerId,
+                  groupId: groupId,
+                },
+              },
+              data: {
+                role: 'ADMIN',
+              },
+            }),
           ]
         : []),
       this.prisma.usersOnGroups.delete({
