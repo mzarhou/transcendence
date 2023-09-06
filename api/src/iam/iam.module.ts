@@ -20,6 +20,7 @@ import { BcryptService } from './hashing/bcrypt.service';
 import { HashingService } from './hashing/hashing.service';
 import { UsersModule } from '@src/users/users.module';
 import { WsAuthGuard } from './authentication/guards/ws-auth.guard';
+import { CookiesService } from './authentication/cookies.service';
 
 const Fingerprint = require('express-fingerprint');
 
@@ -48,6 +49,7 @@ const Fingerprint = require('express-fingerprint');
       provide: HashingService,
       useClass: BcryptService,
     },
+    CookiesService,
   ],
   controllers: [
     School42AuthController,

@@ -17,8 +17,8 @@ import {
   FormMessage,
 } from "@/components/ui/form";
 import { zodResolver } from "@hookform/resolvers/zod";
-import { useSignUp } from "@/api-hooks/use-signup";
 import { School42LoginBtn } from "../components/School42LoginBtn";
+import { useSignUp } from "@/api-hooks/auth/use-signup";
 
 interface UserSignUpFormProps extends React.HTMLAttributes<HTMLDivElement> {}
 

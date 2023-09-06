@@ -1,7 +1,7 @@
 import { useToast } from "@/components/ui/use-toast";
+import { USER_KEY } from "@/context/user-context";
 import { api } from "@/lib/api";
 import { getServerMessage } from "@/lib/utils";
-import { AxiosError } from "axios";
 import { useSWRConfig } from "swr";
 import useSWRMutation from "swr/mutation";
 
@@ -24,9 +24,9 @@ export const useEnable2fa = () => {
       },
       onSuccess: () => {
         toast({ description: "2FA is enabled" });
-        mutate("/users/me");
+        mutate(USER_KEY);
       },
-    }
+    },
   );
 
   return {

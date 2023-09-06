@@ -1,6 +1,5 @@
 "use client";
 
-import axios from "axios";
 import {
   ReactNode,
   createContext,
@@ -52,6 +51,7 @@ import { LEAVE_GROUP_NOTIFICATION } from "@transcendence/common";
 import { GROUP_NOTIFICATION_PAYLOAD } from "@transcendence/common";
 import { groupsKey } from "@/api-hooks/groups/use-groups";
 import { groupKey } from "@/api-hooks/groups/use-group";
+import { api } from "@/lib/api";
 
 const EventsSocketContext = createContext<Socket | null>(null);
 
@@ -188,7 +188,7 @@ const useOnError = () => {
     }
     try {
       // try to refresh tokens
-      await axios.post("/api/auth/refresh-tokens");
+      await api.post("/authentication/refresh-tokens");
       setTimeout(() => {
         socket.connect();
       }, 200);

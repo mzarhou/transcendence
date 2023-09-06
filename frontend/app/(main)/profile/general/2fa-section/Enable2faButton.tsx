@@ -13,10 +13,10 @@ import {
   FormItem,
   FormMessage,
 } from "@/components/ui/form";
-import { useEnable2fa } from "@/api-hooks/use-enable-2fa";
 import { AxiosError } from "axios";
 import { Close } from "@radix-ui/react-dialog";
 import { useGenerateQrcode } from "@/api-hooks/use-generate-qrcode";
+import { useEnable2fa } from "@/api-hooks/2fa/use-enable-2fa";
 
 export default function Enable2faButton() {
   return (

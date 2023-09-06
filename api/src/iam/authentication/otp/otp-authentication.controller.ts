@@ -18,12 +18,16 @@ import { Provide2faCodeDto } from '../dto/provide-2fa-code.dto';
 import { AuthType } from '../enum/auth-type.enum';
 import { OtpAuthenticationService } from './otp-authentication.service';
 import { ApiBearerAuth, ApiTags } from '@nestjs/swagger';
+import { CookiesService } from '../cookies.service';
 
 @ApiBearerAuth()
 @ApiTags('2fa')
 @Controller('authentication/2fa')
 export class OtpAuthenticationController {
-  constructor(private readonly otpAuthService: OtpAuthenticationService) {}
+  constructor(
+    private readonly otpAuthService: OtpAuthenticationService,
+    private readonly cookiesService: CookiesService,
+  ) {}
 
   @HttpCode(HttpStatus.OK)
   @Get('generate')
@@ -67,11 +71,14 @@ export class OtpAuthenticationController {
     @FPHash() fingerPrintHash: string,
     @ActiveUser() activeUser: ActiveUserData,
     @Body() provide2faCodeDto: Provide2faCodeDto,
+    @Res({ passthrough: true }) response: Response,
   ) {
-    return this.otpAuthService.provide2faCode(
+    const tokens = await this.otpAuthService.provide2faCode(
       activeUser,
       provide2faCodeDto,
       fingerPrintHash,
     );
+    this.cookiesService.setCookies(response, tokens);
+    return { success: true };
   }
 }

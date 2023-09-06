@@ -1,4 +1,5 @@
 import { useToast } from "@/components/ui/use-toast";
+import { USER_KEY } from "@/context/user-context";
 import { api } from "@/lib/api";
 import { getServerMessage } from "@/lib/utils";
 import { useSWRConfig } from "swr";
@@ -21,9 +22,9 @@ export const useDisable2fa = () => {
       },
       onSuccess: () => {
         toast({ description: "2FA is disabled" });
-        mutate("/users/me");
+        mutate(USER_KEY);
       },
-    }
+    },
   );
   return {
     disable2FA: trigger,

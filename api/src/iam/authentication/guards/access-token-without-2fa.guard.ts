@@ -19,7 +19,7 @@ export class AccessTokenWithout2faGuard implements CanActivate {
 
   async tryGetPayload(context: ExecutionContext) {
     const request: Request = context.switchToHttp().getRequest();
-    const token = this.extractTokenFromHeaderOrCookie(request);
+    const token = this.extractTokenFromCookie(request);
     if (!token) {
       throw new UnauthorizedException('No access token provided');
     }
@@ -33,10 +33,8 @@ export class AccessTokenWithout2faGuard implements CanActivate {
     }
   }
 
-  private extractTokenFromHeaderOrCookie(req: Request) {
+  private extractTokenFromCookie(req: Request) {
     const accessToken: string | undefined = req.cookies?.['accessToken'];
-    if (accessToken) return accessToken;
-    const [, token] = req.headers.authorization?.split(' ') ?? [];
-    return token;
+    return accessToken;
   }
 }

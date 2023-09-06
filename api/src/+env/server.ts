@@ -2,11 +2,17 @@ import { z, ZodFormattedError } from 'zod';
 import * as dotenv from 'dotenv';
 
 const envSchema = z.object({
+  BACKEND_URL: z.string(),
   FRONTEND_URL: z.string(),
 
   DATABASE_URL: z.string(),
 
   APP_SECRET: z.string(),
+
+  COOKIES_DOMAIN: z.string(),
+
+  CLIENT_ID_42: z.string().min(1),
+  CLIENT_SECRET_42: z.string().min(1),
 
   PORT: z.string().regex(/^\d+$/).transform(Number).optional(),
 
