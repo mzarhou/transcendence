@@ -23,11 +23,11 @@ export default function GoBackBtn({ className, children, full }: Props) {
   return (
     <div
       className={cn(
-        "flex items-center md:ml-4 md:py-5",
+        "flex items-center md:ml-4 py-5",
         {
           "cursor-pointer": full,
         },
-        className
+        className,
       )}
       onClick={full ? goBack : undefined}
     >
