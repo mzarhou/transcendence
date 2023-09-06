@@ -22,9 +22,9 @@ export const useEnable2fa = () => {
           variant: "destructive",
         });
       },
-      onSuccess: () => {
+      onSuccess: async () => {
         toast({ description: "2FA is enabled" });
-        mutate(USER_KEY);
+        await mutate(USER_KEY);
       },
     },
   );

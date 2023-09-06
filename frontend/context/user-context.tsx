@@ -32,7 +32,7 @@ export const USER_KEY = "/users/me";
 export const UserProvider: FC<UserProviderProps> = ({ children }) => {
   const userData = useSWR(USER_KEY, fetchUser, {
     revalidateOnFocus: false,
-    revalidateOnMount: false,
+    revalidateOnMount: true,
     revalidateOnReconnect: false,
     refreshWhenOffline: false,
     refreshWhenHidden: false,

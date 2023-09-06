@@ -43,13 +43,17 @@ export class OtpAuthenticationController {
   @HttpCode(HttpStatus.OK)
   @Post('enable')
   async enable2FA(
+    @FPHash() fingerPrintHash: string,
     @ActiveUser() activeUser: ActiveUserData,
     @Body() enable2faDto: Enable2faDto,
+    @Res({ passthrough: true }) response: Response,
   ) {
-    return this.otpAuthService.enableTfaForUser(
-      activeUser,
-      enable2faDto.tfaCode,
-    );
+    const tokens = await this.otpAuthService.enableTfaForUser(activeUser, {
+      code: enable2faDto.tfaCode,
+      fpHash: fingerPrintHash,
+    });
+    this.cookiesService.setCookies(response, tokens);
+    return { success: true };
   }
 
   @HttpCode(HttpStatus.OK)
