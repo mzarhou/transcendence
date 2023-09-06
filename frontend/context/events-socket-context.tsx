@@ -52,6 +52,7 @@ import { GROUP_NOTIFICATION_PAYLOAD } from "@transcendence/common";
 import { groupsKey } from "@/api-hooks/groups/use-groups";
 import { groupKey } from "@/api-hooks/groups/use-group";
 import { api } from "@/lib/api";
+import { friendsKey } from "@/api-hooks/use-friends";
 
 const EventsSocketContext = createContext<Socket | null>(null);
 
@@ -105,14 +106,17 @@ function useSocket_() {
         _socket.on(FRIEND_DISCONNECTED, (data: FriendDisconnectedData) => {
           onFriendDisconnected(data);
         });
-        [FRIEND_REQUEST_EVENT, FRIEND_REQUEST_ACCEPTED_EVENT].forEach(
-          (event) => {
-            _socket.on(event, (_data: FriendRequest) => {
-              mutate(friendRequestsKey);
-              mutate(notificationsKey);
-            });
-          },
-        );
+
+        _socket.on(FRIEND_REQUEST_EVENT, (_data: FriendRequest) => {
+          mutate(friendRequestsKey);
+          mutate(notificationsKey);
+        });
+
+        _socket.on(FRIEND_REQUEST_ACCEPTED_EVENT, () => {
+          mutate(friendsKey);
+          mutate(notificationsKey);
+        });
+
         [
           GROUP_DELETED_NOTIFICATION,
           ADD_ADMIN_NOTIFICATION,
