@@ -73,11 +73,7 @@ export default function Game() {
               <Loader2 className="mx-auto h-8 w-8 animate-spin" />
             </div>
           ) : friends && friends.length ? (
-            friends.map((frd) => (
-              <Link key={frd.id} href={`/game-chat/${frd.id}`}>
-                <FriendItem friend={frd} />
-              </Link>
-            ))
+            friends.map((frd) => <FriendItem key={frd.id} friend={frd} />)
           ) : (
             <FullPlaceHolder text="No friend found" className="text-xl" />
           )}

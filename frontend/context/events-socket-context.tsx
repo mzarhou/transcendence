@@ -53,6 +53,7 @@ import { groupsKey } from "@/api-hooks/groups/use-groups";
 import { groupKey } from "@/api-hooks/groups/use-group";
 import { api } from "@/lib/api";
 import { friendsKey } from "@/api-hooks/use-friends";
+import { UNFRIEND_EVENT } from "@transcendence/common";
 
 const EventsSocketContext = createContext<Socket | null>(null);
 
@@ -100,8 +101,9 @@ function useSocket_() {
           mutate(getMessagesKey(friendId));
           mutate(unreadMessagesKey);
         });
-        _socket.on(FRIEND_CONNECTED, (data: FriendConnectedData) => {
+        _socket.on(FRIEND_CONNECTED, async (data: FriendConnectedData) => {
           onFriendConnected(data);
+          mutate(friendsKey);
         });
         _socket.on(FRIEND_DISCONNECTED, (data: FriendDisconnectedData) => {
           onFriendDisconnected(data);
@@ -113,8 +115,11 @@ function useSocket_() {
         });
 
         _socket.on(FRIEND_REQUEST_ACCEPTED_EVENT, () => {
-          mutate(friendsKey);
           mutate(notificationsKey);
+        });
+
+        _socket.on(UNFRIEND_EVENT, () => {
+          mutate(friendsKey);
         });
 
         [
