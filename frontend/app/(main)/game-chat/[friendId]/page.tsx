@@ -145,12 +145,12 @@ function MessageItem({ message: msg }: MessageItemProps) {
     <div
       ref={messageRef}
       className={cn(
-        "w-2/3 rounded-md  bg-chat-card px-4 pb-3 pt-4 text-chat-card-foreground",
+        "w-2/3 rounded-md  bg-chat-card px-4 pb-3 pt-4 text-chat-card-foreground break-words",
         { "self-end": user?.id === msg.senderId },
       )}
       data-message-id={msg.id}
     >
-      {msg.id}
+      {msg.message}
 
       {msg.senderId === user?.id && (
         <div className="-mt-2 flex justify-end">

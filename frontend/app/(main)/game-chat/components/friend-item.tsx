@@ -36,10 +36,10 @@ export default function FriendItem({
         <div
           className={cn(
             "relative flex aspect-square items-center justify-center rounded-full bg-gray-100/10 text-lg",
-            size === "default" ? "h-[72px]" : "h-[40px]"
+            size === "default" ? "h-[72px]" : "h-[40px]",
           )}
         >
-          <Image
+          <img
             src={friend.avatar}
             width={size === "default" ? 72 : 40}
             height={size === "default" ? 72 : 40}
@@ -53,7 +53,7 @@ export default function FriendItem({
                 {
                   "bottom-0 right-0 h-3 w-3": size === "sm",
                   "": size === "sm",
-                }
+                },
               )}
             ></div>
           )}
