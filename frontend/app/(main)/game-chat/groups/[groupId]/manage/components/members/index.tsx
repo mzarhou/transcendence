@@ -17,6 +17,7 @@ import {
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
 import FullPlaceHolder from "@/components/ui/full-placeholder";
+import MuteUser from "./components/mute-user";
 
 export default function Members({ group }: { group: GroupType }) {
   const { user: currentUser } = useUser();
@@ -89,6 +90,7 @@ function Actions({ targetUser, group }: ActionsProps) {
           ))}
         <KickUser user={targetUser} groupId={group.id} />
         <BanUser user={targetUser} groupId={group.id} />
+        <MuteUser user={targetUser} groupId={group.id} />
         {/* TODO: add mute action */}
       </DropdownMenuContent>
     </DropdownMenu>

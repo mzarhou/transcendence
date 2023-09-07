@@ -1,5 +1,5 @@
 export interface WebsocketEvent {
-  usersIds: number[];
+  rooms: string[] | number[];
   name: string;
   data: unknown;
 }

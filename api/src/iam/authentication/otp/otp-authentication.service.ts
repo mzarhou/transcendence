@@ -33,13 +33,16 @@ export class OtpAuthenticationService {
     return { uri, secret };
   }
 
-  async enableTfaForUser(activeUser: ActiveUserData, code: string) {
+  async enableTfaForUser(
+    activeUser: ActiveUserData,
+    data: { code: string; fpHash: string },
+  ) {
     const encryptedSecret = await this.otpSecretsStorage.get(activeUser.sub);
     if (!encryptedSecret) {
       throw new ForbiddenException('You must generate qrcode first');
     }
-    if (!this.verifyCode(code, encryptedSecret)) {
-      throw new ForbiddenException(`Invalid code: ${code}`);
+    if (!this.verifyCode(data.code, encryptedSecret)) {
+      throw new ForbiddenException(`Invalid code: ${data.code}`);
     }
 
     const { id, isTfaEnabled } = await this.usersRepository.findOneOrThrow(
@@ -50,10 +53,11 @@ export class OtpAuthenticationService {
     }
 
     await this.otpSecretsStorage.invalidate(activeUser.sub);
-    await this.usersRepository.update(id, {
+    const user = await this.usersRepository.update(id, {
       isTfaEnabled: true,
       tfaSecret: encryptedSecret,
     });
+    return this.authService.generateTokens(user, data.fpHash, true);
   }
 
   async disableTfaForUser(activeUser: ActiveUserData, code: string) {

@@ -17,7 +17,7 @@ import {
 } from "@/components/ui/form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { SignInType, signinSchema } from "@transcendence/common";
-import { useSignIn } from "@/api-hooks/use-signin";
+import { useSignIn } from "@/api-hooks/auth/use-signin";
 import { School42LoginBtn } from "../components/School42LoginBtn";
 
 interface UserLoginFormProps extends React.HTMLAttributes<HTMLDivElement> {}
@@ -33,10 +33,10 @@ export function UserLoginForm({ className, ...props }: UserLoginFormProps) {
     },
   });
 
-  function submit(data: SignInType) {
-    signin(data).catch((err) => {
-      // Todo: handle error
-    });
+  async function submit(data: SignInType) {
+    try {
+      await signin(data);
+    } catch (error) {}
   }
 
   return (

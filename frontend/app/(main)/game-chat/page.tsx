@@ -73,11 +73,7 @@ export default function Game() {
               <Loader2 className="mx-auto h-8 w-8 animate-spin" />
             </div>
           ) : friends && friends.length ? (
-            friends.map((frd) => (
-              <Link key={frd.id} href={`/game-chat/${frd.id}`}>
-                <FriendItem friend={frd} />
-              </Link>
-            ))
+            friends.map((frd) => <FriendItem key={frd.id} friend={frd} />)
           ) : (
             <FullPlaceHolder text="No friend found" className="text-xl" />
           )}
@@ -98,7 +94,7 @@ function GroupItem({
       <Tooltip>
         <TooltipTrigger asChild>
           <div className="relative flex aspect-square w-20 min-w-[80px] flex-col items-center space-y-2">
-            <Link href={`/game-chat/groups/${id}/info`}>
+            <Link href={`/game-chat/groups/${id}`}>
               <img
                 className="h-20 min-h-[80px] w-20 min-w-[80px] rounded-full"
                 src={avatar}

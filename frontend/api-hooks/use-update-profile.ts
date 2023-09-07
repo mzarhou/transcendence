@@ -1,8 +1,6 @@
-import { useUser } from "@/context/user-context";
 import { useToast } from "@/components/ui/use-toast";
 import { api } from "@/lib/api";
 import { UpdateUserType } from "@transcendence/common";
-import { AxiosError } from "axios";
 import { useSWRConfig } from "swr";
 import useSWRMutation from "swr/mutation";
 import { getServerMessage } from "@/lib/utils";
@@ -25,7 +23,7 @@ export const useUpdateProfile = () => {
           variant: "destructive",
         });
       },
-    }
+    },
   );
   return { trigger: (arg: UpdateUserType) => trigger(arg).catch(), ...rest };
 };

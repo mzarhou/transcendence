@@ -1,9 +1,4 @@
-import {
-  HttpStatus,
-  Inject,
-  Injectable,
-  UnauthorizedException,
-} from '@nestjs/common';
+import { ForbiddenException, Inject, Injectable } from '@nestjs/common';
 import { ConfigType } from '@nestjs/config';
 import { JwtService } from '@nestjs/jwt';
 import { randomUUID } from 'crypto';
@@ -39,14 +34,14 @@ export class AuthenticationService {
       email: signInDto.email,
     });
     if (!user) {
-      throw new UnauthorizedException(undefined, "User doesn't exists");
+      throw new ForbiddenException(undefined, "User doesn't exists");
     }
     const isEqual = await this.hashingService.compare(
       signInDto.password,
       user.secrets?.password ?? '',
     );
     if (!isEqual) {
-      throw new UnauthorizedException(undefined, "Password doesn't match");
+      throw new ForbiddenException(undefined, "Password doesn't match");
     }
     return this.generateTokens(user, fingerprintHash);
   }
@@ -120,7 +115,7 @@ export class AuthenticationService {
 
       const user = await this.usersRepository.findOne(sub);
       if (!user) {
-        throw new UnauthorizedException();
+        throw new ForbiddenException();
       }
 
       const isValid = await this.refreshTokenIdsStorage.validate(
@@ -129,19 +124,19 @@ export class AuthenticationService {
         refreshTokenId,
       );
       if (!isValid) {
-        throw new UnauthorizedException('Invalide refresh token');
+        throw new ForbiddenException('Invalide refresh token');
       }
 
       await this.refreshTokenIdsStorage.invalidate(user.id, fingerprintHash);
       return this.generateTokens(user, fingerprintHash, isTfaCodeProvided);
     } catch (error) {
       if (error instanceof InvalidateRefreshTokenError) {
-        throw new UnauthorizedException(
+        throw new ForbiddenException(
           undefined,
           'your refresh token might be stolen',
         );
       }
-      throw new UnauthorizedException();
+      throw new ForbiddenException();
     }
   }
 

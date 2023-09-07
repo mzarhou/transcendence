@@ -12,7 +12,7 @@ import { Subscription } from 'rxjs';
 import { Logger, OnApplicationShutdown } from '@nestjs/common';
 import { WebsocketEvent } from './weboscket-event.interface';
 import { AuthenticationService } from '@src/iam/authentication/authentication.service';
-import { CONNECTION_STATUS } from './websocket.enum';
+import { CONNECTION_STATUS, NewSocketData } from './websocket.enum';
 import { ERROR_EVENT } from '@transcendence/common';
 import { env } from '@src/+env/server';
 
@@ -63,6 +63,10 @@ export class WebsocketGateway
         this.service.addEvent([], CONNECTION_STATUS.CONNECTED, user);
       }
       socket.join(user.sub.toString());
+      this.service.addEvent([], CONNECTION_STATUS.NEW_SOCKET, {
+        user,
+        socket,
+      } satisfies NewSocketData);
     } catch (error) {
       this.logger.warn(`failed to connect user ${socket.id}`);
       if (error instanceof WsException) {
@@ -89,16 +93,11 @@ export class WebsocketGateway
   }
 
   handleEvent(server: Server, event: WebsocketEvent) {
-    if (
-      event.name === CONNECTION_STATUS.CONNECTED ||
-      event.name === CONNECTION_STATUS.DISCONNECTED
-    ) {
+    if (Object.keys(CONNECTION_STATUS).includes(event.name)) {
       return;
     }
-
-    for (const userId of event.usersIds) {
-      if (!this.service.isUserConnected(userId)) continue;
-      server.to(userId.toString()).emit(event.name, event.data);
+    for (const room of event.rooms) {
+      server.to(room.toString()).emit(event.name, event.data);
     }
   }
 }

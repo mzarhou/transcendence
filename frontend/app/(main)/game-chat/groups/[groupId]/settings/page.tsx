@@ -19,10 +19,9 @@ import { useUpdateGroup } from "@/api-hooks/groups/use-update-group";
 import GoBackBtn from "../../../components/chat-go-back";
 import { GroupType, useGroup } from "@/api-hooks/groups/use-group";
 import FullLoader from "@/components/ui/full-loader";
-import { useRouter } from "next/navigation";
-import { useUser } from "@/context/user-context";
 import FullPlaceHolder from "@/components/ui/full-placeholder";
 import { truncateText } from "@/lib/utils";
+import GroupSettingsDangerZone from "./group-settings-danger-zone";
 
 type GroupInfoPageProps = {
   params: {
@@ -34,14 +33,6 @@ export default function UpdateGroupPage({
   params: { groupId },
 }: GroupInfoPageProps) {
   const { data: group, isLoading, error } = useGroup(groupId);
-  const router = useRouter();
-  const { user } = useUser();
-
-  useEffect(() => {
-    if (group && user && group.ownerId !== user.id)
-      router.replace("/game-chat");
-  }, [router, group, user]);
-
   return (
     <>
       <GoBackBtn>
@@ -54,7 +45,10 @@ export default function UpdateGroupPage({
       {isLoading ? (
         <FullLoader />
       ) : group ? (
-        <UpdateGroupBody group={group} />
+        <div className="flex h-0 w-full flex-grow flex-col space-y-12 overflow-y-auto px-1 pt-8 md:p-4 md:px-6 md:pt-0">
+          <UpdateGroupBody group={group} />
+          <GroupSettingsDangerZone group={group} />
+        </div>
       ) : (
         <FullPlaceHolder
           text={error ? "Failed getting group details" : "Group not found"}
@@ -99,7 +93,7 @@ function UpdateGroupBody({ group }: UpdateGroupBodyProps) {
   }
 
   return (
-    <div className="flex h-0 w-full flex-grow flex-col space-y-8 overflow-y-auto px-1 pt-8 md:p-4 md:px-6 md:pt-0">
+    <div className="space-y-8">
       <Form {...form}>
         <form onSubmit={form.handleSubmit(submit)} className="space-y-8">
           <div className="">

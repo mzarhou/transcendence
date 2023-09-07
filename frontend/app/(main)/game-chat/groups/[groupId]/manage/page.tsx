@@ -3,8 +3,6 @@
 import { useGroup } from "@/api-hooks/groups/use-group";
 import GoBackBtn from "../../../components/chat-go-back";
 import FullLoader from "@/components/ui/full-loader";
-import { useRouter } from "next/navigation";
-import { ReactNode, useEffect } from "react";
 import { Input } from "@/components/ui/input";
 import { queryAtom } from "./components/search-query-atom";
 import { useAtom } from "jotai";
@@ -24,14 +22,9 @@ type ManageGroupPageProps = {
 export default function ManageGroupPage({
   params: { groupId },
 }: ManageGroupPageProps) {
-  const router = useRouter();
   const { data: group, isLoading, error } = useGroup(groupId);
 
   useGroupUsers({ filter: "banned", groupId });
-
-  useEffect(() => {
-    if (group && group.role === "MEMBER") router.replace("/game-chat");
-  }, [router, group]);
 
   return (
     <>
