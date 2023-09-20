@@ -54,7 +54,7 @@ function ProfileSideBarItem({
         "mb-2 flex cursor-pointer items-center space-x-4 rounded-md px-3 py-2 hover:bg-gray-100 hover:text-black",
         {
           "text-gray-300": !selected,
-        }
+        },
       )}
     >
       <Slot className="icon-container icon-md">{children}</Slot>

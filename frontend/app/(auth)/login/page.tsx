@@ -7,12 +7,12 @@ import { ModeToggle } from "@/components/mode-toggle";
 export default function () {
   return (
     <>
-      <div className="absolute right-4 top-4 flex items-center md:right-8 md:top-8">
+      <div className="right-4 absolute top-4 flex items-center md:right-8 md:top-8">
         <Link
           href="/signup"
           className={cn(
             buttonVariants({ variant: "ghost", size: "sm" }),
-            "mr-4"
+            "mr-4",
           )}
         >
           Sign Up
