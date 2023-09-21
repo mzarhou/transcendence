@@ -1,10 +1,10 @@
 import { Injectable } from '@nestjs/common';
 import { FriendRequest } from '@transcendence/common';
-import { PolicyBase } from '@src/+common/dto/base.policy';
+import { BasePolicy } from '@src/+common/dto/base.policy';
 import { ActiveUserData } from '@src/iam/interface/active-user-data.interface';
 
 @Injectable()
-export class FriendRequestPolicy extends PolicyBase {
+export class FriendRequestPolicy extends BasePolicy {
   canView(user: ActiveUserData, friendRequest: FriendRequest): boolean {
     return this.throwUnlessCan(
       friendRequest.recipientId === user.sub ||

@@ -12,9 +12,16 @@ import { RedisModule } from '@src/redis/redis.module';
 import { GroupChatService } from './group-chat/group-chat.service';
 import { GroupChatController } from './group-chat/group-chat.controller';
 import { UsersModule } from '@src/users/users.module';
+import { GroupInvitationsModule } from './group-invitations/group-invitations.module';
 
 @Module({
-  imports: [NotificationsModule, IamModule, RedisModule, UsersModule],
+  imports: [
+    NotificationsModule,
+    IamModule,
+    RedisModule,
+    UsersModule,
+    GroupInvitationsModule,
+  ],
   controllers: [GroupsController, GroupChatController],
   providers: [
     GroupsPolicy,

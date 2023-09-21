@@ -46,7 +46,6 @@ export class GroupsService {
     private readonly notificationService: NotificationsService,
     private readonly hashingService: HashingService,
     private readonly mutedUsersStorage: GroupsMutedUsersStorage,
-    private readonly usersService: UsersService,
   ) {}
 
   async create(
