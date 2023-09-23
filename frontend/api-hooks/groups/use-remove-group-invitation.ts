@@ -3,25 +3,25 @@ import { api } from "@/lib/api";
 import { useSWRConfig } from "swr";
 import useSWRMutation from "swr/mutation";
 import { getServerMessage } from "@/lib/utils";
-import { groupsKey } from "./use-groups";
+import { groupInvitationsKey } from "./use-group-invitations";
 
-export const useRemoveInvitation = (invitationId: string) => {
+export const useRemoveGroupInvitation = (invitationId: number) => {
   const { toast } = useToast();
   const { mutate } = useSWRConfig();
 
   return useSWRMutation(
     `/groups/${invitationId}/invitations`,
-    async (url) => api.post(url),
+    async (url) => api.delete(url),
     {
       onError: (error) => {
         toast({
-          description: getServerMessage(error, "Invitation removed"),
+          description: getServerMessage(error, "Failed to remove invitation"),
           variant: "destructive",
         });
       },
       onSuccess: () => {
-        toast({ description: "Failed to remove invitation" });
-        mutate(groupsKey);
+        toast({ description: "Invitation removed" });
+        mutate(groupInvitationsKey);
       },
     }
   );

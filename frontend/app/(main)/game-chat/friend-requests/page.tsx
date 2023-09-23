@@ -15,21 +15,21 @@ export default function FriendRequestsPage() {
       <GoBackBtn>
         <h3 className="sm">Friend requests</h3>
       </GoBackBtn>
-      <div className="flex-grow pt-8 md:px-6 md:pt-0">
-        <div className="mt-5 h-full space-y-8">
-          {friendRequestsCount > 0 ? (
-            data!.map((friendRequest) => (
+      <div className="flex h-0 flex-grow flex-col pt-8 md:px-4 md:pt-0">
+        {friendRequestsCount > 0 ? (
+          <div className="mt-5 flex-grow space-y-8 overflow-y-scroll pb-4">
+            {data!.map((friendRequest) => (
               <FriendRequestItem
                 key={friendRequest.id}
                 friendRequest={friendRequest}
               />
-            ))
-          ) : (
-            <div className="flex h-full flex-grow items-center justify-center text-lg text-chat-card-foreground/60">
-              No friend request
-            </div>
-          )}
-        </div>
+            ))}
+          </div>
+        ) : (
+          <div className="flex h-full flex-grow items-center justify-center text-lg text-chat-card-foreground/60">
+            No friend request
+          </div>
+        )}
       </div>
     </>
   );
