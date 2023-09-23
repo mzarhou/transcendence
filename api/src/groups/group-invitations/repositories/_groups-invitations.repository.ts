@@ -1,6 +1,7 @@
 import { Injectable } from '@nestjs/common';
 import { Prisma } from '@prisma/client';
 import { GroupWithUsers } from '@src/+prisma/helpers';
+import { UserGroupInvitation } from '@transcendence/common';
 
 export interface CreateGroupInvitation {
   userId: number;
@@ -9,7 +10,15 @@ export interface CreateGroupInvitation {
 }
 
 export type GroupInvitationWithGroup = Prisma.GroupInvitationGetPayload<{
-  include: { group: true };
+  include: { group: true; user: true };
+}>;
+
+export type SearchableGroup = Prisma.GroupGetPayload<{
+  include: {
+    users: { include: { user: true } };
+    blockedUsers: true;
+    invitations: true;
+  };
 }>;
 
 @Injectable()
@@ -18,5 +27,11 @@ export abstract class GroupsInvitationsRepository {
     data: CreateGroupInvitation,
   ): Promise<GroupInvitationWithGroup>;
 
-  abstract findGroupWithUsers(groupId: number): Promise<GroupWithUsers>;
+  abstract findGroupWithUsers(groupId: number): Promise<GroupWithUsers | null>;
+
+  abstract findSearchableGroup(
+    groupId: number,
+  ): Promise<SearchableGroup | null>;
+
+  abstract findUserInvitations(userId: number): Promise<UserGroupInvitation[]>;
 }

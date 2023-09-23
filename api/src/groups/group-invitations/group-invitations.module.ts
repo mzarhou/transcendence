@@ -1,14 +1,16 @@
 import { Module } from '@nestjs/common';
 import { GroupInvitationsController } from './group-invitations.controller';
-import { GroupInvitationsService } from './group-invitations.service';
 import { GroupsInvitationsRepository } from './repositories/_groups-invitations.repository';
 import { GroupsInvitationsPrismaRepository } from './repositories/groups-prisma-invitations.repository';
 import { GroupInvitationsPolicy } from './group-invitations.policy';
+import actions from './actions';
+import { UsersModule } from '@src/users/users.module';
 
 @Module({
+  imports: [UsersModule],
   controllers: [GroupInvitationsController],
   providers: [
-    GroupInvitationsService,
+    ...actions,
     GroupInvitationsPolicy,
     {
       provide: GroupsInvitationsRepository,

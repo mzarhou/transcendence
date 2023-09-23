@@ -6,10 +6,12 @@ import { GroupWithUsers, mapGroup } from '@src/+prisma/helpers';
 
 type GroupInvitationWithUser = Prisma.GroupInvitationGetPayload<{
   include: {
-    user: true;
+    user: { select: { id: true } };
     group: {
       include: {
-        users: { include: { user: true } };
+        users: {
+          include: { user: true };
+        };
       };
     };
   };
@@ -39,5 +41,12 @@ export class GroupInvitationsPolicy extends BaseGroupsPolicy {
       user.sub === invitation.user.id || // is invited user
         this.isAdmin(user.sub, mapGroup(invitation.group)),
     );
+  }
+
+  /**
+   * any member of the group can invite users
+   */
+  canInviteUsers(user: ActiveUserData, group: GroupWithUsers) {
+    return this.requireMember(user.sub, mapGroup(group));
   }
 }

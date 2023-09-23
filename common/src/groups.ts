@@ -1,5 +1,6 @@
 import z from "zod";
 import { Group, UserGroupRole } from "./db-types";
+import { Prisma } from "@prisma/client";
 
 const errorMessage =
   "You must provide a password when setting status to `PROTECTED`";
@@ -12,7 +13,7 @@ export const baseCreateGroupSchema = z.object({
 
 export const createGroupSchema = baseCreateGroupSchema.refine(
   (data) => data.status !== "PROTECTED" || data.password !== undefined,
-  errorMessage,
+  errorMessage
 );
 export type CreateGroupType = z.infer<typeof createGroupSchema>;
 
@@ -74,3 +75,17 @@ export const muteUserSchema = z.object({
     .describe("period in seconds, 10 - 86400 (24h)"),
 });
 export type MuteUserType = z.infer<typeof muteUserSchema>;
+
+export const inviteUserToGroupSchema = z.object({
+  userId: z.number().positive(),
+});
+export type InviteUserToGroupType = z.infer<typeof inviteUserToGroupSchema>;
+
+export type UserGroupInvitation = Prisma.GroupInvitationGetPayload<{
+  include: {
+    user: {
+      select: { id: true; name: true };
+    };
+    group: { include: { users: { include: { user: true } } } };
+  };
+}>;

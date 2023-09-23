@@ -1,3 +1,5 @@
+import { Group } from "./db-types";
+
 export const MESSAGE_EVENT = "message";
 export const MESSAGE_READ_EVENT = "message_read";
 
@@ -51,3 +53,13 @@ export type GroupUserConnectedData = {
 
 export const GROUP_USER_DISCONNECTED_EVENT = "group_user_disconnected";
 export type GroupUserDisconnectedData = GroupUserConnectedData;
+
+export const GROUP_INVITATION_EVENT = "new_group_invitation";
+export type GroupInvitationData = {
+  id: number;
+  group: Group;
+  user: {
+    name: string;
+    avatar: string;
+  };
+};
