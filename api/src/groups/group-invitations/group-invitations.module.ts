@@ -4,10 +4,11 @@ import { GroupsInvitationsRepository } from './repositories/_groups-invitations.
 import { GroupsInvitationsPrismaRepository } from './repositories/groups-prisma-invitations.repository';
 import { GroupInvitationsPolicy } from './group-invitations.policy';
 import actions from './actions';
+import { NotificationsModule } from '@src/notifications/notifications.module';
 import { UsersModule } from '@src/users/users.module';
 
 @Module({
-  imports: [UsersModule],
+  imports: [UsersModule, NotificationsModule],
   controllers: [GroupInvitationsController],
   providers: [
     ...actions,

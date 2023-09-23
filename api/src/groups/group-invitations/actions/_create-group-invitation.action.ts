@@ -4,24 +4,21 @@ import {
   NotFoundException,
 } from '@nestjs/common';
 import { ActiveUserData } from '@src/iam/interface/active-user-data.interface';
-import { WebsocketService } from '@src/websocket/websocket.service';
 import {
   GroupsInvitationsRepository,
   SearchableGroup,
 } from '../repositories/_groups-invitations.repository';
 import { GroupInvitationsPolicy } from '../group-invitations.policy';
 import { CreateGroupInvitationDto } from '../dto/create-group-invitation.dto';
-import {
-  GROUP_INVITATION_EVENT,
-  GroupInvitationData,
-} from '@transcendence/common';
+import { GROUP_INVITATION_NOTIFICATION } from '@transcendence/common';
+import { NotificationsService } from '@src/notifications/notifications.service';
 
 @Injectable()
 export class CreateGroupInvitationAction {
   constructor(
     private readonly policy: GroupInvitationsPolicy,
     private readonly repository: GroupsInvitationsRepository,
-    private readonly websocket: WebsocketService,
+    private readonly notificationsService: NotificationsService,
   ) {}
 
   async execute(
@@ -42,14 +39,11 @@ export class CreateGroupInvitationAction {
       invitedById: user.sub,
     });
 
-    this.websocket.addEvent([userId], GROUP_INVITATION_EVENT, {
-      id: invitationWithGroup.id,
-      group: invitationWithGroup.group,
-      user: {
-        name: invitationWithGroup.user.name,
-        avatar: invitationWithGroup.user.avatar,
-      },
-    } satisfies GroupInvitationData);
+    this.notificationsService.notify(
+      [userId],
+      GROUP_INVITATION_NOTIFICATION,
+      `You have been invited to join ${invitationWithGroup.group.name} group`,
+    );
 
     return { success: true };
   }

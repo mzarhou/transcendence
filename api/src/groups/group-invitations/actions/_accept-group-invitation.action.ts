@@ -5,10 +5,18 @@ import {
 } from '@nestjs/common';
 import { ActiveUserData } from '@src/iam/interface/active-user-data.interface';
 import { PrismaService } from '@src/+prisma/prisma.service';
+import {
+  GROUP_NOTIFICATION_PAYLOAD,
+  JOIN_GROUP_NOTIFICATION,
+} from '@transcendence/common';
+import { NotificationsService } from '@src/notifications/notifications.service';
 
 @Injectable()
 export class AcceptGroupInvitationAction {
-  constructor(private readonly prisma: PrismaService) {}
+  constructor(
+    private readonly prisma: PrismaService,
+    private readonly notificationsService: NotificationsService,
+  ) {}
 
   async execute(user: ActiveUserData, invitationId: number) {
     const invitation = await this.requireInvitation(invitationId);
@@ -28,6 +36,12 @@ export class AcceptGroupInvitationAction {
       userId: user.sub,
       groupId: invitation.groupId,
     });
+
+    this.notificationsService.notify([user.sub], JOIN_GROUP_NOTIFICATION, {
+      groupId: invitation.groupId,
+      message: `You've joined ${invitation.group.name} group!`,
+    } satisfies GROUP_NOTIFICATION_PAYLOAD);
+
     return { success: true };
   }
 
