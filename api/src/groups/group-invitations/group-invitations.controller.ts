@@ -16,6 +16,7 @@ import { CreateGroupInvitationAction } from './actions/_create-group-invitation.
 import { RemoveGroupInvitationAction } from './actions/_remove-group-invitation.action';
 import { GetGroupInvitationAction } from './actions/_get-group-invitations.action';
 import { SearchInvitableUsersAction } from './actions/_search-invitable-users.action';
+import { AcceptGroupInvitationAction } from './actions/_accept-group-invitation.action';
 
 @ApiTags('groups')
 @Controller('groups')
@@ -25,6 +26,7 @@ export class GroupInvitationsController {
     private readonly removeInvitationAction: RemoveGroupInvitationAction,
     private readonly getInvitationsAction: GetGroupInvitationAction,
     private readonly searchInvitableUsersAction: SearchInvitableUsersAction,
+    private readonly acceptGroupInvitationAction: AcceptGroupInvitationAction,
   ) {}
 
   @ApiOperation({ summary: 'Invite user to group' })
@@ -51,6 +53,14 @@ export class GroupInvitationsController {
     @Query('term') searchTerm: string,
   ) {
     return this.searchInvitableUsersAction.execute(user, groupId, searchTerm);
+  }
+
+  @Post('/invitations/:id/accept')
+  accept(
+    @ActiveUser() user: ActiveUserData,
+    @Param() { id: invitationId }: IdDto,
+  ) {
+    return this.acceptGroupInvitationAction.execute(user, invitationId);
   }
 
   @Delete('/:id/invitations')

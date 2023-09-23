@@ -4,19 +4,31 @@ import { Check, X } from "lucide-react";
 import { UserGroupInvitation } from "@transcendence/common";
 import { LoaderButton } from "@/components/ui/loader-button";
 import { useRemoveGroupInvitation } from "@/api-hooks/groups/use-remove-group-invitation";
+import { useAcceptGroupInvitation } from "@/api-hooks/groups/use-accept-group-invitation";
 
 type GroupInvitationItemProps = {
   invitation: UserGroupInvitation;
 };
 export function GroupInvitationItem({ invitation }: GroupInvitationItemProps) {
-  const { trigger, isMutating } = useRemoveGroupInvitation(invitation.id);
+  const { trigger: refuse, isMutating: isRefusing } = useRemoveGroupInvitation(
+    invitation.id
+  );
+  const { trigger: accept, isMutating: isAccepting } = useAcceptGroupInvitation(
+    invitation.id.toString()
+  );
 
   const removeGroupInvitation = async () => {
     try {
-      await trigger();
+      await refuse();
     } catch (error) {
       console.log({ error });
     }
+  };
+
+  const acceptInvitation = async () => {
+    try {
+      await accept();
+    } catch (error) {}
   };
 
   return (
@@ -26,12 +38,17 @@ export function GroupInvitationItem({ invitation }: GroupInvitationItemProps) {
         <h4>{invitation.group.name}</h4>
         <div className="flex justify-end space-x-2">
           <LoaderButton
-            isLoading={isMutating}
+            isLoading={isRefusing}
             onClick={() => removeGroupInvitation()}
+            disabled={isRefusing || isAccepting}
           >
             <X />
           </LoaderButton>
-          <LoaderButton>
+          <LoaderButton
+            isLoading={isAccepting}
+            onClick={() => acceptInvitation()}
+            disabled={isRefusing || isAccepting}
+          >
             <Check />
           </LoaderButton>
         </div>
