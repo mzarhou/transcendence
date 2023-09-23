@@ -16,6 +16,7 @@ import {
   Notification,
   FriendRequestWithRequester,
   FriendRequestWithRecipient,
+  GROUP_INVITATION_NOTIFICATION,
 } from "@transcendence/common";
 import { LoaderButton } from "./ui/loader-button";
 import { NoticationsBadge } from "./ui/notifications-badge";
@@ -51,7 +52,7 @@ export default function NotificationsPopup() {
 
   const unreadNotificationsCount = useMemo(
     () => notifications.filter((n) => !n.isRead).length,
-    [notifications],
+    [notifications]
   );
 
   return (
@@ -151,6 +152,14 @@ function NotificationItem({
   ) {
     const data = nt.data as GROUP_NOTIFICATION_PAYLOAD;
     return <data>{data.message}</data>;
+  }
+
+  if (nt.event === GROUP_INVITATION_NOTIFICATION) {
+    return (
+      <Link href="/game-chat/group-invitations">
+        <div>{nt.data as string}</div>
+      </Link>
+    );
   }
 
   if (typeof nt.data === "object") {

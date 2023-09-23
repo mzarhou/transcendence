@@ -36,10 +36,12 @@ model User {
   receivedMessages Message[]       @relation("User_canReceiveMany_messages")
   Notifications    Notifications[]
 
-  ownGroups      Group[]         @relation("users_own_groups")
-  groups         UsersOnGroups[]
-  blockingGroups Group[]
-  groupMessages  GroupMessage[]
+  ownGroups        Group[]           @relation("users_own_groups")
+  groups           UsersOnGroups[]
+  blockingGroups   Group[]
+  groupMessages    GroupMessage[]
+  groupInvitations GroupInvitation[] @relation("privateGroupInvitaions")
+  invitedUsersByMe GroupInvitation[] @relation("invitingUsersToGroups")
 
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
@@ -118,10 +120,11 @@ model Group {
   status   GroupStatus
 
   ownerId      Int
-  owner        User            @relation("users_own_groups", fields: [ownerId], references: [id], onDelete: Cascade)
+  owner        User              @relation("users_own_groups", fields: [ownerId], references: [id], onDelete: Cascade)
   users        UsersOnGroups[]
   blockedUsers User[]
   messages     GroupMessage[]
+  invitations  GroupInvitation[]
 
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
@@ -154,4 +157,17 @@ model GroupMessage {
 
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
+}
+
+model GroupInvitation {
+  id Int @id @default(autoincrement())
+
+  user   User @relation("privateGroupInvitaions", fields: [userId], references: [id], onDelete: Cascade)
+  userId Int  @unique
+
+  invitedBy   User @relation("invitingUsersToGroups", fields: [invitedById], references: [id], onDelete: Cascade)
+  invitedById Int
+
+  group   Group @relation(fields: [groupId], references: [id], onDelete: Cascade)
+  groupId Int
 }

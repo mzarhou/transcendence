@@ -38,7 +38,7 @@ export default function FriendItem({
           <div
             className={cn(
               "relative flex aspect-square items-center justify-center rounded-full bg-gray-100/10 text-lg",
-              size === "default" ? "h-[72px]" : "h-[40px]",
+              size === "default" ? "h-[72px]" : "h-[40px]"
             )}
           >
             <img
@@ -55,7 +55,7 @@ export default function FriendItem({
                   {
                     "bottom-0 right-0 h-3 w-3": size === "sm",
                     "": size === "sm",
-                  },
+                  }
                 )}
               ></div>
             )}
@@ -68,8 +68,8 @@ export default function FriendItem({
             <p>{friend.name}</p>
             {size === "default" && (
               <>
-                <p className="text-chat-foreground/60 text-sm">In game</p>
-                <p className="text-chat-foreground/60 text-sm">#60</p>
+                <p className="text-sm text-chat-card-foreground/60">In game</p>
+                <p className="text-sm text-chat-card-foreground/60">#60</p>
               </>
             )}
           </div>

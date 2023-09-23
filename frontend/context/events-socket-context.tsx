@@ -54,6 +54,7 @@ import { groupKey } from "@/api-hooks/groups/use-group";
 import { api } from "@/lib/api";
 import { friendsKey } from "@/api-hooks/use-friends";
 import { UNFRIEND_EVENT } from "@transcendence/common";
+import { GROUP_INVITATION_NOTIFICATION } from "@transcendence/common";
 
 const EventsSocketContext = createContext<Socket | null>(null);
 
@@ -93,7 +94,7 @@ function useSocket_() {
     if (!_socket.hasListeners("connect")) {
       _socket.on("connect", () => {
         _socket.on(ERROR_EVENT, async (data: WsErrorData) =>
-          onError(_socket, data),
+          onError(_socket, data)
         );
         _socket.on(MESSAGE_EVENT, (data: MessageType) => onMessage(data));
         _socket.on(MESSAGE_READ_EVENT, (data: MessageType) => {
@@ -131,6 +132,7 @@ function useSocket_() {
           GROUP_KICKED_NOTIFICATION,
           JOIN_GROUP_NOTIFICATION,
           LEAVE_GROUP_NOTIFICATION,
+          GROUP_INVITATION_NOTIFICATION,
         ].forEach((event) => {
           _socket.on(event, (_data: GROUP_NOTIFICATION_PAYLOAD) => {
             mutate(notificationsKey);
@@ -140,24 +142,27 @@ function useSocket_() {
           GROUP_DELETED_NOTIFICATION,
           (_data: GROUP_NOTIFICATION_PAYLOAD) => {
             mutate(groupsKey);
-          },
+          }
         );
         [GROUP_USER_CONNECTED_EVENT, GROUP_USER_DISCONNECTED_EVENT].forEach(
           (event) => {
             _socket.on(event, (data: GroupUserConnectedData) => {
               mutate(groupKey(data.groupId + ""));
             });
-          },
+          }
         );
         _socket.on(
           GROUP_MESSAGE_EVENT,
           (message: GroupMessage & GroupMessageWithSender) => {
             mutate(
               getGroupMessagesKey(message.groupId.toString()),
-              (data: any) => [...(data ?? []), message],
+              (data: any) => [...(data ?? []), message]
             );
-          },
+          }
         );
+
+        // TODO
+        // add group notifications
       });
     }
 
@@ -179,7 +184,7 @@ const useOnMessage = () => {
       mutate(getMessagesKey(friendId));
       mutate(unreadMessagesKey);
     },
-    [currentUser],
+    [currentUser]
   );
   return onMessage;
 };
@@ -211,7 +216,7 @@ const useOnFriendConnected = () => {
 
   const onFriendConnected = useCallback(({ friendId }: FriendConnectedData) => {
     setConnectedFriends(
-      (oldFriendsSet) => new Set(oldFriendsSet.add(friendId)),
+      (oldFriendsSet) => new Set(oldFriendsSet.add(friendId))
     );
   }, []);
   return onFriendConnected;
@@ -227,7 +232,7 @@ const useOnFriendDisconnected = () => {
         return new Set(oldFriendsSet);
       });
     },
-    [],
+    []
   );
 
   return onFriendDisconnected;

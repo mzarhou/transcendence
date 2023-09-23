@@ -39,8 +39,8 @@ export default function UserItem({
         <div className="mt-0.5">
           <p>{user.name}</p>
           {/* TODO: update with real data */}
-          <p className="text-chat-foreground/60 text-sm">In game</p>
-          <p className="text-chat-foreground/60 text-sm">#55</p>
+          <p className="text-sm text-chat-card-foreground/60">In game</p>
+          <p className="text-sm text-chat-card-foreground/60">#55</p>
         </div>
         <div className="absolute bottom-0 right-2">{children}</div>
       </div>

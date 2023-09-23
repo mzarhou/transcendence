@@ -1,3 +1,5 @@
+import { Group } from "./db-types";
+
 export const MESSAGE_EVENT = "message";
 export const MESSAGE_READ_EVENT = "message_read";
 
@@ -33,6 +35,7 @@ export const GROUP_UNBANNED_NOTIFICATION = "group_unbanned_event";
 export const GROUP_KICKED_NOTIFICATION = "group_kicked_event";
 export const JOIN_GROUP_NOTIFICATION = "join_group_event";
 export const LEAVE_GROUP_NOTIFICATION = "leave_group_event";
+export const GROUP_INVITATION_NOTIFICATION = "new_group_invitation";
 export type GROUP_NOTIFICATION_PAYLOAD = {
   message: string;
   groupId: number;

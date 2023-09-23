@@ -13,6 +13,7 @@ export const LoaderButton: FC<LoaderButtonProps> = ({
   children,
   iconClassName,
   className,
+  disabled,
   ...props
 }) => {
   return (
@@ -21,10 +22,10 @@ export const LoaderButton: FC<LoaderButtonProps> = ({
         {
           "relative overflow-hidden": isLoading,
         },
-        className,
+        className
       )}
       type="submit"
-      disabled={isLoading}
+      disabled={disabled || isLoading}
       {...props}
     >
       {isLoading && (
@@ -34,7 +35,7 @@ export const LoaderButton: FC<LoaderButtonProps> = ({
               {
                 "animate-spin": isLoading,
               },
-              iconClassName,
+              iconClassName
             )}
           />
         </div>
