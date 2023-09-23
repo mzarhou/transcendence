@@ -23,17 +23,17 @@ export default function GoBackBtn({ className, children, full }: Props) {
   return (
     <div
       className={cn(
-        "flex items-center md:ml-4 py-5",
+        "flex items-center py-5 md:ml-4",
         {
           "cursor-pointer": full,
         },
-        className,
+        className
       )}
       onClick={full ? goBack : undefined}
     >
       <button
         onClick={full ? undefined : goBack}
-        className="flex items-center space-x-2 text-chat-foreground/80 md:static"
+        className="flex items-center space-x-2 text-chat-card-foreground/80 md:static"
       >
         <ChevronLeft />
       </button>

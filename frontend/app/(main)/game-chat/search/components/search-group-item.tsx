@@ -14,7 +14,7 @@ export default function SearchGroupItem({ group }: SearchGroupItemProps) {
         </div>
         <div className="mt-0.5">
           <p>{group.name}</p>
-          <p className="text-sm text-chat-foreground/60">{group.status}</p>
+          <p className="text-sm text-chat-card-foreground/60">{group.status}</p>
         </div>
       </div>
       {!group.role && (

@@ -25,7 +25,7 @@ export default function FriendRequestsPage() {
               />
             ))
           ) : (
-            <div className="text-chat-foreground/60 flex h-full flex-grow items-center justify-center text-lg">
+            <div className="flex h-full flex-grow items-center justify-center text-lg text-chat-card-foreground/60">
               No friend request
             </div>
           )}

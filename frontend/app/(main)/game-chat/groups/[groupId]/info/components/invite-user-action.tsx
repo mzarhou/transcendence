@@ -1,7 +1,6 @@
 "use client";
 
 import { GroupType } from "@/api-hooks/groups/use-group";
-import { useSearchUsers } from "@/api-hooks/use-search-users";
 import ConfirmDialog from "@/components/confirm-dialog";
 import FullPlaceHolder from "@/components/ui/full-placeholder";
 import { Input } from "@/components/ui/input";
@@ -10,6 +9,12 @@ import { useDebouncedValue } from "@/hooks/use-debounced-value";
 import { Loader2, UserPlus } from "lucide-react";
 import { useState } from "react";
 import { ActionLink } from "./action-link";
+import { useInviteUser } from "@/api-hooks/groups/use-invite-user";
+import {
+  getSearchGroupsInvitableUsersKey,
+  useGroupSearchInvitableUsers,
+} from "@/api-hooks/groups/use-group-search-invitable-users";
+import { useSWRConfig } from "swr";
 
 export function InviteUserAction({ group }: { group: GroupType }) {
   return (
@@ -40,22 +45,25 @@ function InviteUserActionDialogContent({
   close: () => void;
   group: GroupType;
 }) {
+  const { mutate } = useSWRConfig();
   const [query, setQuery] = useState("");
   const debouncedQuery = useDebouncedValue(query, 300);
-  const { data, isLoading } = useSearchUsers(debouncedQuery);
+  const { data, isLoading } = useGroupSearchInvitableUsers({
+    searchTerm: debouncedQuery,
+    groupId: group.id,
+  });
+
+  const { trigger: invite, isMutating } = useInviteUser(group.id, () => {
+    // on success
+    mutate(getSearchGroupsInvitableUsersKey(group.id, debouncedQuery));
+  });
 
   const users = data?.filter((u) => !group.users.find((gu) => gu.id === u.id));
 
-  const [isMutating, setIsMutating] = useState(false);
-  const inviteUser = async (_userId: number) => {
-    // TODO: implement
-    setIsMutating(true);
-    await new Promise((res) => {
-      setTimeout(res, 2000);
-    }).finally(() => {
-      setIsMutating(false);
-      close();
-    });
+  const inviteUser = async (userId: number) => {
+    try {
+      await invite({ userId });
+    } catch (error) {}
   };
 
   return (
