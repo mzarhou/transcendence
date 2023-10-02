@@ -11,16 +11,16 @@ import github from "/public/images/github.png";
 import linkedin from "/public/images/linkedin.png";
 import twitter from "/public/images/twitter.png";
 import { NavBar } from "@/components/navbar";
-import { UserProvider } from "@/context/user-context";
 import { useTheme } from "next-themes";
 import Link from "next/link";
 import { buttonVariants } from "@/components/ui/button";
+import Guest from "../Guest";
 
 export default function Home() {
   const { theme } = useTheme();
 
   return (
-    <UserProvider>
+    <Guest>
       <div className="px-5 md:px-8 ">
         <NavBar />
       </div>
@@ -204,6 +204,6 @@ export default function Home() {
           </div>
         </div>
       </main>
-    </UserProvider>
+    </Guest>
   );
 }

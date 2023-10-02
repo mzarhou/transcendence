@@ -14,6 +14,10 @@ export interface User {
   updatedAt: Date;
 }
 
+export type CurrentUser = User & {
+  isTfaCodeProvided: boolean;
+};
+
 export interface UserWithSecrets {
   secrets: UserSecrets | null;
 }

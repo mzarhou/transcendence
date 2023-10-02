@@ -13,6 +13,7 @@ export const LoaderButton: FC<LoaderButtonProps> = ({
   children,
   iconClassName,
   className,
+  disabled,
   ...props
 }) => {
   return (
@@ -24,7 +25,7 @@ export const LoaderButton: FC<LoaderButtonProps> = ({
         className
       )}
       type="submit"
-      disabled={isLoading}
+      disabled={disabled || isLoading}
       {...props}
     >
       {isLoading && (

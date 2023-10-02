@@ -1,5 +1,3 @@
-import { AppAbility } from '../authorization/ability.factory';
-
 export interface ActiveUserData {
   /**
    * subject (user)
@@ -16,9 +14,4 @@ export interface ActiveUserData {
    * is 2fa provided
    */
   isTfaCodeProvided: boolean;
-
-  /**
-   * user authorization
-   */
-  allow(...args: Parameters<AppAbility['can']>): void;
 }

@@ -8,8 +8,9 @@ import z from 'zod';
 import { AuthenticationService } from '../authentication.service';
 import { School42AuthDto } from '../dto/school-42-token.dto';
 import { Prisma } from '@prisma/client';
-import { UsersRepository } from 'src/users/repositories/users.repository';
+import { UsersRepository } from '@src/users/repositories/users.repository';
 import { faker } from '@faker-js/faker';
+import { env } from '@src/+env/server';
 
 export const user42Schema = z.object({
   id: z.number(),
@@ -28,6 +29,13 @@ export const user42Schema = z.object({
   }),
 });
 
+export const tokensResponseSchema = z.object({
+  accessToken: z.string(),
+  refreshToken: z.string(),
+});
+
+export type TokensResponse = z.infer<typeof tokensResponseSchema>;
+
 @Injectable()
 export class School42AuthService {
   constructor(
@@ -35,7 +43,45 @@ export class School42AuthService {
     private readonly usersRepository: UsersRepository,
   ) {}
 
-  async authenticate(
+  async callback(data: { code: string; fingerprintHash: string }) {
+    const accessToken = await this.getAccessToken(data.code);
+    if (!accessToken) {
+      throw new ForbiddenException('Invalid 42 access token');
+    }
+    return this.authenticate({ accessToken }, data.fingerprintHash);
+  }
+
+  getLoginRedirectUrl() {
+    const authorizeUrlParams = new URLSearchParams();
+    authorizeUrlParams.set('client_id', env.CLIENT_ID_42);
+    authorizeUrlParams.set('scope', 'public');
+    authorizeUrlParams.set(
+      'redirect_uri',
+      `${env.BACKEND_URL}/authentication/school-42/callback`,
+    );
+    authorizeUrlParams.set('response_type', 'code');
+    return `https://api.intra.42.fr/oauth/authorize?${authorizeUrlParams}`;
+  }
+
+  private async getAccessToken(code: string): Promise<string | null> {
+    try {
+      const { data: authData } = await axios.post(
+        'https://api.intra.42.fr/oauth/token',
+        {
+          grant_type: 'authorization_code',
+          client_id: env.CLIENT_ID_42,
+          client_secret: env.CLIENT_SECRET_42,
+          redirect_uri: `${env.BACKEND_URL}/authentication/school-42/callback`,
+          code,
+        },
+      );
+      return authData.access_token;
+    } catch (err) {
+      return null;
+    }
+  }
+
+  private async authenticate(
     { accessToken }: School42AuthDto,
     fingerprintHash: string,
   ) {
@@ -77,7 +123,7 @@ export class School42AuthService {
       return this.authService.generateTokens(createdUser, fingerprintHash);
     } catch (error) {
       if (error instanceof Prisma.PrismaClientKnownRequestError) throw error;
-      throw new UnauthorizedException();
+      throw new ForbiddenException();
     }
   }
 

@@ -16,9 +16,19 @@ import {
   Notification,
   FriendRequestWithRequester,
   FriendRequestWithRecipient,
+  GROUP_INVITATION_NOTIFICATION,
 } from "@transcendence/common";
 import { LoaderButton } from "./ui/loader-button";
 import { NoticationsBadge } from "./ui/notifications-badge";
+import { GROUP_DELETED_NOTIFICATION } from "@transcendence/common";
+import { ADD_ADMIN_NOTIFICATION } from "@transcendence/common";
+import { REMOVE_ADMIN_NOTIFICATION } from "@transcendence/common";
+import { GROUP_BANNED_NOTIFICATION } from "@transcendence/common";
+import { GROUP_UNBANNED_NOTIFICATION } from "@transcendence/common";
+import { LEAVE_GROUP_NOTIFICATION } from "@transcendence/common";
+import { JOIN_GROUP_NOTIFICATION } from "@transcendence/common";
+import { GROUP_KICKED_NOTIFICATION } from "@transcendence/common";
+import { GROUP_NOTIFICATION_PAYLOAD } from "@transcendence/common";
 
 export default function NotificationsPopup() {
   const [open, setOpen] = useState(false);
@@ -128,5 +138,34 @@ function NotificationItem({
       </div>
     );
   }
-  return <div>{nt.data}</div>;
+  if (
+    [
+      GROUP_DELETED_NOTIFICATION,
+      ADD_ADMIN_NOTIFICATION,
+      REMOVE_ADMIN_NOTIFICATION,
+      GROUP_BANNED_NOTIFICATION,
+      GROUP_UNBANNED_NOTIFICATION,
+      GROUP_KICKED_NOTIFICATION,
+      JOIN_GROUP_NOTIFICATION,
+      LEAVE_GROUP_NOTIFICATION,
+    ].includes(nt.event)
+  ) {
+    const data = nt.data as GROUP_NOTIFICATION_PAYLOAD;
+    return <data>{data.message}</data>;
+  }
+
+  if (nt.event === GROUP_INVITATION_NOTIFICATION) {
+    return (
+      <Link href="/game-chat/group-invitations">
+        <div>{nt.data as string}</div>
+      </Link>
+    );
+  }
+
+  if (typeof nt.data === "object") {
+    return <div>{JSON.stringify(nt.data)}</div>;
+  } else if (typeof nt.data === "string") {
+    return <div>{nt.data}</div>;
+  }
+  return <div>Unknow notification</div>;
 }

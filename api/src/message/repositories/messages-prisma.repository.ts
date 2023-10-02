@@ -1,4 +1,4 @@
-import { PrismaService } from 'src/prisma/prisma.service';
+import { PrismaService } from '@src/+prisma/prisma.service';
 import { MessagesRepository } from './messages.repository';
 import { MessageType } from '@transcendence/common';
 import { MessageDto } from '../dto/message.dto';

@@ -1,6 +1,6 @@
 "use client";
 
-import { useUser } from "@/context/user-context";
+import { USER_KEY, useUser } from "@/context/user-context";
 import axios from "axios";
 import { Loader2, LucideChevronDown, Mail } from "lucide-react";
 import Link from "next/link";
@@ -15,6 +15,7 @@ import { ModeToggle } from "./mode-toggle";
 import NotificationsPopup from "./notifications-popup";
 import { NoticationsBadge } from "./ui/notifications-badge";
 import { useUnreadMessages } from "@/api-hooks/use-unread-messages";
+import { useSignOut } from "@/api-hooks/auth/use-signout";
 
 export function NavBar() {
   return (
@@ -66,17 +67,14 @@ function MessagesIcon() {
 
 function NavUserPopup() {
   const { user } = useUser();
-  const { mutate } = useSWRConfig();
-  const router = useRouter();
   const [open, setOpen] = useState(false);
+  const { signout } = useSignOut();
 
   const closePoppup = () => setOpen(false);
 
   const logout = async () => {
-    await axios.post("/api/auth/logout");
+    await signout();
     closePoppup();
-    router.replace("/login");
-    mutate("/users/me");
   };
 
   return (

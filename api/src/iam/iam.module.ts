@@ -5,7 +5,7 @@ import { School42AuthController } from './authentication/social/school-42-auth.c
 import { ConfigModule } from '@nestjs/config';
 import jwtConfig from './config/jwt.config';
 import { JwtModule } from '@nestjs/jwt';
-import { APP_FILTER, APP_GUARD } from '@nestjs/core';
+import { APP_GUARD } from '@nestjs/core';
 import { AuthenticationGuard } from './authentication/guards/authentication.guard';
 import { AccessTokenGuard } from './authentication/guards/access-token.guard';
 import { AuthenticationController } from './authentication/authentication.controller';
@@ -14,20 +14,18 @@ import { OtpAuthenticationService } from './authentication/otp/otp-authenticatio
 import { AccessTokenWithout2faGuard } from './authentication/guards/access-token-without-2fa.guard';
 import { OtpAuthenticationController } from './authentication/otp/otp-authentication.controller';
 import { OtpSecretsStorage } from './authentication/otp/otp-secrets.storage';
-import { RedisModule } from 'src/redis/redis.module';
+import { RedisModule } from '@src/redis/redis.module';
 import { CryptoService } from './authentication/otp/crypto.service';
 import { BcryptService } from './hashing/bcrypt.service';
 import { HashingService } from './hashing/hashing.service';
-import { PrismaModule } from 'src/prisma/prisma.module';
-import { UsersModule } from 'src/users/users.module';
-import { CaslExceptionFilter } from './authorization/casl-exception.filter';
-import { AbilityFactory } from './authorization/ability.factory';
+import { UsersModule } from '@src/users/users.module';
+import { WsAuthGuard } from './authentication/guards/ws-auth.guard';
+import { CookiesService } from './authentication/cookies.service';
 
 const Fingerprint = require('express-fingerprint');
 
 @Module({
   imports: [
-    PrismaModule,
     RedisModule,
     UsersModule,
     ConfigModule.forFeature(jwtConfig),
@@ -40,6 +38,7 @@ const Fingerprint = require('express-fingerprint');
       provide: APP_GUARD,
       useClass: AuthenticationGuard,
     },
+    WsAuthGuard,
     AccessTokenGuard,
     AccessTokenWithout2faGuard,
     RefreshTokenIdsStorage,
@@ -50,23 +49,14 @@ const Fingerprint = require('express-fingerprint');
       provide: HashingService,
       useClass: BcryptService,
     },
-    AbilityFactory,
-    {
-      provide: APP_FILTER,
-      useClass: CaslExceptionFilter,
-    },
+    CookiesService,
   ],
   controllers: [
     School42AuthController,
     AuthenticationController,
     OtpAuthenticationController,
   ],
-  exports: [
-    AuthenticationService,
-    AccessTokenGuard,
-    AccessTokenWithout2faGuard,
-    HashingService,
-  ],
+  exports: [AuthenticationService, HashingService],
 })
 export class IamModule implements NestModule {
   configure(consumer: MiddlewareConsumer) {

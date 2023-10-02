@@ -1,10 +1,13 @@
 import { Controller, Get, Body, Patch, Param } from '@nestjs/common';
 import { UsersService } from './users.service';
 import { UpdateUserDto } from './dto/update-user.dto';
-import { ActiveUser } from 'src/iam/decorators/active-user.decorator';
-import { ActiveUserData } from 'src/iam/interface/active-user-data.interface';
-import { IdDto } from 'src/common/dto/id-param.dto';
+import { ActiveUser } from '@src/iam/decorators/active-user.decorator';
+import { ActiveUserData } from '@src/iam/interface/active-user-data.interface';
+import { IdDto } from '@src/+common/dto/id-param.dto';
 import { ApiBearerAuth, ApiTags } from '@nestjs/swagger';
+import { Auth } from '@src/iam/authentication/decorators/auth.decorator';
+import { AuthType } from '@src/iam/authentication/enum/auth-type.enum';
+import { CurrentUser } from '@transcendence/common';
 
 @ApiBearerAuth()
 @ApiTags('users')
@@ -12,9 +15,14 @@ import { ApiBearerAuth, ApiTags } from '@nestjs/swagger';
 export class UsersController {
   constructor(private readonly usersService: UsersService) {}
 
+  @Auth(AuthType.BearerWithou2fa)
   @Get('me')
-  me(@ActiveUser() user: ActiveUserData) {
-    return this.usersService.findOne(user.sub);
+  async me(@ActiveUser() user: ActiveUserData) {
+    const data = await this.usersService.findOne(user.sub);
+    return {
+      ...data,
+      isTfaCodeProvided: user.isTfaCodeProvided,
+    } satisfies CurrentUser;
   }
 
   @Get(':id')

@@ -1,10 +1,16 @@
 import { Injectable } from '@nestjs/common';
-import { ActiveUserData } from 'src/iam/interface/active-user-data.interface';
+import { ActiveUserData } from '@src/iam/interface/active-user-data.interface';
 import { FriendRequestService } from '../friend-request/friend-request.service';
 import { FriendRequest, User } from '@prisma/client';
-import { SearchUser } from '@transcendence/common';
-import { UsersRepository } from 'src/users/repositories/users.repository';
-import { FriendRequestsRepository } from 'src/friend-request/repositories/_friend-requests.repository';
+import {
+  FRIEND_DISCONNECTED,
+  FriendDisconnectedData,
+  SearchUser,
+} from '@transcendence/common';
+import { UsersRepository } from '@src/users/repositories/users.repository';
+import { FriendRequestsRepository } from '@src/friend-request/repositories/_friend-requests.repository';
+import { WebsocketService } from '@src/websocket/websocket.service';
+import { UNFRIEND_EVENT } from '@transcendence/common';
 
 @Injectable()
 export class ChatService {
@@ -12,6 +18,7 @@ export class ChatService {
     private readonly usersRepository: UsersRepository,
     private readonly friendRequestsRepository: FriendRequestsRepository,
     private readonly friendRequestService: FriendRequestService,
+    private readonly websocketService: WebsocketService,
   ) {}
 
   async isFriendOf(user: ActiveUserData, targetUserId: number) {
@@ -69,6 +76,14 @@ export class ChatService {
 
   async unfriend(targetUserId: number, user: ActiveUserData) {
     await this.usersRepository.unfriend(user.sub, targetUserId);
+    this.websocketService.addEvent([targetUserId], UNFRIEND_EVENT, {});
+    this.websocketService.addEvent([targetUserId], FRIEND_DISCONNECTED, {
+      friendId: user.sub,
+    } satisfies FriendDisconnectedData);
+    this.websocketService.addEvent([user.sub], FRIEND_DISCONNECTED, {
+      friendId: targetUserId,
+    } satisfies FriendDisconnectedData);
+    return { success: true };
   }
 
   async blockUser(user: ActiveUserData, targetUserId: number) {

@@ -1,21 +1,24 @@
-import {
-  BadRequestException,
-  ForbiddenException,
-  Injectable,
-} from '@nestjs/common';
+import { BadRequestException, Injectable } from '@nestjs/common';
 import { CreateFriendRequestDto } from './dto/create-friend-request.dto';
-import { ActiveUserData } from 'src/iam/interface/active-user-data.interface';
-import { NotificationsService } from 'src/notifications/notifications.service';
-import { FRIEND_REQUEST_EVENT } from '@transcendence/common';
+import { ActiveUserData } from '@src/iam/interface/active-user-data.interface';
+import { NotificationsService } from '@src/notifications/notifications.service';
+import {
+  FRIEND_CONNECTED,
+  FRIEND_REQUEST_EVENT,
+  FriendConnectedData,
+} from '@transcendence/common';
 import { FRIEND_REQUEST_ACCEPTED_EVENT } from '@transcendence/common';
 import { FriendRequestsRepository } from './repositories/_friend-requests.repository';
-import { subject } from '@casl/ability';
+import { FriendRequestPolicy } from './friend-request.policy';
+import { WebsocketService } from '@src/websocket/websocket.service';
 
 @Injectable()
 export class FriendRequestService {
   constructor(
     private readonly friendRequestsRepository: FriendRequestsRepository,
+    private readonly friendRequestsPolicy: FriendRequestPolicy,
     private readonly notificationsService: NotificationsService,
+    private readonly websocketService: WebsocketService,
   ) {}
 
   async create(
@@ -23,11 +26,7 @@ export class FriendRequestService {
     createFriendRequestDto: CreateFriendRequestDto,
   ) {
     const { targetUserId } = createFriendRequestDto;
-    if (targetUserId === user.sub) {
-      throw new BadRequestException(
-        "You can't send friend request to your self",
-      );
-    }
+    this.friendRequestsPolicy.canCreate(user, targetUserId);
 
     const receivedFriendRequests = await this.findRecieved(user);
     const pendingFriendRequest =
@@ -68,22 +67,20 @@ export class FriendRequestService {
   }
 
   async remove(user: ActiveUserData, id: number) {
-    const friendRequest = await this.friendRequestsRepository.findOneOrThrow(
-      id,
-    );
-    user.allow('delete', subject('FriendRequest', friendRequest));
+    const friendRequest =
+      await this.friendRequestsRepository.findOneOrThrow(id);
+    this.friendRequestsPolicy.canDelete(user, friendRequest);
     await this.friendRequestsRepository.destroy(id);
   }
 
   async accept(user: ActiveUserData, id: number) {
-    const friendRequest = await this.friendRequestsRepository.findOneOrThrow(
-      id,
-    );
-    user.allow('accept', subject('FriendRequest', friendRequest));
+    const friendRequest =
+      await this.friendRequestsRepository.findOneOrThrow(id);
 
-    if (friendRequest.recipientId !== user.sub) {
-      throw new ForbiddenException('You can not accept this friend request');
-    }
+    this.friendRequestsPolicy.canUpdate(user, {
+      action: 'accept',
+      friendRequest,
+    });
 
     const acceptedFriendRequest =
       await this.friendRequestsRepository.acceptFriendRequest({
@@ -96,6 +93,17 @@ export class FriendRequestService {
       [friendRequest.requesterId],
       FRIEND_REQUEST_ACCEPTED_EVENT,
       acceptedFriendRequest,
+    );
+
+    this.websocketService.addEvent(
+      [friendRequest.recipientId],
+      FRIEND_CONNECTED,
+      { friendId: friendRequest.requesterId } satisfies FriendConnectedData,
+    );
+    this.websocketService.addEvent(
+      [friendRequest.requesterId],
+      FRIEND_CONNECTED,
+      { friendId: friendRequest.recipientId } satisfies FriendConnectedData,
     );
   }
 }

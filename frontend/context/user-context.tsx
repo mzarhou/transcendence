@@ -1,12 +1,12 @@
 "use client";
 
 import { api } from "@/lib/api";
-import { User } from "@transcendence/common";
+import { CurrentUser } from "@transcendence/common";
 import { createContext, FC, useContext } from "react";
 import useSWR, { SWRResponse } from "swr";
 
 type UserContextType = Pick<
-  SWRResponse<User, any, any>,
+  SWRResponse<CurrentUser, any, any>,
   "data" | "isLoading" | "error"
 >;
 
@@ -23,13 +23,20 @@ interface UserProviderProps {
 }
 
 async function fetchUser(endpoint: string) {
-  const { data } = await api.get<User>(endpoint);
+  const { data } = await api.get<CurrentUser>(endpoint);
   return data;
 }
 
+export const USER_KEY = "/users/me";
+
 export const UserProvider: FC<UserProviderProps> = ({ children }) => {
-  const userData = useSWR("/users/me", fetchUser, {
+  const userData = useSWR(USER_KEY, fetchUser, {
     revalidateOnFocus: false,
+    revalidateOnMount: true,
+    revalidateOnReconnect: false,
+    refreshWhenOffline: false,
+    refreshWhenHidden: false,
+    refreshInterval: 0,
   });
 
   return (

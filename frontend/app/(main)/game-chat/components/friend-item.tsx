@@ -14,6 +14,7 @@ import Image from "next/image";
 import { BlockUserMenuItem } from "./user-item";
 import { useFriendUreadMessagesCount } from "@/api-hooks/use-unread-messages";
 import { cn } from "@/lib/utils";
+import Link from "next/link";
 
 type FriendItemProps = {
   friend: User;
@@ -32,46 +33,48 @@ export default function FriendItem({
 
   return (
     <div className={cn("relative flex justify-between", className)}>
-      <div className="flex space-x-4">
-        <div
-          className={cn(
-            "relative flex aspect-square items-center justify-center rounded-full bg-gray-100/10 text-lg",
-            size === "default" ? "h-[72px]" : "h-[40px]"
-          )}
-        >
-          <Image
-            src={friend.avatar}
-            width={size === "default" ? 72 : 40}
-            height={size === "default" ? 72 : 40}
-            alt=""
-            className="rounded-full"
-          />
-          {isFriendConnected(friend.id) && (
-            <div
-              className={cn(
-                "absolute  bottom-1.5 right-0.5 h-4 w-4 rounded-full border-2 border-card bg-green-400",
-                {
-                  "bottom-0 right-0 h-3 w-3": size === "sm",
-                  "": size === "sm",
-                }
-              )}
-            ></div>
-          )}
+      <Link href={`/game-chat/${friend.id}`}>
+        <div className="flex space-x-4">
+          <div
+            className={cn(
+              "relative flex aspect-square items-center justify-center rounded-full bg-gray-100/10 text-lg",
+              size === "default" ? "h-[72px]" : "h-[40px]"
+            )}
+          >
+            <img
+              src={friend.avatar}
+              width={size === "default" ? 72 : 40}
+              height={size === "default" ? 72 : 40}
+              alt=""
+              className="rounded-full"
+            />
+            {isFriendConnected(friend.id) && (
+              <div
+                className={cn(
+                  "absolute  bottom-1.5 right-0.5 h-4 w-4 rounded-full border-2 border-card bg-green-400",
+                  {
+                    "bottom-0 right-0 h-3 w-3": size === "sm",
+                    "": size === "sm",
+                  }
+                )}
+              ></div>
+            )}
+          </div>
+          <div
+            className={cn("mt-0.5", {
+              "flex flex-col justify-center text-lg": size === "sm",
+            })}
+          >
+            <p>{friend.name}</p>
+            {size === "default" && (
+              <>
+                <p className="text-sm text-chat-card-foreground/60">In game</p>
+                <p className="text-sm text-chat-card-foreground/60">#60</p>
+              </>
+            )}
+          </div>
         </div>
-        <div
-          className={cn("mt-0.5", {
-            "flex flex-col justify-center text-lg": size === "sm",
-          })}
-        >
-          <p>{friend.name}</p>
-          {size === "default" && (
-            <>
-              <p className="text-chat-foreground/60 text-sm">In game</p>
-              <p className="text-chat-foreground/60 text-sm">#60</p>
-            </>
-          )}
-        </div>
-      </div>
+      </Link>
       <div className={cn(size === "sm" && "flex flex-col justify-center")}>
         <DropdownMenu>
           <DropdownMenuTrigger asChild>

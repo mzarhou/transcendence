@@ -1,17 +1,20 @@
-import { PrismaService } from 'src/prisma/prisma.service';
+import { PrismaService } from '@src/+prisma/prisma.service';
 import {
   GroupsFindOne,
   GroupsFindOneOrThrow,
   GroupsRepository,
-} from './_goups.repository';
+} from './_groups.repository';
 import { Injectable, NotFoundException } from '@nestjs/common';
 import { CreateGroupDto } from '../dto/create-group.dto';
 import {
+  GroupMessage,
+  GroupMessageWithSender,
   GroupWithBlockedUsers,
   GroupWithPassword,
   UserGroupRole,
 } from '@transcendence/common';
 import { UpdateGroupDto } from '../dto/update-group.dto';
+import { PaginationQueryDto } from '@src/+common/dto/pagination-query';
 
 @Injectable()
 export class GroupsPrismaRepository extends GroupsRepository {
@@ -48,6 +51,19 @@ export class GroupsPrismaRepository extends GroupsRepository {
       }),
     ]);
     return createdGroup;
+  }
+
+  createMessage(data: { message: string; senderId: number; groupId: number }) {
+    return this.prisma.groupMessage.create({
+      data: {
+        message: data.message,
+        senderId: data.senderId,
+        groupId: data.groupId,
+      },
+      include: {
+        sender: true,
+      },
+    });
   }
 
   findOne: GroupsFindOne = (async (id, options) => {
@@ -195,6 +211,17 @@ export class GroupsPrismaRepository extends GroupsRepository {
               where: { id: groupId },
               data: { ownerId: newOwnerId },
             }),
+            this.prisma.usersOnGroups.update({
+              where: {
+                userId_groupId: {
+                  userId: newOwnerId,
+                  groupId: groupId,
+                },
+              },
+              data: {
+                role: 'ADMIN',
+              },
+            }),
           ]
         : []),
       this.prisma.usersOnGroups.delete({
@@ -231,6 +258,23 @@ export class GroupsPrismaRepository extends GroupsRepository {
       },
       include: {
         blockedUsers: true,
+      },
+    });
+  }
+
+  async findGroupMessages(
+    groupId: number,
+    { take, skip }: PaginationQueryDto,
+  ): Promise<(GroupMessage & GroupMessageWithSender)[]> {
+    return this.prisma.groupMessage.findMany({
+      take,
+      skip,
+      where: { groupId },
+      orderBy: {
+        createdAt: 'asc',
+      },
+      include: {
+        sender: true,
       },
     });
   }

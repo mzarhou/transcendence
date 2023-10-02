@@ -4,52 +4,19 @@ import {
   GroupWithBlockedUsers,
   GroupWithUsers,
 } from '@transcendence/common';
-import { ActiveUserData } from 'src/iam/interface/active-user-data.interface';
+import { ActiveUserData } from '@src/iam/interface/active-user-data.interface';
+import { GroupsMutedUsersStorage } from './groups-muted-users.storage';
+import { BaseGroupsPolicy } from './base-groups.policy';
 
 @Injectable()
-export class GroupsPolicy {
-  private isOwnerOrAdmin(user: ActiveUserData, group: Group & GroupWithUsers) {
-    if (user.sub === group.ownerId) return true;
-    return !!group.users.find((u) => u.id === user.sub && u.role === 'ADMIN');
-  }
-
-  private isMember(userId: number, group: Group & GroupWithUsers) {
-    return !!group.users.find((u) => u.id === userId);
-  }
-
-  private isOwner(userId: number, group: Group) {
-    return userId === group.ownerId;
-  }
-
-  private isAdmin(userId: number, group: Group & GroupWithUsers) {
-    return !!group.users.find((u) => u.id === userId && u.role === 'ADMIN');
-  }
-
-  private requireOwner(userId: number, group: Group, message?: string) {
-    if (userId !== group.ownerId) throw new ForbiddenException(message);
-    return true;
-  }
-
-  private requireAdmin(
-    userId: number,
-    group: Group & GroupWithUsers,
-    message?: string,
-  ) {
-    if (this.isOwner(userId, group) || this.isAdmin(userId, group)) return true;
-    throw new ForbiddenException(message);
-  }
-  private requireMember(
-    userId: number,
-    group: Group & GroupWithUsers,
-    message?: string,
-  ) {
-    if (this.isMember(userId, group)) return true;
-    throw new ForbiddenException(message);
+export class GroupsPolicy extends BaseGroupsPolicy {
+  constructor(private readonly mutedUsersStorage: GroupsMutedUsersStorage) {
+    super();
   }
 
   canRead(user: ActiveUserData, group: Group & GroupWithUsers) {
     if (this.isMember(user.sub, group)) return true;
-    throw new ForbiddenException('You can not delete the group');
+    throw new ForbiddenException('You can not read group info');
   }
 
   canDelete(user: ActiveUserData, group: Group) {
@@ -134,5 +101,25 @@ export class GroupsPolicy {
 
   canLeaveGroup(user: ActiveUserData, group: Group & GroupWithUsers) {
     return this.requireMember(user.sub, group, 'You are not a member');
+  }
+
+  async canSendMessage(user: ActiveUserData, group: Group & GroupWithUsers) {
+    this.canRead(user, group);
+    const isMuted = await this.mutedUsersStorage.isUserMuted({
+      userId: user.sub,
+      groupId: group.id,
+    });
+    if (isMuted) {
+      throw new ForbiddenException('You ara muted');
+    }
+    return true;
+  }
+
+  canMuteUser(data: {
+    user: ActiveUserData;
+    group: Group & GroupWithUsers;
+    targetUserId: number;
+  }) {
+    return this.canBanUser(data);
   }
 }

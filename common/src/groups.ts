@@ -1,5 +1,6 @@
 import z from "zod";
 import { Group, UserGroupRole } from "./db-types";
+import { Prisma } from "@prisma/client";
 
 const errorMessage =
   "You must provide a password when setting status to `PROTECTED`";
@@ -45,10 +46,10 @@ export const joinGroupSchema = z.object({
 });
 export type JoinGroupType = z.infer<typeof joinGroupSchema>;
 
-export const leaveGroupSchema = z.object({
-  newOwnerId: z.number().positive().optional(),
+export const ownerLeaveGroupSchema = z.object({
+  newOwnerId: z.number().positive(),
 });
-export type LeaveGroupType = z.infer<typeof leaveGroupSchema>;
+export type OwnerLeaveGroupType = z.infer<typeof ownerLeaveGroupSchema>;
 
 export type GroupWithRole = Group & { role: UserGroupRole };
 export type SearchGroup = Group & { role: UserGroupRole | undefined };
@@ -57,3 +58,34 @@ export const groupUsersFilterSchema = z.object({
   filter: z.enum(["admins", "members", "banned"]),
 });
 export type GroupUsersFilter = z.infer<typeof groupUsersFilterSchema>;
+
+export const sendGroupMessageSchema = z.object({
+  groupId: z.number().positive(),
+  message: z.string().min(1).max(2000),
+});
+export type SendGroupMessageType = z.infer<typeof sendGroupMessageSchema>;
+
+export const muteUserSchema = z.object({
+  userId: z.number().positive(),
+  period: z
+    .number()
+    .positive()
+    .min(10)
+    .max(86400)
+    .describe("period in seconds, 10 - 86400 (24h)"),
+});
+export type MuteUserType = z.infer<typeof muteUserSchema>;
+
+export const inviteUserToGroupSchema = z.object({
+  userId: z.number().positive(),
+});
+export type InviteUserToGroupType = z.infer<typeof inviteUserToGroupSchema>;
+
+export type UserGroupInvitation = Prisma.GroupInvitationGetPayload<{
+  include: {
+    user: {
+      select: { id: true; name: true };
+    };
+    group: { include: { users: { include: { user: true } } } };
+  };
+}>;

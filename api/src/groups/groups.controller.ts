@@ -13,9 +13,9 @@ import {
 import { GroupsService } from './groups.service';
 import { CreateGroupDto } from './dto/create-group.dto';
 import { UpdateGroupDto } from './dto/update-group.dto';
-import { ActiveUser } from 'src/iam/decorators/active-user.decorator';
-import { ActiveUserData } from 'src/iam/interface/active-user-data.interface';
-import { IdDto } from 'src/common/dto/id-param.dto';
+import { ActiveUser } from '@src/iam/decorators/active-user.decorator';
+import { ActiveUserData } from '@src/iam/interface/active-user-data.interface';
+import { IdDto } from '@src/+common/dto/id-param.dto';
 import { AddGroupAdminDto } from './dto/group-admin/add-group-admin.dto';
 import { BanUserDto } from './dto/ban-user/ban-user.dto';
 import { UnBanUserDto } from './dto/ban-user/unban-user.dto';
@@ -23,9 +23,10 @@ import { RemoveGroupAdminDto } from './dto/group-admin/remove-group-admin.dto';
 import { ApiBearerAuth, ApiOperation, ApiTags } from '@nestjs/swagger';
 import { KickUserDto } from './dto/kick-user.dto';
 import { JoinGroupDto } from './dto/join-group.dto';
-import { LeaveGroupDto } from './dto/leave-group.dto';
-import { SearchUsersDto } from 'src/chat/dto/search-users.dto';
+import { OwnerLeaveGroupDto } from './dto/owner-leave-group.dto';
+import { SearchUsersDto } from '@src/chat/dto/search-users.dto';
 import { GroupUsersFilterDto } from './dto/group-users-filter-query.dto';
+import { MuteUserDto } from './dto/mute-user.dto';
 
 @ApiBearerAuth()
 @ApiTags('groups')
@@ -137,9 +138,19 @@ export class GroupsController {
   async leaveGroup(
     @ActiveUser() user: ActiveUserData,
     @Param() { id: groupId }: IdDto,
-    @Body() leaveGroupDto: LeaveGroupDto,
   ) {
-    return this.groupsService.leaveGroup(user, groupId, leaveGroupDto);
+    return this.groupsService.leaveGroup(user, groupId);
+  }
+
+  @ApiOperation({ summary: 'Leave a group' })
+  @HttpCode(HttpStatus.OK)
+  @Post('/:id/owner-leave')
+  async ownerLeaveGroup(
+    @ActiveUser() user: ActiveUserData,
+    @Param() { id: groupId }: IdDto,
+    @Body() leaveGroupDto: OwnerLeaveGroupDto,
+  ) {
+    return this.groupsService.ownerLeaveGroup(user, groupId, leaveGroupDto);
   }
 
   @ApiOperation({ summary: 'Search public/protected groups' })
@@ -174,5 +185,16 @@ export class GroupsController {
     @Query() query: GroupUsersFilterDto,
   ) {
     return this.groupsService.findGroupUsers(user, groupId, query);
+  }
+
+  @ApiOperation({ summary: 'Mute a user' })
+  @HttpCode(HttpStatus.OK)
+  @Post('/:id/mute')
+  async muteUser(
+    @ActiveUser() user: ActiveUserData,
+    @Param() { id: groupId }: IdDto,
+    @Body() muteUserDto: MuteUserDto,
+  ) {
+    return this.groupsService.muteUser(user, groupId, muteUserDto);
   }
 }

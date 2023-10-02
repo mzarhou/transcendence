@@ -8,10 +8,10 @@ export const api = axios.create({
   withCredentials: true,
 });
 
+/**
+ * check if 2FA required
+ */
 api.interceptors.response.use(null, (error: AxiosError) => {
-  /**
-   * check if 2FA required
-   */
   const wwwAuthHeader: string | undefined =
     error.response?.headers?.["www-authenticate"];
   if (
@@ -19,18 +19,35 @@ api.interceptors.response.use(null, (error: AxiosError) => {
     window.location.pathname != "/2fa"
   ) {
     window.location.href = "/2fa";
-    return Promise.resolve();
   }
-
-  /**
-   * refreshing tokens if status code is 401
-   */
-  if (error.response?.status !== 401) {
-    return Promise.reject(error);
-  }
-
-  return axios.post("/api/auth/refresh-tokens").then(() => {
-    // rerun original request
-    return axios.request(error.config!);
-  });
+  return Promise.reject(error);
 });
+
+/**
+ * refresh tokens
+ */
+api.interceptors.response.use(
+  (response) => response,
+  async (error: AxiosError) => {
+    const res = error.response;
+
+    if (
+      res?.status === 401 &&
+      res.config &&
+      !(res.config as any).__isRetryRequest
+    ) {
+      return new Promise(async (resolve, reject) => {
+        try {
+          await api.post("/authentication/refresh-tokens");
+          (error.config as any).__isRetryRequest = true;
+          resolve(api(error.config!));
+        } catch (error) {
+          console.log("Failed to refresh token");
+          reject(error);
+        }
+      });
+    }
+
+    return Promise.reject(error);
+  },
+);

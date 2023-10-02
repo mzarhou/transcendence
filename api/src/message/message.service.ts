@@ -1,19 +1,19 @@
 import { Injectable } from '@nestjs/common';
 import { MessageDto } from './dto/message.dto';
-import { ActiveUserData } from 'src/iam/interface/active-user-data.interface';
-import { ChatService } from 'src/chat/chat.service';
-import { NotificationsService } from 'src/notifications/notifications.service';
+import { ActiveUserData } from '@src/iam/interface/active-user-data.interface';
+import { ChatService } from '@src/chat/chat.service';
 import { MESSAGE_READ_EVENT } from '@transcendence/common';
 import { MessagesRepository } from './repositories/messages.repository';
 import { MessagesPolicy } from './message.policy';
+import { WebsocketService } from '@src/websocket/websocket.service';
 
 @Injectable()
 export class MessageService {
   constructor(
     private readonly messagesRepository: MessagesRepository,
     private readonly chatService: ChatService,
-    private readonly notificationsService: NotificationsService,
     private readonly messagesPolicy: MessagesPolicy,
+    private readonly websocketService: WebsocketService,
   ) {}
 
   async saveMessage(
@@ -33,7 +33,7 @@ export class MessageService {
     const updatedMessage = await this.messagesRepository.update(messageId, {
       isRead: true,
     });
-    this.notificationsService.emit(
+    this.websocketService.addEvent(
       [updatedMessage.senderId],
       MESSAGE_READ_EVENT,
       updatedMessage,

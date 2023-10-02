@@ -11,7 +11,7 @@ import {
 import { ROOT_EL_ID } from "../hooks/use-message-intersection-callback";
 
 const IntersectionObserverContext = createContext<IntersectionObserver | null>(
-  null
+  null,
 );
 
 const useIntersectionObserver = () => useContext(IntersectionObserverContext);

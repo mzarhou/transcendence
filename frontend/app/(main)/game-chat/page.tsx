@@ -23,6 +23,7 @@ import {
   TooltipTrigger,
 } from "@/components/ui/tooltip";
 import { truncateText } from "@/lib/utils";
+import GroupInvitationsLink from "./components/group-invitations-link";
 
 export default function Game() {
   const { data: friends, isLoading } = useFriends();
@@ -35,16 +36,19 @@ export default function Game() {
       <div className="space-y-4">
         <div className="flex justify-between">
           <h3 className="text-sm">Your groups</h3>
-          <DropdownMenu>
-            <DropdownMenuTrigger asChild>
-              <MoreVertical className="h-6 w-6 cursor-pointer" />
-            </DropdownMenuTrigger>
-            <DropdownMenuContent align="end">
-              <DropdownMenuItem className="cursor-pointer">
-                <Link href="/game-chat/groups/create">Create Group</Link>
-              </DropdownMenuItem>
-            </DropdownMenuContent>
-          </DropdownMenu>
+          <div className="flex items-center space-x-1">
+            <GroupInvitationsLink />
+            <DropdownMenu>
+              <DropdownMenuTrigger asChild>
+                <MoreVertical className="h-6 w-6 cursor-pointer" />
+              </DropdownMenuTrigger>
+              <DropdownMenuContent align="end">
+                <DropdownMenuItem className="cursor-pointer">
+                  <Link href="/game-chat/groups/create">Create Group</Link>
+                </DropdownMenuItem>
+              </DropdownMenuContent>
+            </DropdownMenu>
+          </div>
         </div>
         <Groups />
       </div>
@@ -73,11 +77,7 @@ export default function Game() {
               <Loader2 className="mx-auto h-8 w-8 animate-spin" />
             </div>
           ) : friends && friends.length ? (
-            friends.map((frd) => (
-              <Link key={frd.id} href={`/game-chat/${frd.id}`}>
-                <FriendItem friend={frd} />
-              </Link>
-            ))
+            friends.map((frd) => <FriendItem key={frd.id} friend={frd} />)
           ) : (
             <FullPlaceHolder text="No friend found" className="text-xl" />
           )}
@@ -98,7 +98,7 @@ function GroupItem({
       <Tooltip>
         <TooltipTrigger asChild>
           <div className="relative flex aspect-square w-20 min-w-[80px] flex-col items-center space-y-2">
-            <Link href={`/game-chat/groups/${id}/info`}>
+            <Link href={`/game-chat/groups/${id}`}>
               <img
                 className="h-20 min-h-[80px] w-20 min-w-[80px] rounded-full"
                 src={avatar}

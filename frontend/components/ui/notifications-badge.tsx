@@ -12,7 +12,7 @@ const NoticationsBadge = ({ count, className }: NoticationsBadgeProps) => {
           className={cn(
             "absolute bottom-1.5 right-0.5 flex aspect-square h-5 items-center justify-center rounded-full bg-red-400 text-xs",
             count > 9 ? "h-5" : "h-4",
-            className
+            className,
           )}
         >
           {count > 9 ? "9+" : count}

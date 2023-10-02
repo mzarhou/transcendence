@@ -1,6 +1,6 @@
 "use client";
 
-import { useDisable2fa } from "@/api-hooks/use-disable-2fa";
+import { useDisable2fa } from "@/api-hooks/2fa/use-disable-2fa";
 import { Button } from "@/components/ui/button";
 import { Dialog, DialogContent, DialogTrigger } from "@/components/ui/dialog";
 import {

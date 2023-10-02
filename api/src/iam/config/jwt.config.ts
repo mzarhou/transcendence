@@ -1,5 +1,5 @@
 import { registerAs } from '@nestjs/config';
-import { env } from 'src/env/server';
+import { env } from '@src/+env/server';
 
 export default registerAs('jwt', () => {
   return {

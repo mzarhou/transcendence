@@ -18,7 +18,7 @@ export default function AuthenticationPage() {
           href="/login"
           className={cn(
             buttonVariants({ variant: "ghost", size: "sm" }),
-            "mr-4"
+            "mr-4",
           )}
         >
           Login

@@ -1,6 +1,5 @@
 "use client";
 
-import axios from "axios";
 import {
   ReactNode,
   createContext,
@@ -24,9 +23,13 @@ import {
   ERROR_EVENT,
   WsErrorData,
   MESSAGE_READ_EVENT,
+  GroupMessageWithSender,
+  GROUP_USER_CONNECTED_EVENT,
+  GroupUserConnectedData,
+  GROUP_USER_DISCONNECTED_EVENT,
 } from "@transcendence/common";
 import { useToast } from "@/components/ui/use-toast";
-import { useSWRConfig } from "swr";
+import { useSWRConfig, Cache } from "swr";
 import { getMessagesKey } from "@/api-hooks/use-messages";
 import { useAtom } from "jotai";
 import { connectedFriendsAtom } from "@/stores/connected-users-atom";
@@ -34,6 +37,24 @@ import { friendRequestsKey } from "@/api-hooks/friend-requests/use-friend-reques
 import { unreadMessagesKey } from "@/api-hooks/use-unread-messages";
 import { env } from "@/env/client.mjs";
 import { notificationsKey } from "@/api-hooks/notifications/use-notifications";
+import { GROUP_MESSAGE_EVENT } from "@transcendence/common";
+import { GroupMessage } from "@transcendence/common";
+import { getGroupMessagesKey } from "@/api-hooks/groups/use-group-messages";
+import { GROUP_DELETED_NOTIFICATION } from "@transcendence/common";
+import { ADD_ADMIN_NOTIFICATION } from "@transcendence/common";
+import { REMOVE_ADMIN_NOTIFICATION } from "@transcendence/common";
+import { GROUP_BANNED_NOTIFICATION } from "@transcendence/common";
+import { GROUP_UNBANNED_NOTIFICATION } from "@transcendence/common";
+import { GROUP_KICKED_NOTIFICATION } from "@transcendence/common";
+import { JOIN_GROUP_NOTIFICATION } from "@transcendence/common";
+import { LEAVE_GROUP_NOTIFICATION } from "@transcendence/common";
+import { GROUP_NOTIFICATION_PAYLOAD } from "@transcendence/common";
+import { groupsKey } from "@/api-hooks/groups/use-groups";
+import { groupKey } from "@/api-hooks/groups/use-group";
+import { api } from "@/lib/api";
+import { friendsKey } from "@/api-hooks/use-friends";
+import { UNFRIEND_EVENT } from "@transcendence/common";
+import { GROUP_INVITATION_NOTIFICATION } from "@transcendence/common";
 
 const EventsSocketContext = createContext<Socket | null>(null);
 
@@ -81,20 +102,67 @@ function useSocket_() {
           mutate(getMessagesKey(friendId));
           mutate(unreadMessagesKey);
         });
-        _socket.on(FRIEND_CONNECTED, (data: FriendConnectedData) => {
+        _socket.on(FRIEND_CONNECTED, async (data: FriendConnectedData) => {
           onFriendConnected(data);
+          mutate(friendsKey);
         });
         _socket.on(FRIEND_DISCONNECTED, (data: FriendDisconnectedData) => {
           onFriendDisconnected(data);
         });
-        [FRIEND_REQUEST_EVENT, FRIEND_REQUEST_ACCEPTED_EVENT].forEach(
+
+        _socket.on(FRIEND_REQUEST_EVENT, (_data: FriendRequest) => {
+          mutate(friendRequestsKey);
+          mutate(notificationsKey);
+        });
+
+        _socket.on(FRIEND_REQUEST_ACCEPTED_EVENT, () => {
+          mutate(notificationsKey);
+        });
+
+        _socket.on(UNFRIEND_EVENT, () => {
+          mutate(friendsKey);
+        });
+
+        [
+          GROUP_DELETED_NOTIFICATION,
+          ADD_ADMIN_NOTIFICATION,
+          REMOVE_ADMIN_NOTIFICATION,
+          GROUP_BANNED_NOTIFICATION,
+          GROUP_UNBANNED_NOTIFICATION,
+          GROUP_KICKED_NOTIFICATION,
+          JOIN_GROUP_NOTIFICATION,
+          LEAVE_GROUP_NOTIFICATION,
+          GROUP_INVITATION_NOTIFICATION,
+        ].forEach((event) => {
+          _socket.on(event, (_data: GROUP_NOTIFICATION_PAYLOAD) => {
+            mutate(notificationsKey);
+          });
+        });
+        _socket.on(
+          GROUP_DELETED_NOTIFICATION,
+          (_data: GROUP_NOTIFICATION_PAYLOAD) => {
+            mutate(groupsKey);
+          }
+        );
+        [GROUP_USER_CONNECTED_EVENT, GROUP_USER_DISCONNECTED_EVENT].forEach(
           (event) => {
-            _socket.on(event, (_data: FriendRequest) => {
-              mutate(friendRequestsKey);
-              mutate(notificationsKey);
+            _socket.on(event, (data: GroupUserConnectedData) => {
+              mutate(groupKey(data.groupId + ""));
             });
           }
         );
+        _socket.on(
+          GROUP_MESSAGE_EVENT,
+          (message: GroupMessage & GroupMessageWithSender) => {
+            mutate(
+              getGroupMessagesKey(message.groupId.toString()),
+              (data: any) => [...(data ?? []), message]
+            );
+          }
+        );
+
+        // TODO
+        // add group notifications
       });
     }
 
@@ -134,7 +202,7 @@ const useOnError = () => {
     }
     try {
       // try to refresh tokens
-      await axios.post("/api/auth/refresh-tokens");
+      await api.post("/authentication/refresh-tokens");
       setTimeout(() => {
         socket.connect();
       }, 200);

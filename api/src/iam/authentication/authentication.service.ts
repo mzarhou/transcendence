@@ -1,9 +1,4 @@
-import {
-  HttpStatus,
-  Inject,
-  Injectable,
-  UnauthorizedException,
-} from '@nestjs/common';
+import { ForbiddenException, Inject, Injectable } from '@nestjs/common';
 import { ConfigType } from '@nestjs/config';
 import { JwtService } from '@nestjs/jwt';
 import { randomUUID } from 'crypto';
@@ -18,12 +13,10 @@ import { SignInDto } from './dto/sign-in.dto';
 import { SignUpDto } from './dto/sign-up.dto';
 import { HashingService } from '../hashing/hashing.service';
 import { User } from '@prisma/client';
-import { AbilityFactory, AppAbility } from '../authorization/ability.factory';
-import { ForbiddenError } from '@casl/ability';
 import { Socket } from 'socket.io';
 import { parse } from 'cookie';
-import { WebsocketException } from 'src/notifications/ws.exception';
-import { UsersRepository } from 'src/users/repositories/users.repository';
+import { UsersRepository } from '@src/users/repositories/users.repository';
+import { WsException } from '@nestjs/websockets';
 
 @Injectable()
 export class AuthenticationService {
@@ -34,7 +27,6 @@ export class AuthenticationService {
     private readonly refreshTokenIdsStorage: RefreshTokenIdsStorage,
     private readonly usersRepository: UsersRepository,
     private readonly hashingService: HashingService,
-    private readonly abilityFactory: AbilityFactory,
   ) {}
 
   async signIn(signInDto: SignInDto, fingerprintHash: string) {
@@ -42,14 +34,14 @@ export class AuthenticationService {
       email: signInDto.email,
     });
     if (!user) {
-      throw new UnauthorizedException(undefined, "User doesn't exists");
+      throw new ForbiddenException(undefined, "User doesn't exists");
     }
     const isEqual = await this.hashingService.compare(
       signInDto.password,
       user.secrets?.password ?? '',
     );
     if (!isEqual) {
-      throw new UnauthorizedException(undefined, "Password doesn't match");
+      throw new ForbiddenException(undefined, "Password doesn't match");
     }
     return this.generateTokens(user, fingerprintHash);
   }
@@ -72,7 +64,7 @@ export class AuthenticationService {
     const refreshTokenId = randomUUID();
 
     const [accessToken, refreshToken] = await Promise.all([
-      this.signToken<Omit<ActiveUserData, 'sub' | 'allow'>>(
+      this.signToken<Omit<ActiveUserData, 'sub'>>(
         user,
         this.jwtConfiguration.accessTokenTtl,
         {
@@ -123,7 +115,7 @@ export class AuthenticationService {
 
       const user = await this.usersRepository.findOne(sub);
       if (!user) {
-        throw new UnauthorizedException();
+        throw new ForbiddenException();
       }
 
       const isValid = await this.refreshTokenIdsStorage.validate(
@@ -132,34 +124,28 @@ export class AuthenticationService {
         refreshTokenId,
       );
       if (!isValid) {
-        throw new UnauthorizedException('Invalide refresh token');
+        throw new ForbiddenException('Invalide refresh token');
       }
 
       await this.refreshTokenIdsStorage.invalidate(user.id, fingerprintHash);
       return this.generateTokens(user, fingerprintHash, isTfaCodeProvided);
     } catch (error) {
       if (error instanceof InvalidateRefreshTokenError) {
-        throw new UnauthorizedException(
+        throw new ForbiddenException(
           undefined,
           'your refresh token might be stolen',
         );
       }
-      throw new UnauthorizedException();
+      throw new ForbiddenException();
     }
   }
 
   async getUserFromToken(token: string): Promise<ActiveUserData> {
-    const _payload = await this.jwtService.verifyAsync<
-      Omit<ActiveUserData, 'allow'>
-    >(token, this.jwtConfiguration);
-
-    const ability = this.abilityFactory.defineForUser(_payload);
-    return {
-      ..._payload,
-      allow: (...args: Parameters<AppAbility['can']>) => {
-        ForbiddenError.from(ability).throwUnlessCan(...args);
-      },
-    };
+    const payload = await this.jwtService.verifyAsync<ActiveUserData>(
+      token,
+      this.jwtConfiguration,
+    );
+    return payload;
   }
 
   async getUserFromSocket(socket: Socket) {
@@ -170,12 +156,10 @@ export class AuthenticationService {
       const headers = socket.handshake.headers;
       accessToken ??= headers.authorization?.split(' ')[1];
 
-      return this.getUserFromToken(accessToken ?? '');
+      const user = await this.getUserFromToken(accessToken ?? '');
+      return user;
     } catch (error) {
-      throw new WebsocketException({
-        message: 'Invalid credentials',
-        statusCode: HttpStatus.UNAUTHORIZED,
-      });
+      throw new WsException('Invalid credentials');
     }
   }
 }

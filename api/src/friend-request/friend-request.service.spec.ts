@@ -1,14 +1,14 @@
 import { Test } from '@nestjs/testing';
 import { FriendRequestService } from './friend-request.service';
-import { PrismaModule } from 'src/prisma/prisma.module';
-import { PrismaService } from 'src/prisma/prisma.service';
+import { PrismaModule } from '@src/+prisma/prisma.module';
+import { PrismaService } from '@src/+prisma/prisma.service';
 import { User } from '@prisma/client';
-import { ActiveUserData } from 'src/iam/interface/active-user-data.interface';
+import { ActiveUserData } from '@src/iam/interface/active-user-data.interface';
 import {
   createUser,
   getUserFriends,
   makeUsersFriends,
-} from 'src/common/dto/utils/test-utils';
+} from '@src/+common/dto/utils/test-utils';
 
 describe('FriendRequestService', () => {
   let friendRequestService: FriendRequestService;

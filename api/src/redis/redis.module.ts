@@ -1,6 +1,6 @@
 import { Module, OnModuleDestroy, Provider } from '@nestjs/common';
 import Redis from 'ioredis';
-import { env } from 'src/env/server';
+import { env } from '@src/+env/server';
 
 export abstract class RedisClient extends Redis {}
 
