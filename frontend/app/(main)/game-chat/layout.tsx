@@ -7,6 +7,7 @@ import { ReactNode } from "react";
 import Game from "./_game/index";
 import Profile from "./_game/profile";
 import GameSettings from "./_game/game-settings";
+import MatchMaking from "./_game/match-making";
 import { useState, useEffect } from "react";
 
 type Props = {
@@ -49,9 +50,10 @@ export default function GameLayout({ children }: Props) {
         </Dialog>
         <div className="h-full flex-grow space-x-4 md:flex">
           <div className="flex h-full flex-grow justify-center overflow-y-auto rounded-md border px-[clamp(2rem,7vw,120px)] ">
-            <Game />
+            {/* <Game /> */}
             {/* <Profile /> */}
             {/* <GameSettings /> */}
+            <MatchMaking />
           </div>
           <div className="relative hidden h-full w-full overflow-y-hidden md:block md:max-w-sm">
             {chatPopup}
