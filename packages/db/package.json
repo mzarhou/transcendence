@@ -1,0 +1,24 @@
+{
+  "name": "@transcendence/db",
+  "version": "0.0.1",
+  "main": "./dist/index",
+  "types": "./dist/index",
+  "scripts": {
+    "predev": "yarn generate",
+    "dev": "tsup --watch",
+    "prebuild": "yarn generate",
+    "build": "tsup",
+    "generate": "yarn prisma generate",
+    "reset": "prisma migrate reset --force",
+    "push": "prisma migrate deploy"
+  },
+  "dependencies": {
+    "@prisma/client": "^5.3.1",
+    "jotai": "^2.4.2",
+    "tsup": "^7.2.0",
+    "zod": "^3.22.2"
+  },
+  "devDependencies": {
+    "prisma": "^5.3.1"
+  }
+}
