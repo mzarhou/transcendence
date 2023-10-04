@@ -7,6 +7,8 @@ services:
       - 5432:5432
     environment:
       POSTGRES_PASSWORD: password123
+    volumes:
+      - db-data:/var/lib/postgresql/data
   testdb:
     image: postgres
     restart: always
@@ -19,3 +21,9 @@ services:
     ports:
       - "6379:6379"
     restart: always
+    volumes:
+      - redis-data:/data
+
+volumes:
+  db-data:
+  redis-data:
