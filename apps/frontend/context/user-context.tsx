@@ -2,48 +2,50 @@
 
 import { api } from "@/lib/api";
 import { CurrentUser } from "@transcendence/db";
-import { createContext, FC, useContext } from "react";
+import { createContext, FC, useContext, useEffect, useState } from "react";
 import useSWR, { SWRResponse } from "swr";
 
-type UserContextType = Pick<
-  SWRResponse<CurrentUser, any, any>,
-  "data" | "isLoading" | "error"
->;
-
-const UserContext = createContext<
-  Omit<UserContextType, "data"> & { user: UserContextType["data"] }
->({
+const UserContext = createContext<{
+  user: CurrentUser | undefined;
+  isLoading: boolean;
+  refresh: () => void;
+}>({
   user: undefined,
   isLoading: false,
-  error: undefined,
+  refresh: () => {},
 });
 
 interface UserProviderProps {
   children: React.ReactNode;
 }
 
-async function fetchUser(endpoint: string) {
-  const { data } = await api.get<CurrentUser>(endpoint);
+async function fetchUser() {
+  const { data } = await api.get<CurrentUser>("/users/me");
   return data;
 }
 
-export const USER_KEY = "/users/me";
-
 export const UserProvider: FC<UserProviderProps> = ({ children }) => {
-  // TODO: fix unexpected revalidation problem
-  const userData = useSWR(USER_KEY, fetchUser, {
-    revalidateOnFocus: false,
-    revalidateOnMount: true,
-    revalidateOnReconnect: false,
-    refreshWhenOffline: false,
-    refreshWhenHidden: false,
-    refreshInterval: 0,
-  });
+  const [user, setUser] = useState<CurrentUser | undefined>();
+  const [isLoading, setLoading] = useState(true);
+
+  const refresh = async () => {
+    setLoading(true);
+    try {
+      const data = await fetchUser();
+      setUser(data);
+    } catch (error) {
+      setUser(undefined);
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  useEffect(() => {
+    refresh();
+  }, []);
 
   return (
-    <UserContext.Provider
-      value={{ ...userData, user: userData.error ? undefined : userData.data }}
-    >
+    <UserContext.Provider value={{ user, isLoading, refresh }}>
       {children}
     </UserContext.Provider>
   );

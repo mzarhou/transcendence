@@ -1,16 +1,13 @@
 "use client";
 
-import { USER_KEY, useUser } from "@/context/user-context";
-import axios from "axios";
+import { useUser } from "@/context/user-context";
 import { Loader2, LucideChevronDown, Mail } from "lucide-react";
 import Link from "next/link";
-import { useSWRConfig } from "swr";
 import Auth from "./Auth";
 import Guest from "./Guest";
 import { Button, buttonVariants } from "./ui/button";
 import { Popover, PopoverContent, PopoverTrigger } from "./ui/popover";
 import { useState } from "react";
-import { useRouter } from "next/navigation";
 import { ModeToggle } from "./mode-toggle";
 import NotificationsPopup from "./notifications-popup";
 import { NoticationsBadge } from "./ui/notifications-badge";

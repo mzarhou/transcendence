@@ -1,5 +1,5 @@
 import { useToast } from "@/components/ui/use-toast";
-import { USER_KEY } from "@/context/user-context";
+import { useUser } from "@/context/user-context";
 import { api } from "@/lib/api";
 import { getServerMessage } from "@/lib/utils";
 import { SignInType } from "@transcendence/db";
@@ -10,13 +10,14 @@ import useSWRMutation from "swr/mutation";
 export const useSignIn = () => {
   const { mutate } = useSWRConfig();
   const { toast } = useToast();
+  const { refresh } = useUser();
 
   const { trigger, ...rest } = useSWRMutation(
     "/authentication/sign-in",
     async (url, { arg }: { arg: SignInType }) => api.post(url, arg),
     {
       onSuccess: async () => {
-        await mutate(USER_KEY);
+        await refresh();
         toast({ description: "You are logged in" });
       },
       onError: (error) => {

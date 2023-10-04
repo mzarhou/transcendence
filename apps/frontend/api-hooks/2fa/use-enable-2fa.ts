@@ -1,13 +1,12 @@
 import { useToast } from "@/components/ui/use-toast";
-import { USER_KEY } from "@/context/user-context";
+import { useUser } from "@/context/user-context";
 import { api } from "@/lib/api";
 import { getServerMessage } from "@/lib/utils";
-import { useSWRConfig } from "swr";
 import useSWRMutation from "swr/mutation";
 
 export const useEnable2fa = () => {
   const { toast } = useToast();
-  const { mutate } = useSWRConfig();
+  const { refresh } = useUser();
   const { trigger, ...rest } = useSWRMutation(
     "/authentication/2fa/enable",
     async (url, { arg: tfaCode }: { arg: string }) => {
@@ -23,10 +22,10 @@ export const useEnable2fa = () => {
         });
       },
       onSuccess: async () => {
+        await refresh();
         toast({ description: "2FA is enabled" });
-        await mutate(USER_KEY);
       },
-    },
+    }
   );
 
   return {
