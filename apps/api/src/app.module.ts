@@ -15,6 +15,7 @@ import { FriendRequestModule } from './friend-request/friend-request.module';
 import { GroupsModule } from './groups/groups.module';
 import { WebsocketModule } from './websocket/websocket.module';
 import { ZodExceptionFilter } from './+common/filters/zod-exception.filter';
+import { GameModule } from './game/game.module';
 
 @Module({
   imports: [
@@ -29,6 +30,7 @@ import { ZodExceptionFilter } from './+common/filters/zod-exception.filter';
     FriendRequestModule,
     GroupsModule,
     WebsocketModule,
+    GameModule,
   ],
   controllers: [AppController],
   providers: [
