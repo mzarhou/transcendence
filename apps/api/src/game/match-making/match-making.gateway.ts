@@ -20,9 +20,10 @@ export class MatchMakingGateway implements OnGatewayDisconnect {
 
   constructor(private matchesService: MatchesService) {}
 
-  handleDisconnect(client: any) {
-    this.queue.deletePlayer(client);
-  }
+  // TODO: use websocketService rxjs subject
+  // handleDisconnect(client: any) {
+  //   this.queue.deletePlayer(client);
+  // }
 
   //use the right Auth for the guard to authenticate the client
   // @UseGuards(Auth)  => to do
