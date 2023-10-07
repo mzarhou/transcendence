@@ -1,6 +1,5 @@
 import {
   ConnectedSocket,
-  OnGatewayDisconnect,
   WebSocketGateway,
   WebSocketServer,
   SubscribeMessage,
@@ -13,7 +12,7 @@ import { WsAuthGuard } from '@src/iam/authentication/guards/ws-auth.guard';
 import { UseGuards } from '@nestjs/common';
 
 @WebSocketGateway()
-export class MatchMakingGateway implements OnGatewayDisconnect {
+export class MatchMakingGateway {
   @WebSocketServer()
   queue: queueArr = new queueArr();
   server!: Server;

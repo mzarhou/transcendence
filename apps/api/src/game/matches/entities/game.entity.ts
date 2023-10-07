@@ -7,11 +7,6 @@ interface User {
   socketId: string;
 }
 
-interface Player {
-  id: number;
-  score: number;
-}
-
 export enum Direction {
   UP = 'UP',
   DOWN = 'DOWN',
@@ -47,11 +42,7 @@ export class GamesCollection {
     private readonly matchesService: MatchesService,
   ) {}
 
-  private createGame(
-    matchId: number,
-    player1Id: number,
-    player2Id: number,
-  ): Game {
+  private createGame(matchId: number): Game {
     const game = new Game(this.server, this.matchesService, matchId);
     this.games.push(game);
     return game;
@@ -65,7 +56,7 @@ export class GamesCollection {
     this.removePlayer(client);
     let game = this.findGame(match.matchId);
     if (!game) {
-      game = this.createGame(match.matchId, match.homeId, match.adversaryId);
+      game = this.createGame(match.matchId);
     }
     game.users.push({
       id: userId,
