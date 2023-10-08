@@ -14,6 +14,11 @@ export enum State {
   OVER,
 }
 
+export interface scoreType {
+  home: number;
+  adversary: number;
+}
+
 export interface boardType {
   posi: [number, number, number];
   size: [number, number];
@@ -45,6 +50,10 @@ export const staticOption = {
 };
 
 export class GameData {
+  scores: scoreType = {
+    home: 0,
+    adversary: 0,
+  };
   bdDt: boardType = {
     posi: [0, 0, 0],
     size: [600, 800],

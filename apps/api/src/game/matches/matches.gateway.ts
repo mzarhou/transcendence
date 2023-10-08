@@ -15,17 +15,23 @@ import { Socket } from 'socket.io';
 import { ActiveUserData } from '@src/iam/interface/active-user-data.interface';
 import { WsAuthGuard } from '@src/iam/authentication/guards/ws-auth.guard';
 import { UseGuards } from '@nestjs/common';
+import { GamePlayService } from '../gameplay/gameplay.service';
 
 @WebSocketGateway()
 export class MatchesGateway implements OnGatewayDisconnect, OnGatewayInit {
   @WebSocketServer()
   server!: Server;
   games!: GamesCollection;
+  gamePlay!: GamePlayService;
 
   constructor(private matchesService: MatchesService) {}
 
   afterInit(): any {
-    this.games = new GamesCollection(this.server, this.matchesService);
+    this.games = new GamesCollection(
+      this.server,
+      this.matchesService,
+      this.gamePlay,
+    );
   }
 
   handleDisconnect(client: any) {
@@ -44,5 +50,6 @@ export class MatchesGateway implements OnGatewayDisconnect, OnGatewayInit {
     if (match.winnerId !== null) throw new WsException('Match is Over!');
 
     this.games.connectPlayer(match, user.sub, client);
+    this.server.to(matchId.toString()).emit('startGame', this.games[matchId]);
   }
 }

@@ -2,6 +2,7 @@ import { Server, Socket } from 'socket.io';
 import { MatchesService } from '@src/game/matches/matches.service';
 import { Match } from '@prisma/client';
 import { GameData, State, User } from '@src/game/gameplay/gameData';
+import { GamePlayService } from '@src/game/gameplay/gameplay.service';
 
 //table of games
 export class Game {
@@ -28,6 +29,7 @@ export class GamesCollection {
   constructor(
     private readonly server: Server,
     private readonly matchesService: MatchesService,
+    private readonly gamePlayService: GamePlayService,
   ) {}
 
   private createGame(matchId: number): Game {
@@ -59,6 +61,7 @@ export class GamesCollection {
       game.state = State.PLAYING;
 
       // start game simulation
+      this.gamePlayService.startgame();
     }
   }
 
