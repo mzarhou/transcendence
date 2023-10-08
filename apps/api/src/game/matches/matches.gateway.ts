@@ -3,39 +3,32 @@ import {
   SubscribeMessage,
   MessageBody,
   OnGatewayDisconnect,
-  OnGatewayInit,
   WebSocketServer,
   ConnectedSocket,
   WsException,
 } from '@nestjs/websockets';
 import { MatchesService } from './matches.service';
 import { Server } from 'socket.io';
-import { GamesCollection } from './entities/game.entity';
 import { Socket } from 'socket.io';
 import { ActiveUserData } from '@src/iam/interface/active-user-data.interface';
 import { WsAuthGuard } from '@src/iam/authentication/guards/ws-auth.guard';
 import { UseGuards } from '@nestjs/common';
 import { GamePlayService } from '../gameplay/gameplay.service';
+import { MatchesStorage } from './matches.storage';
 
 @WebSocketGateway()
-export class MatchesGateway implements OnGatewayDisconnect, OnGatewayInit {
+export class MatchesGateway implements OnGatewayDisconnect {
   @WebSocketServer()
   server!: Server;
-  games!: GamesCollection;
   gamePlay!: GamePlayService;
 
-  constructor(private matchesService: MatchesService) {}
-
-  afterInit(): any {
-    this.games = new GamesCollection(
-      this.server,
-      this.matchesService,
-      this.gamePlay,
-    );
-  }
+  constructor(
+    private matchesService: MatchesService,
+    private matchesStorage: MatchesStorage,
+  ) {}
 
   handleDisconnect(client: any) {
-    this.games.removePlayer(client);
+    this.matchesStorage.removePlayer(client);
   }
 
   @UseGuards(WsAuthGuard)
@@ -49,7 +42,8 @@ export class MatchesGateway implements OnGatewayDisconnect, OnGatewayInit {
     if (!match) throw new WsException('Match Not Found!');
     if (match.winnerId !== null) throw new WsException('Match is Over!');
 
-    this.games.connectPlayer(match, user.sub, client);
-    this.server.to(matchId.toString()).emit('startGame', this.games[matchId]);
+    this.matchesStorage.connectPlayer(match, user.sub, client);
+    const roomId = this.matchesStorage.getRoomId(matchId);
+    this.server.to(roomId).emit('startGame', this.matchesStorage[matchId]);
   }
 }

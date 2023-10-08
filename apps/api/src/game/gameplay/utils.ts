@@ -1,4 +1,4 @@
-import { Game } from '../matches/entities/game.entity';
+import { Game } from '../matches/matches.storage';
 
 export function map_(
   value: number,

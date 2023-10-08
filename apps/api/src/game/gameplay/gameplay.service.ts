@@ -2,9 +2,8 @@ import { Injectable } from '@nestjs/common';
 import Matter, { Events, Engine, World, Bodies, Runner, Body } from 'matter-js';
 import { walls, ballOptions, staticOption, GameData } from './gameData';
 import { updateBallPosition, updatePlayerS1SPosition } from './utils';
-import { Game } from '../matches/entities/game.entity';
+import { Game } from '../matches/matches.storage';
 
-@Injectable()
 export class GamePlayService {
   private engine: Engine;
   private ball: Matter.Body;

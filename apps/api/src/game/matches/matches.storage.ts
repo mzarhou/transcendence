@@ -2,7 +2,8 @@ import { Server, Socket } from 'socket.io';
 import { MatchesService } from '@src/game/matches/matches.service';
 import { Match } from '@prisma/client';
 import { GameData, State, User } from '@src/game/gameplay/gameData';
-import { GamePlayService } from '@src/game/gameplay/gameplay.service';
+import { Injectable } from '@nestjs/common';
+import { GamePlayService } from '../gameplay/gameplay.service';
 
 //table of games
 export class Game {
@@ -14,6 +15,7 @@ export class Game {
   gameData: GameData;
   homeId: number;
   adversaryId: number;
+  gameService!: GamePlayService;
 
   constructor(
     server: Server,
@@ -31,19 +33,26 @@ export class Game {
     this.adversaryId = adversaryId;
     this.gameData = new GameData();
   }
+
+  setGameService() {
+    this.gameService = new GamePlayService(this);
+  }
 }
 
-export class GamesCollection {
+@Injectable()
+export class MatchesStorage {
   games: Game[] = [];
+  server!: Server;
+  
+  setServer(server: Server){
+    this.server = server;
+  }
 
   constructor(
-    private readonly server: Server,
-    private readonly matchesService: MatchesService,
-    private readonly gamePlayService: GamePlayService,
+    private readonly matchesService: MatchesService
   ) {}
 
   private createGame(match: Match): Game {
-    console.log(match);
     const game = new Game(
       this.server,
       this.matchesService,
@@ -51,9 +60,12 @@ export class GamesCollection {
       match.homeId,
       match.adversaryId,
     );
+    game.setGameService();
     this.games.push(game);
     return game;
   }
+
+
 
   private findGame(matchId: number): Game | undefined {
     return this.games.find((game) => game.matchId === matchId);
@@ -69,7 +81,7 @@ export class GamesCollection {
       id: userId,
       socketId: client.id,
     });
-    client.join(match.matchId.toString());
+    client.join(this.getRoomId(game.matchId));
     if (
       game.state === State.WAITING &&
       game.users.find((user) => user.id === match.homeId) &&
@@ -78,7 +90,7 @@ export class GamesCollection {
       game.state = State.PLAYING;
 
       // start game simulation
-      this.gamePlayService.startgame();
+      game.gameService.startgame();
     }
   }
 
@@ -88,10 +100,14 @@ export class GamesCollection {
       if (user) {
         game.users = game.users.filter((user) => user.socketId !== client.id);
       }
-      client.leave(game.matchId.toString());
+      client.leave(this.getRoomId(game.matchId));
       if (game.users.length === 0 && game.state !== State.PLAYING) {
         this.games = this.games.filter((game) => game.matchId !== game.matchId);
       }
     });
+  }
+
+  getRoomId(matchId: number) {
+    return `games.${matchId}`;
   }
 }

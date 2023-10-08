@@ -61,10 +61,12 @@ export class RankService {
   }
 
   async newElo(newElo: number, userId: number) {
-    const player = await this.prisma.user.findUnique({
+    // eslint-disable-next-line @typescript-eslint/no-unused-vars
+    const _player = await this.prisma.user.findUnique({
       where: { id: userId },
     });
-    const uptPlayer = await this.prisma.user.update({
+    // eslint-disable-next-line @typescript-eslint/no-unused-vars
+    const _uptPlayer = await this.prisma.user.update({
       where: { id: userId },
       data: {
         eloRating: newElo,

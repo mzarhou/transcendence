@@ -4,6 +4,7 @@ import { Button } from "@/components/ui/button";
 import { Dialog, DialogContent, DialogTrigger } from "@/components/ui/dialog";
 import { MessagesSquare } from "lucide-react";
 import { ReactNode, useEffect, useState } from "react";
+import { SceneGame } from "./_engine/ui/scene";
 
 type Props = {
   children: ReactNode;
@@ -46,15 +47,7 @@ export default function GameLayout({ children }: Props) {
       </Dialog>
       <div className="h-full space-x-4 md:flex">
         <div className="flex h-full flex-grow items-center justify-center rounded-md border text-3xl font-light text-card-foreground/40">
-          <div className="flex flex-col items-center space-y-4">
-            <div>Game</div>
-            <Button>Default</Button>
-            <Button variant="secondary">secondary</Button>
-            <Button variant="outline">outline</Button>
-            <Button variant="destructive">destructive</Button>
-            <Button variant="link">link</Button>
-            <Button variant="ghost">ghost</Button>
-          </div>
+         <SceneGame/> 
         </div>
         <div className="relative hidden h-full w-full overflow-y-hidden md:block md:max-w-sm">
           {chatPopup}

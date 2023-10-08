@@ -11,13 +11,17 @@ import { Direction } from './gameData';
 import { ActiveUserData } from '@src/iam/interface/active-user-data.interface';
 import { UseGuards } from '@nestjs/common';
 import { WsAuthGuard } from '@src/iam/authentication/guards/ws-auth.guard';
+import { MatchesStorage } from '../matches/matches.storage';
 
 @WebSocketGateway()
 export class GamePlayGateway {
   @WebSocketServer()
   server!: Server;
 
-  constructor(private readonly gameService: GamePlayService) {}
+  constructor(
+    private readonly gameService: GamePlayService,
+    private matchesStorage: MatchesStorage,
+    ) {}
 
   @UseGuards(WsAuthGuard)
   @SubscribeMessage('moveRight')
@@ -28,7 +32,7 @@ export class GamePlayGateway {
     const user: ActiveUserData = client.data.id;
     this.gameService.movePlayer(Direction.RIGHT, user.sub, matchId);
     this.server
-      .to(matchId.toString())
+      .to(this.matchesStorage.getRoomId(matchId))
       .emit('updateGame', this.gameService.getGameDataS1());
   }
 
@@ -41,7 +45,7 @@ export class GamePlayGateway {
     const user: ActiveUserData = client.data.id;
     this.gameService.movePlayer(Direction.LEFT, user.sub, matchId);
     this.server
-      .to(matchId.toString())
+      .to(this.matchesStorage.getRoomId(matchId))
       .emit('updateGame', this.gameService.getGameDataS1());
   }
 
@@ -49,7 +53,7 @@ export class GamePlayGateway {
   @SubscribeMessage('update')
   gameUpdate(@MessageBody('matchId') matchId: number) {
     this.server
-      .to(matchId.toString())
+      .to(this.matchesStorage.getRoomId(matchId))
       .emit('updateGame', this.gameService.getGameDataS1());
   }
 }
