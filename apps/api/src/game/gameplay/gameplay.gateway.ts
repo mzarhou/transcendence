@@ -4,9 +4,9 @@ import {
   SubscribeMessage,
   ConnectedSocket,
   MessageBody,
+  WsException,
 } from '@nestjs/websockets';
 import { Server, Socket } from 'socket.io';
-import { GamePlayService } from './gameplay.service';
 import { Direction } from './gameData';
 import { ActiveUserData } from '@src/iam/interface/active-user-data.interface';
 import { UseGuards } from '@nestjs/common';
@@ -18,10 +18,7 @@ export class GamePlayGateway {
   @WebSocketServer()
   server!: Server;
 
-  constructor(
-    private readonly gameService: GamePlayService,
-    private matchesStorage: MatchesStorage,
-    ) {}
+  constructor(private readonly matchesStorage: MatchesStorage) {}
 
   @UseGuards(WsAuthGuard)
   @SubscribeMessage('moveRight')
@@ -30,10 +27,14 @@ export class GamePlayGateway {
     @MessageBody('matchId') matchId: number,
   ) {
     const user: ActiveUserData = client.data.id;
-    this.gameService.movePlayer(Direction.RIGHT, user.sub, matchId);
+    const game = this.matchesStorage.findGame(matchId);
+    if (!game) {
+      throw new WsException('Invalid matchId');
+    }
+    game.gameService.movePlayer(Direction.RIGHT, user.sub, matchId);
     this.server
-      .to(this.matchesStorage.getRoomId(matchId))
-      .emit('updateGame', this.gameService.getGameDataS1());
+      .to(getMatchRoomId(matchId))
+      .emit('updateGame', game.gameService.getGameData());
   }
 
   @UseGuards(WsAuthGuard)
@@ -42,18 +43,26 @@ export class GamePlayGateway {
     @ConnectedSocket() client: Socket,
     @MessageBody('matchId') matchId: number,
   ) {
+    const game = this.matchesStorage.findGame(matchId);
     const user: ActiveUserData = client.data.id;
-    this.gameService.movePlayer(Direction.LEFT, user.sub, matchId);
+    if (!game) {
+      throw new WsException('Invalid matchId');
+    }
+    game.gameService.movePlayer(Direction.LEFT, user.sub, matchId);
     this.server
-      .to(this.matchesStorage.getRoomId(matchId))
-      .emit('updateGame', this.gameService.getGameDataS1());
+      .to(getMatchRoomId(matchId))
+      .emit('updateGame', game.gameService.getGameData());
   }
 
   @UseGuards(WsAuthGuard)
   @SubscribeMessage('update')
   gameUpdate(@MessageBody('matchId') matchId: number) {
+    const game = this.matchesStorage.findGame(matchId);
+    if (!game) {
+      throw new WsException('Invalid matchId');
+    }
     this.server
-      .to(this.matchesStorage.getRoomId(matchId))
-      .emit('updateGame', this.gameService.getGameDataS1());
+      .to(getMatchRoomId(matchId))
+      .emit('updateGame', game.gameService.getGameData());
   }
 }

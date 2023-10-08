@@ -1,4 +1,4 @@
-import { Game } from '../matches/matches.storage';
+import { Game } from '../matches/match-game.interface';
 
 export function map_(
   value: number,

@@ -1,10 +1,10 @@
 import { Module } from '@nestjs/common';
 import { GamePlayGateway } from './gameplay.gateway';
-import { Game } from '../matches/matches.storage';
 import { IamModule } from '@src/iam/iam.module';
+import { MatchesModule } from '../matches/matches.module';
 
 @Module({
-  imports: [IamModule],
+  imports: [IamModule, MatchesModule],
   providers: [GamePlayGateway],
 })
 export class GamePlayModule {}

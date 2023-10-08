@@ -1,56 +1,20 @@
 import { Server, Socket } from 'socket.io';
 import { MatchesService } from '@src/game/matches/matches.service';
 import { Match } from '@prisma/client';
-import { GameData, State, User } from '@src/game/gameplay/gameData';
+import { State } from '@src/game/gameplay/gameData';
 import { Injectable } from '@nestjs/common';
-import { GamePlayService } from '../gameplay/gameplay.service';
-
-//table of games
-export class Game {
-  state: State;
-  server: Server;
-  matchesService: MatchesService;
-  matchId: number;
-  users: User[];
-  gameData: GameData;
-  homeId: number;
-  adversaryId: number;
-  gameService!: GamePlayService;
-
-  constructor(
-    server: Server,
-    matchesService: MatchesService,
-    matchId: number,
-    homeId: number,
-    adversaryId: number,
-  ) {
-    this.state = State.WAITING;
-    this.server = server;
-    this.matchesService = matchesService;
-    this.matchId = matchId;
-    this.users = [];
-    this.homeId = homeId;
-    this.adversaryId = adversaryId;
-    this.gameData = new GameData();
-  }
-
-  setGameService() {
-    this.gameService = new GamePlayService(this);
-  }
-}
+import { Game } from './match-game.interface';
 
 @Injectable()
 export class MatchesStorage {
   games: Game[] = [];
   server!: Server;
-  
-  setServer(server: Server){
+
+  setServer(server: Server) {
     this.server = server;
   }
 
-  constructor(
-    private readonly matchesService: MatchesService
-  ) {}
+  constructor(private readonly matchesService: MatchesService) {}
 
   private createGame(match: Match): Game {
     const game = new Game(
@@ -65,9 +29,7 @@ export class MatchesStorage {
     return game;
   }
 
-
-
-  private findGame(matchId: number): Game | undefined {
+  findGame(matchId: number): Game | undefined {
     return this.games.find((game) => game.matchId === matchId);
   }
 
@@ -81,7 +43,7 @@ export class MatchesStorage {
       id: userId,
       socketId: client.id,
     });
-    client.join(this.getRoomId(game.matchId));
+    client.join(getMatchRoomId(game.matchId));
     if (
       game.state === State.WAITING &&
       game.users.find((user) => user.id === match.homeId) &&
@@ -100,14 +62,10 @@ export class MatchesStorage {
       if (user) {
         game.users = game.users.filter((user) => user.socketId !== client.id);
       }
-      client.leave(this.getRoomId(game.matchId));
+      client.leave(getMatchRoomId(game.matchId));
       if (game.users.length === 0 && game.state !== State.PLAYING) {
         this.games = this.games.filter((game) => game.matchId !== game.matchId);
       }
     });
-  }
-
-  getRoomId(matchId: number) {
-    return `games.${matchId}`;
   }
 }

@@ -25,7 +25,9 @@ export class MatchesGateway implements OnGatewayDisconnect {
   constructor(
     private matchesService: MatchesService,
     private matchesStorage: MatchesStorage,
-  ) {}
+  ) {
+    matchesStorage.setServer(this.server);
+  }
 
   handleDisconnect(client: any) {
     this.matchesStorage.removePlayer(client);
@@ -43,7 +45,7 @@ export class MatchesGateway implements OnGatewayDisconnect {
     if (match.winnerId !== null) throw new WsException('Match is Over!');
 
     this.matchesStorage.connectPlayer(match, user.sub, client);
-    const roomId = this.matchesStorage.getRoomId(matchId);
+    const roomId = getMatchRoomId(matchId);
     this.server.to(roomId).emit('startGame', this.matchesStorage[matchId]);
   }
 }

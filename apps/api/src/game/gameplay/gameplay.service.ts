@@ -2,7 +2,7 @@ import { Injectable } from '@nestjs/common';
 import Matter, { Events, Engine, World, Bodies, Runner, Body } from 'matter-js';
 import { walls, ballOptions, staticOption, GameData } from './gameData';
 import { updateBallPosition, updatePlayerS1SPosition } from './utils';
-import { Game } from '../matches/matches.storage';
+import { Game } from '../matches/match-game.interface';
 
 export class GamePlayService {
   private engine: Engine;
@@ -111,7 +111,7 @@ export class GamePlayService {
     }
   }
 
-  getGameDataS1(): any {
+  getGameData(): any {
     const data: string = JSON.stringify(this.gmDt);
     return data;
   }
