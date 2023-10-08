@@ -20,6 +20,7 @@ export enum Direction {
 export enum State {
   WAITING,
   PLAYING,
+  OVER,
 }
 
 //table of games
@@ -49,8 +50,6 @@ export class GamesCollection {
 
   private createGame(
     matchId: number,
-    player1Id: number,
-    player2Id: number,
   ): Game {
     const game = new Game(this.server, this.matchesService, matchId);
     this.games.push(game);
@@ -65,7 +64,7 @@ export class GamesCollection {
     this.removePlayer(client);
     let game = this.findGame(match.matchId);
     if (!game) {
-      game = this.createGame(match.matchId, match.homeId, match.adversaryId);
+      game = this.createGame(match.matchId);
     }
     game.users.push({
       id: userId,
