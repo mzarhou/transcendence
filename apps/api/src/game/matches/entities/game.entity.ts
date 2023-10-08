@@ -12,13 +12,17 @@ export class Game {
   matchId: number;
   users: User[];
   gameData: GameData;
+  homeId: number;
+  adversaryId: number;
 
-  constructor(server: Server, matchesService: MatchesService, matchId: number) {
+  constructor(server: Server, matchesService: MatchesService, match: Match) {
     this.state = State.WAITING;
     this.server = server;
     this.matchesService = matchesService;
-    this.matchId = matchId;
+    this.matchId = match.matchId;
     this.users = [];
+    this.homeId = match.homeId;
+    this.adversaryId = match.adversaryId;
     this.gameData = new GameData();
   }
 }
@@ -32,8 +36,8 @@ export class GamesCollection {
     private readonly gamePlayService: GamePlayService,
   ) {}
 
-  private createGame(matchId: number): Game {
-    const game = new Game(this.server, this.matchesService, matchId);
+  private createGame(match: Match): Game {
+    const game = new Game(this.server, this.matchesService, match);
     this.games.push(game);
     return game;
   }
@@ -46,7 +50,7 @@ export class GamesCollection {
     this.removePlayer(client);
     let game = this.findGame(match.matchId);
     if (!game) {
-      game = this.createGame(match.matchId);
+      game = this.createGame(match);
     }
     game.users.push({
       id: userId,

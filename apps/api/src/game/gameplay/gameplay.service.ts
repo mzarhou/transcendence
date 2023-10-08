@@ -11,9 +11,11 @@ export class GamePlayService {
   private pl1: Matter.Body;
   private pl2: Matter.Body;
   private gmDt: GameData;
+  private game: Game;
 
   constructor(game: Game) {
     this.gmDt = game.gameData;
+    this.game = game;
     this.engine = Engine.create({ gravity: { x: 0, y: 0 } });
     this.ball = Bodies.circle(
       this.gmDt.bl.posi[0],
@@ -80,9 +82,9 @@ export class GamePlayService {
     Runner.stop(Runner.run(this.engine));
   }
 
-  movePlayer(direction: string, client: string, clients: [string, string]) {
-    if (clients[0] == client) this.processDataplayer(this.pl1, direction);
-    if (clients[1] == client) this.processDataplayer(this.pl2, direction);
+  movePlayer(direction: string, client: number, matchId: number) {
+    if (client == matchId) this.processDataplayer(this.pl1, direction);
+    if (client == matchId) this.processDataplayer(this.pl2, direction);
   }
 
   private processDataplayer(player: Matter.Body, direction: string) {
