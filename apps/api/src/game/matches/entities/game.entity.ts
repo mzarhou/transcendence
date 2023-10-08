@@ -1,21 +1,7 @@
 import { Server, Socket } from 'socket.io';
 import { MatchesService } from '@src/game/matches/matches.service';
 import { Match } from '@prisma/client';
-
-interface User {
-  id: number;
-  socketId: string;
-}
-
-export enum Direction {
-  UP = 'UP',
-  DOWN = 'DOWN',
-}
-
-export enum State {
-  WAITING,
-  PLAYING,
-}
+import { GameData, State, User } from '@src/game/gameplay/gameData';
 
 //table of games
 export class Game {
@@ -24,6 +10,7 @@ export class Game {
   matchesService: MatchesService;
   matchId: number;
   users: User[];
+  gameData: GameData;
 
   constructor(server: Server, matchesService: MatchesService, matchId: number) {
     this.state = State.WAITING;
@@ -31,6 +18,7 @@ export class Game {
     this.matchesService = matchesService;
     this.matchId = matchId;
     this.users = [];
+    this.gameData = new GameData();
   }
 }
 
