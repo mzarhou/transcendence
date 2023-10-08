@@ -1976,6 +1976,11 @@
   dependencies:
     "@types/node" "*"
 
+"@types/matter-js@^0.19.1":
+  version "0.19.1"
+  resolved "https://registry.yarnpkg.com/@types/matter-js/-/matter-js-0.19.1.tgz#0f80d2eb89b8a4b485a9c653e9c88a1c4861d6eb"
+  integrity sha512-GtX6SBzhQ+BpFimYx4oAQlwH8vFLcXv0rl7x0T59B/BJ/jp8UwpJq621trCvI8kBsEeAcfR+witutMrLANYzIA==
+
 "@types/mime@*":
   version "3.0.1"
   resolved "https://registry.yarnpkg.com/@types/mime/-/mime-3.0.1.tgz#5f8f2bca0a5863cb69bc0b0acd88c96cb1d4ae10"
@@ -6567,6 +6572,11 @@ makeerror@1.0.12:
   integrity sha512-JmqCvUhmt43madlpFzG4BQzG2Z3m6tvQDNKdClZnO3VbIudJYmxsT0FNJMeiB2+JTSlTQTSbU8QdesVmwJcmLg==
   dependencies:
     tmpl "1.0.5"
+
+matter-js@^0.19.0:
+  version "0.19.0"
+  resolved "https://registry.yarnpkg.com/matter-js/-/matter-js-0.19.0.tgz#185e518146ae4fa20c33826ebc7e6e42685e3642"
+  integrity sha512-v2huwvQGOHTGOkMqtHd2hercCG3f6QAObTisPPHg8TZqq2lz7eIY/5i/5YUV8Ibf3mEioFEmwibcPUF2/fnKKQ==
 
 media-typer@0.3.0:
   version "0.3.0"
