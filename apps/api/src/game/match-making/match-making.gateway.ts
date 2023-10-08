@@ -4,6 +4,7 @@ import {
   WebSocketGateway,
   WebSocketServer,
   SubscribeMessage,
+  MessageBody,
 } from '@nestjs/websockets';
 import { Server, Socket } from 'socket.io';
 import { queueArr } from './entities/queue.entity';
@@ -11,6 +12,7 @@ import { MatchesService } from '@src/game/matches/matches.service';
 import { ActiveUserData } from '@src/iam/interface/active-user-data.interface';
 import { WsAuthGuard } from '@src/iam/authentication/guards/ws-auth.guard';
 import { UseGuards } from '@nestjs/common';
+import { PrismaService } from '@src/+prisma/prisma.service';
 
 @WebSocketGateway()
 export class MatchMakingGateway implements OnGatewayDisconnect {
@@ -24,11 +26,9 @@ export class MatchMakingGateway implements OnGatewayDisconnect {
     this.queue.deletePlayer(client);
   }
 
-  //use the right Auth for the guard to authenticate the client
-  // @UseGuards(Auth)  => to do
   @UseGuards(WsAuthGuard)
-  @SubscribeMessage('makeMatch')
-  async makeMatch(@ConnectedSocket() client: Socket) {
+  @SubscribeMessage('JoinRandomMatch')
+  async JoinRandomMatch(@ConnectedSocket() client: Socket) {
     const user: ActiveUserData = client.data.user;
 
     //possible problem if user and adversary are the same
