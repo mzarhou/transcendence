@@ -70,8 +70,8 @@ export class GamePlayService {
     });
 
     Events.on(this.engine, 'beforeUpdate', () => {
-      updateBallPosition(this.ball);
-      updatePlayerS1SPosition(this.pl1, this.pl2);
+      updateBallPosition(this.ball, this.game);
+      updatePlayerS1SPosition(this.pl1, this.pl2, this.game);
     });
 
     Runner.run(this.engine);

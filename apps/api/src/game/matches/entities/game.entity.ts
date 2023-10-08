@@ -15,14 +15,20 @@ export class Game {
   homeId: number;
   adversaryId: number;
 
-  constructor(server: Server, matchesService: MatchesService, match: Match) {
+  constructor(
+    server: Server,
+    matchesService: MatchesService,
+    matchId: number,
+    homeId: number,
+    adversaryId: number,
+  ) {
     this.state = State.WAITING;
     this.server = server;
     this.matchesService = matchesService;
-    this.matchId = match.matchId;
+    this.matchId = matchId;
     this.users = [];
-    this.homeId = match.homeId;
-    this.adversaryId = match.adversaryId;
+    this.homeId = homeId;
+    this.adversaryId = adversaryId;
     this.gameData = new GameData();
   }
 }
@@ -37,7 +43,14 @@ export class GamesCollection {
   ) {}
 
   private createGame(match: Match): Game {
-    const game = new Game(this.server, this.matchesService, match);
+    console.log(match);
+    const game = new Game(
+      this.server,
+      this.matchesService,
+      match.matchId,
+      match.homeId,
+      match.adversaryId,
+    );
     this.games.push(game);
     return game;
   }

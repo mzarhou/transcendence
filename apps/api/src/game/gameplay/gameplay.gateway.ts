@@ -8,20 +8,16 @@ import {
 import { Server, Socket } from 'socket.io';
 import { GamePlayService } from './gameplay.service';
 import { Direction } from './gameData';
+import { ActiveUserData } from '@src/iam/interface/active-user-data.interface';
 import { UseGuards } from '@nestjs/common';
 import { WsAuthGuard } from '@src/iam/authentication/guards/ws-auth.guard';
-import { ActiveUserData } from '@src/iam/interface/active-user-data.interface';
-import { MatchesService } from '../matches/matches.service';
 
 @WebSocketGateway()
 export class GamePlayGateway {
   @WebSocketServer()
   server!: Server;
 
-  constructor(
-    private readonly gameService: GamePlayService,
-    private readonly matchService: MatchesService,
-  ) {}
+  constructor(private readonly gameService: GamePlayService) {}
 
   @UseGuards(WsAuthGuard)
   @SubscribeMessage('moveRight')
@@ -36,6 +32,7 @@ export class GamePlayGateway {
       .emit('updateGame', this.gameService.getGameDataS1());
   }
 
+  @UseGuards(WsAuthGuard)
   @SubscribeMessage('moveLeft')
   moveLeft(
     @ConnectedSocket() client: Socket,
@@ -48,6 +45,7 @@ export class GamePlayGateway {
       .emit('updateGame', this.gameService.getGameDataS1());
   }
 
+  @UseGuards(WsAuthGuard)
   @SubscribeMessage('update')
   gameUpdate(@MessageBody('matchId') matchId: number) {
     this.server

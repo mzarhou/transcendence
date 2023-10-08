@@ -1,4 +1,4 @@
-import { bdDt, blDtS1, ply1S1, ply2S1 } from './gameData';
+import { Game } from '../matches/entities/game.entity';
 
 export function map_(
   value: number,
@@ -11,36 +11,45 @@ export function map_(
   return (out * inRange.y) / 2;
 }
 
-export function updateBallPosition(ball: Matter.Body) {
-  blDtS1.posi[0] = map_(
+export function updateBallPosition(ball: Matter.Body, game: Game) {
+  const blDt = game.gameData.bl;
+  const bdDt = game.gameData.bdDt;
+  blDt.posi[0] = map_(
     ball.position.x,
     { x: 0, y: bdDt.size[0] },
     { x: -1, y: 1 },
   );
-  blDtS1.posi[1] = map_(
+  blDt.posi[1] = map_(
     ball.position.y,
     { x: 0, y: bdDt.size[1] },
     { x: -1, y: 1 },
   );
 }
 
-export function updatePlayerS1SPosition(pl1: Matter.Body, pl2: Matter.Body) {
-  ply1S1.posi[0] = map_(
+export function updatePlayerS1SPosition(
+  pl1: Matter.Body,
+  pl2: Matter.Body,
+  game: Game,
+) {
+  const ply1 = game.gameData.home;
+  const ply2 = game.gameData.adversary;
+  const bdDt = game.gameData.bdDt;
+  ply1.posi[0] = map_(
     pl1.position.x,
     { x: 0, y: bdDt.size[0] },
     { x: -1, y: 1 },
   );
-  ply1S1.posi[1] = map_(
+  ply1.posi[1] = map_(
     pl1.position.y,
     { x: 0, y: bdDt.size[1] },
     { x: -1, y: 1 },
   );
-  ply2S1.posi[0] = map_(
+  ply2.posi[0] = map_(
     pl2.position.x,
     { x: 0, y: bdDt.size[0] },
     { x: -1, y: 1 },
   );
-  ply2S1.posi[1] = map_(
+  ply2.posi[1] = map_(
     pl2.position.y,
     { x: 0, y: bdDt.size[1] },
     { x: -1, y: 1 },
