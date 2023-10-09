@@ -1,16 +1,12 @@
 import { playerType, statusType } from "../components/player";
 import { ballType } from "../components/ball";
 import { boardType } from "../components/board";
-import { Socket, io } from "socket.io-client";
+import { io } from "socket.io-client";
 
-export const room = 'gameRoom';
-
-export const socket =  io('http://localhost:5500');
-
+export let room:number = 0;
 
 export let player1:playerType = {
     nmPl: '',
-    type: '',
     posi: [0,-330,15],
     size: [100,10,30],
     txtu: "red"
@@ -18,7 +14,6 @@ export let player1:playerType = {
   
   export let player2:playerType = {
     nmPl: '',
-    type: '',
     posi: [0,330,15],
     size: [100,10,30],
     txtu: "blue"
@@ -36,20 +31,24 @@ export let player1:playerType = {
     txtu:'background.png',
   }
   
+
+  export const enum EventGame {
+    MCHFOUND = 'matchingFound',
+    JNRNDMCH = 'joinRandomMatch',
+    PLAYMACH = 'playMatch',
+    STARTSGM = 'startGame',
+    UPDTGAME = 'updateGame',
+    GAMEOVER = 'gameOver'
+  }
+
+  export const enum states {
+    CONNECT='connect',
+    WAITING='waiting',
+    STRGAME='startGame',
+    UPDGAME='update',
+    GAMOVER='GameOver',
+  }
+
   export let status:statusType = {
-    name: 'connect',
-    nbPl: 0
-  }
-
-
-  export function left(player:playerType){
-    player.posi[0] -= 10;
-    if (player.posi[0] - 60 < -boardEntity.size[0]/2)
-        player.posi[0] = -boardEntity.size[0]/2  + 60; 
-  }
-  
- export function right(player:playerType){
-    player.posi[0] += 10;
-    if (player.posi[0] + 60 > boardEntity.size[0]/2)
-        player.posi[0] = boardEntity.size[0]/2 - 60;
+    name: states.CONNECT
   }

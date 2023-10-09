@@ -1,15 +1,16 @@
-import { OrbitControls, PerspectiveCamera } from "@react-three/drei"
+import { PerspectiveCamera } from "@react-three/drei"
 import { Stats } from "@react-three/drei";
-import { ThreeElements, useFrame } from "@react-three/fiber";
 import { useEffect, useRef, useState } from "react";
-import { PointLight, Vector3 } from "three";
-import { boardEntity, player2, socket } from "../entity/entity";
+import { PointLight } from "three";
+import { player2 } from "../entity/entity";
+import { useSocket } from "@/context/events-socket-context";
 
 function Cam() {
+    const socket = useSocket();
     const ref = useRef<THREE.PerspectiveCamera>(null);
     useEffect(()=>{
         if (ref.current){
-            if (socket.id == player2.nmPl)
+            if (socket?.id == player2.nmPl)
                 ref.current.rotateZ(Math.PI);
             // if (threeD){
             // ref.current.position.x = 0;

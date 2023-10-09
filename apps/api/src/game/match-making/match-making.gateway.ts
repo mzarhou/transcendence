@@ -27,8 +27,8 @@ export class MatchMakingGateway {
   //use the right Auth for the guard to authenticate the client
   // @UseGuards(Auth)  => to do
   @UseGuards(WsAuthGuard)
-  @SubscribeMessage('makeMatch')
-  async makeMatch(@ConnectedSocket() client: Socket) {
+  @SubscribeMessage('joinRandomMatch')
+  async joinRandomMatch(@ConnectedSocket() client: Socket) {
     const user: ActiveUserData = client.data.user;
 
     //possible problem if user and adversary are the same

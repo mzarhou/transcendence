@@ -7,12 +7,13 @@ import { Canvas } from "@react-three/fiber";
 import { Board } from "../components/board";
 import { CamScene } from "../components/camScene";
 import {Player } from "../components/player";
-import { ballEntity, boardEntity, player1, player2, room, socket} from "../entity/entity";
+import { ballEntity, boardEntity, player1, player2, room} from "../entity/entity";
 import { socketEventListener, update } from "../utils/utils";
+import { useSocket } from "@/context/events-socket-context";
 
 
 export function SceneGame () {
-  
+  const socket = useSocket(); 
   useEffect(()=>{socketEventListener(socket,room);},[]);
   useEffect(()=>{update(socket,room)});
 

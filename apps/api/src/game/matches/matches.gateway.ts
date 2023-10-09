@@ -34,8 +34,8 @@ export class MatchesGateway implements OnGatewayDisconnect {
   }
 
   @UseGuards(WsAuthGuard)
-  @SubscribeMessage('joinMatch')
-  async joinMatch(
+  @SubscribeMessage('playMatch')
+  async PlayMatch(
     @ConnectedSocket() client: Socket,
     @MessageBody('matchId') matchId: number,
   ) {

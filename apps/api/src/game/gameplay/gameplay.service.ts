@@ -1,4 +1,3 @@
-import { Injectable } from '@nestjs/common';
 import Matter, { Events, Engine, World, Bodies, Runner, Body } from 'matter-js';
 import { walls, ballOptions, staticOption, GameData } from './gameData';
 import { updateBallPosition, updatePlayerS1SPosition } from './utils';
