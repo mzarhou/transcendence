@@ -17,6 +17,7 @@ import { AxiosError } from "axios";
 import { Close } from "@radix-ui/react-dialog";
 import { useGenerateQrcode } from "@/api-hooks/use-generate-qrcode";
 import { useEnable2fa } from "@/api-hooks/2fa/use-enable-2fa";
+import { Input } from "@/components/ui/input";
 
 export default function Enable2faButton() {
   return (
@@ -100,15 +101,15 @@ function Enable2faForm() {
     <Form {...form}>
       <form
         onSubmit={form.handleSubmit(onSubmit)}
-        className="flex justify-end space-x-4"
+        className="flex justify-end space-x-4 p-1.5"
       >
         <FormField
           control={form.control}
           name="code"
           render={({ field }) => (
-            <FormItem>
+            <FormItem className="">
               <FormControl>
-                <input
+                <Input
                   className="w-full rounded-md border px-4 py-2"
                   placeholder="123456"
                   {...field}
