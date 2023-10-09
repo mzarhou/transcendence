@@ -32,7 +32,10 @@ export class MatchMakingGateway implements OnGatewayDisconnect {
     const user: ActiveUserData = client.data.user;
 
     //possible problem if user and adversary are the same
-    const adversary = this.queue.players[0];
+    const adversary = this.queue.players.find(
+      (player) => player.id !== user.sub
+    );
+    
     if (adversary) {
       //if you found an already user waiting in the queue
       this.queue.deletePlayerById(adversary.id);
