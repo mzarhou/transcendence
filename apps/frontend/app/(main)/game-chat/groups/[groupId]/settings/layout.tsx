@@ -16,14 +16,14 @@ export default function Layout({
   };
 }) {
   const { data: group, isLoading, error } = useGroup(params.groupId);
-  const { user, isLoading: isLoadingUser, error: userError } = useUser();
+  const { user, isLoading: isLoadingUser } = useUser();
   const router = useRouter();
 
   useEffect(() => {
-    if (userError || error || group?.ownerId !== user?.id) {
+    if (error || group?.ownerId !== user?.id) {
       router.replace("/game-chat");
     }
-  }, [error, userError, group, user]);
+  }, [error, group, user]);
 
   if (isLoading || isLoadingUser) {
     return <FullLoader />;
