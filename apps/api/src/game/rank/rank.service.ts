@@ -14,14 +14,6 @@ export class RankService {
     return this.prisma.user.findMany();
   }
 
-  //either return rank of user or whole user
-  async getOneRank(id: number) {
-    const user = await this.prisma.user.findUnique({
-      where: { id },
-    });
-    return (user?.rank);
-  }
-
   async getNumOfMatchesPlayed(id: number): Promise<any>{
     const user = await this.prisma.user.findUnique({
       where: { id },

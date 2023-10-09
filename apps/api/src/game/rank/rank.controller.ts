@@ -4,11 +4,6 @@ import { RankService } from './rank.service';
 @Controller('rank')
 export class RankController {
   constructor(private rankService: RankService) {}
-
-  @Get(':id')
-  async findOneRank(@Param('id') id: string) {
-    return this.rankService.getOneRank(+id);
-  }
   
   @Get(':id')
   async getNumOfMatchesPlayed(@Param('id') id: string) {
