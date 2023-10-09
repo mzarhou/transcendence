@@ -1,8 +1,6 @@
-import { useCallback, useEffect, useState } from "react";
-
 import { Socket } from "socket.io-client";
+import { useCallback, useEffect, useState } from "react";
 import { EventGame, states,  status } from "../entity/entity";
-
 
 
 export function PlayerPosition(direction:string) : boolean{
@@ -54,15 +52,15 @@ export function PlayerPosition(direction:string) : boolean{
       socket?.on(EventGame.GAMEOVER, data => {
         console.log(data);
         socket?.emit('leaveGame', room);
-        status.name = 'gameOver';
+        status.name = EventGame.GAMEOVER;
       })
     }
 }  
 
 export const update = (socket:Socket|null, room: number) => {
     const intervalId = setInterval(() => {
-      if (status.name == states.UPDGAME){
-        socket?.emit('update', room );
+      if (status.name == states.UPDGAME) {
+        socket?.emit(states.UPDGAME, room );
       }
     }, 1);
     return () => clearInterval(intervalId);
