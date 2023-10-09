@@ -9,6 +9,26 @@ export class RankController {
   async findOneRank(@Param('id') id: string) {
     return this.rankService.getOneRank(+id);
   }
+  
+  @Get(':id')
+  async getNumOfMatchesPlayed(@Param('id') id: string) {
+    return this.rankService.getNumOfMatchesPlayed(+id);
+  }
+
+  @Get(':id')
+  async getNumOfWins(@Param('id') id: string) {
+    return this.rankService.getNumOfWins(+id);
+  }
+
+  @Get(':id')
+  async getNumOfLosses(@Param('id') id: string) {
+    return (await this.rankService.getNumOfMatchesPlayed(+id) -  await this.rankService.getNumOfWins(+id));
+  }
+
+  @Get(':id')
+  async getEloScore(@Param('id') id: string) {
+    return this.rankService.getEloScore(+id);
+  }
 
   @Get()
   async getAllRank() {
