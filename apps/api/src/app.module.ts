@@ -15,12 +15,15 @@ import { FriendRequestModule } from './friend-request/friend-request.module';
 import { GroupsModule } from './groups/groups.module';
 import { WebsocketModule } from './websocket/websocket.module';
 import { ZodExceptionFilter } from './+common/filters/zod-exception.filter';
+import path from 'path';
+import { ServeStaticModule } from '@nestjs/serve-static';
+import { UploadsModule } from './uploads/uploads.module';
 
 @Module({
   imports: [
-    UsersModule,
     ConfigModule.forRoot(),
     IamModule,
+    UsersModule,
     RedisModule,
     PrismaModule,
     ChatModule,
@@ -29,6 +32,12 @@ import { ZodExceptionFilter } from './+common/filters/zod-exception.filter';
     FriendRequestModule,
     GroupsModule,
     WebsocketModule,
+
+    ServeStaticModule.forRoot({
+      rootPath: path.join(__dirname, '..', '/static'),
+      serveRoot: '/static',
+    }),
+    UploadsModule,
   ],
   controllers: [AppController],
   providers: [
