@@ -30,7 +30,7 @@ export function PlayerPosition(direction:string) : boolean{
   }
 
   export const socketEventListener = async (socket: Socket|null, room: number) =>   {
-
+    socket?.emit(EventGame.JNRNDMCH, room);
     if(socket?.hasListeners(EventGame.MCHFOUND)){
       socket.on(EventGame.MCHFOUND,(data)=>{
         room = data;
@@ -41,7 +41,7 @@ export function PlayerPosition(direction:string) : boolean{
     if (!socket?.hasListeners(EventGame.STARTSGM)){
       socket?.on(EventGame.STARTSGM,()=>{
         status.name = states.UPDGAME;
-        console.log('startgame');
+        console.log(states.STRGAME);
       });
     }
   
