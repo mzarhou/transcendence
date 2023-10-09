@@ -15,6 +15,7 @@ import { WsAuthGuard } from '@src/iam/authentication/guards/ws-auth.guard';
 import { UseGuards } from '@nestjs/common';
 import { GamePlayService } from '../gameplay/gameplay.service';
 import { MatchesStorage } from './matches.storage';
+import { EventGame } from '../gameplay/utils';
 
 @WebSocketGateway()
 export class MatchesGateway implements OnGatewayDisconnect {
@@ -34,7 +35,7 @@ export class MatchesGateway implements OnGatewayDisconnect {
   }
 
   @UseGuards(WsAuthGuard)
-  @SubscribeMessage('playMatch')
+  @SubscribeMessage(EventGame.PLAYMACH)
   async PlayMatch(
     @ConnectedSocket() client: Socket,
     @MessageBody('matchId') matchId: number,
@@ -46,6 +47,6 @@ export class MatchesGateway implements OnGatewayDisconnect {
 
     this.matchesStorage.connectPlayer(match, user.sub, client);
     const roomId = getMatchRoomId(matchId);
-    this.server.to(roomId).emit('startGame', this.matchesStorage[matchId]);
+    this.server.to(roomId).emit(EventGame.STARTSGM, this.matchesStorage[matchId]);
   }
 }
