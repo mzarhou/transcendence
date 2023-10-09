@@ -1,17 +1,23 @@
-import { useToast } from "@/components/ui/use-toast";
 import { api } from "@/lib/api";
-import { UpdateUserType } from "@transcendence/db";
 import useSWRMutation from "swr/mutation";
+import { z } from "zod";
+import { useUpdateProfile } from "./use-update-profile";
+import { useToast } from "@/components/ui/use-toast";
 import { getServerMessage } from "@/lib/utils";
 import { useUser } from "@/context/user-context";
 
-export const useUpdateProfile = () => {
+export const useUploadProfileImage = () => {
   const { toast } = useToast();
+  const { trigger: updateProfile } = useUpdateProfile();
   const { refresh: refreshUser } = useUser();
 
   return useSWRMutation(
-    `/users/me`,
-    async (url, { arg }: { arg: UpdateUserType }) => api.patch(url, arg),
+    `/uploads/image`,
+    async (url, { arg }: { arg: FormData }) => {
+      const { data } = await api.post(url, arg);
+      const imageUrl = z.string().url().parse(data.imageUrl);
+      return updateProfile({ avatar: imageUrl });
+    },
     {
       onSuccess: () => {
         toast({ description: "Profile Updated" });
