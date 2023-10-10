@@ -2,6 +2,7 @@ import Matter, { Events, Engine, World, Bodies, Runner, Body } from 'matter-js';
 import { walls, ballOptions, staticOption, GameData } from './gameData';
 import { updateBallPosition, updatePlayerPosition } from './utils';
 import { Game } from '../matches/match-game.interface';
+import { Match } from '@transcendence/db';
 
 export class GamePlayService {
   private engine: Engine;
@@ -48,7 +49,7 @@ export class GamePlayService {
           (ball === this.ball && wall === walls[0]) ||
           (ball == walls[0] && wall == this.ball)
         ) {
-          console.log('Collision between Ball and WallPlayer1 detected!');
+          // console.log('Collision between Ball and WallPlayer1 detected!');
           this.gmDt.scores.adversary += 1;
           Matter.Body.setPosition(this.ball, {
             x: this.gmDt.bdDt.size[0] / 2,
@@ -60,7 +61,7 @@ export class GamePlayService {
           (ball == walls[1] && wall == this.ball)
         ) {
           this.gmDt.scores.home += 1;
-          console.log('Collision between Ball and WallPlayer2 detected!');
+          // console.log('Collision between Ball and WallPlayer2 detected!');
           Matter.Body.setPosition(this.ball, {
             x: this.gmDt.bdDt.size[0] / 2,
             y: this.gmDt.bdDt.size[1] / 2,
@@ -82,9 +83,10 @@ export class GamePlayService {
     Runner.stop(Runner.run(this.engine));
   }
 
-  movePlayer(direction: string, client: number, matchId: number) {
-    if (client == matchId) this.processDataplayer(this.pl1, direction);
-    if (client == matchId) this.processDataplayer(this.pl2, direction);
+  movePlayer(direction: string, client: number, match: Match) {
+    if (client == match.homeId) this.processDataplayer(this.pl1, direction);
+    if (client == match.adversaryId)
+      this.processDataplayer(this.pl2, direction);
   }
 
   private processDataplayer(player: Matter.Body, direction: string) {

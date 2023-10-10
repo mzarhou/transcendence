@@ -13,6 +13,7 @@ import { UseGuards } from '@nestjs/common';
 import { WsAuthGuard } from '@src/iam/authentication/guards/ws-auth.guard';
 import { MatchesStorage } from '../matches/matches.storage';
 import { getMatchRoomId } from '../matches/matches.helpers';
+import { Match } from '@transcendence/db';
 
 @WebSocketGateway()
 export class GamePlayGateway {
@@ -25,16 +26,16 @@ export class GamePlayGateway {
   @SubscribeMessage('moveRight')
   moveRight(
     @ConnectedSocket() client: Socket,
-    @MessageBody('matchId') matchId: number,
+    @MessageBody('match') match: Match,
   ) {
-    const user: ActiveUserData = client.data.id;
-    const game = this.matchesStorage.findGame(matchId);
+    const user: ActiveUserData = client.data.user;
+    const game = this.matchesStorage.findGame(match.matchId);
     if (!game) {
       throw new WsException('Invalid matchId');
     }
-    game.gameService.movePlayer(Direction.RIGHT, user.sub, matchId);
+    game.gameService.movePlayer(Direction.RIGHT, user.sub, match);
     this.server
-      .to(getMatchRoomId(matchId))
+      .to(getMatchRoomId(match.matchId))
       .emit('updateGame', game.gameService.getGameData());
   }
 
@@ -42,16 +43,16 @@ export class GamePlayGateway {
   @SubscribeMessage('moveLeft')
   moveLeft(
     @ConnectedSocket() client: Socket,
-    @MessageBody('matchId') matchId: number,
+    @MessageBody('match') match: Match,
   ) {
-    const game = this.matchesStorage.findGame(matchId);
-    const user: ActiveUserData = client.data.id;
+    const game = this.matchesStorage.findGame(match.matchId);
+    const user: ActiveUserData = client.data.user;
     if (!game) {
       throw new WsException('Invalid matchId');
     }
-    game.gameService.movePlayer(Direction.LEFT, user.sub, matchId);
+    game.gameService.movePlayer(Direction.LEFT, user.sub, match);
     this.server
-      .to(getMatchRoomId(matchId))
+      .to(getMatchRoomId(match.matchId))
       .emit('updateGame', game.gameService.getGameData());
   }
 
@@ -62,6 +63,7 @@ export class GamePlayGateway {
     if (!game) {
       throw new WsException('Invalid matchId');
     }
+
     this.server
       .to(getMatchRoomId(matchId))
       .emit('updateGame', game.gameService.getGameData());

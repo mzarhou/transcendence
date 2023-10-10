@@ -9,7 +9,19 @@ import {
   status,
 } from "../entity/entity";
 
-export let matchId: number;
+interface match {
+  matchId: number;
+  homeId: number;
+  adversaryId: number;
+  winnerId: number | null;
+}
+
+export let match: match = {
+  matchId: 0,
+  homeId: 0,
+  adversaryId: 0,
+  winnerId: null,
+};
 
 export function PlayerPosition(direction: string): boolean {
   const [arrowDirection, setArrowDirection] = useState(false);
@@ -42,10 +54,14 @@ export const socketEventListener = async (socket: Socket | null) => {
   if (socket) {
     if (!socket.hasListeners(EventGame.MCHFOUND)) {
       socket.on(EventGame.MCHFOUND, (data) => {
-        matchId = data.matchId;
-        console.log("matchId: " + matchId + "\n");
+        match = data.match;
+        player1.nmPl = match.homeId;
+        player2.nmPl = match.adversaryId;
+        console.log("matchId: " + match.matchId + "\n");
+        console.log("matchId: " + match.homeId + "\n");
+        console.log("matchId: " + match.adversaryId + "\n");
         status.name = states.STRGAME;
-        socket?.emit(EventGame.PLAYMACH, { matchId });
+        socket?.emit(EventGame.PLAYMACH, { matchId: match.matchId });
       });
       socket?.on(EventGame.STARTSGM, (data) => {
         status.name = states.UPDGAME;
@@ -60,8 +76,6 @@ export const socketEventListener = async (socket: Socket | null) => {
         player2.posi[1] = parsedData.adversary.posi[1];
         ballEntity.position[0] = parsedData.bl.posi[0];
         ballEntity.position[1] = parsedData.bl.posi[1];
-        player1.nmPl = parsedData.home.id;
-        player2.nmPl = parsedData.adversary.id;
       });
       socket?.on(EventGame.GAMEOVER, (data) => {
         socket?.emit("leaveGame");
@@ -74,7 +88,7 @@ export const socketEventListener = async (socket: Socket | null) => {
 export const update = (socket: Socket | null) => {
   const intervalId = setInterval(() => {
     if (status.name == states.UPDGAME) {
-      socket?.emit(states.UPDGAME, { matchId });
+      socket?.emit(states.UPDGAME, { matchId: match.matchId });
       // status.name = states.GAMOVER;
     }
   }, 1);

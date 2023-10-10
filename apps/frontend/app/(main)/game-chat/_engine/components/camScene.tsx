@@ -11,7 +11,7 @@ function Cam() {
   const ref = useRef<THREE.PerspectiveCamera>(null);
   useEffect(() => {
     if (ref.current) {
-      if (user.id == player2.nmPl) ref.current.rotateZ(Math.PI);
+      if (user?.id == player2.nmPl) ref.current.rotateZ(Math.PI);
       // if (threeD){
       // ref.current.position.x = 0;
       // ref.current.position.y = -540;

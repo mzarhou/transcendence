@@ -48,14 +48,12 @@ export class MatchMakingGateway {
       const match = await this.matchesService.create(user.sub, adversary.id);
       console.log('=>', match.matchId);
       //emit event to client
-      this.server
-        .to(client.id)
-        .emit(EventGame.MCHFOUND, { matchId: match.matchId });
+      this.server.to(client.id).emit(EventGame.MCHFOUND, { match: match });
 
       //emit event to adversary
       this.server
         .to(adversary.socketId)
-        .emit(EventGame.MCHFOUND, { matchId: match.matchId });
+        .emit(EventGame.MCHFOUND, { match: match });
     } else {
       this.queue.addPlayer(user.sub, client);
     }
