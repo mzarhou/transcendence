@@ -45,27 +45,18 @@ export class GamePlayService {
       event.pairs.forEach((collision) => {
         const ball = collision.bodyA as Body;
         const wall = collision.bodyB as Body;
+        const scores = this.gmDt.scores;
         if (
           (ball === this.ball && wall === walls[0]) ||
           (ball == walls[0] && wall == this.ball)
         ) {
-          // console.log('Collision between Ball and WallPlayer1 detected!');
-          this.gmDt.scores.adversary += 1;
-          Matter.Body.setPosition(this.ball, {
-            x: this.gmDt.bdDt.size[0] / 2,
-            y: this.gmDt.bdDt.size[1] / 2,
-          });
+          this.applyCollisionEffect(this.gmDt.scores.adversary);
         }
         if (
           (ball === this.ball && wall === walls[1]) ||
           (ball == walls[1] && wall == this.ball)
         ) {
-          this.gmDt.scores.home += 1;
-          // console.log('Collision between Ball and WallPlayer2 detected!');
-          Matter.Body.setPosition(this.ball, {
-            x: this.gmDt.bdDt.size[0] / 2,
-            y: this.gmDt.bdDt.size[1] / 2,
-          });
+          this.applyCollisionEffect(this.gmDt.scores.home);
         }
       });
     });
@@ -117,5 +108,12 @@ export class GamePlayService {
   getGameData(): any {
     const data: string = JSON.stringify(this.gmDt);
     return data;
+  }
+  applyCollisionEffect(adversary: number) {
+    adversary += 1;
+    Matter.Body.setPosition(this.ball, {
+      x: this.gmDt.bdDt.size[0] / 2,
+      y: this.gmDt.bdDt.size[1] / 2,
+    });
   }
 }
