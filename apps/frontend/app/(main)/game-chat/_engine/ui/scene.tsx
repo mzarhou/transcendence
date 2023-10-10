@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { Suspense, useEffect, useState } from "react";
 import { Ball } from "../components/ball";
 import { Canvas } from "@react-three/fiber";
 import { Board } from "../components/board";
@@ -34,15 +34,16 @@ export function SceneGame() {
     <>
       {showA ? (
         <Canvas>
-          <CamScene />
-          <Player {...player2} />
-          <Ball {...ballEntity} />
-          <Player {...player1} />
-          {/* <Walls/> */}
-          <Board {...boardEntity} />
+          <Suspense>
+            <CamScene />
+            <Player {...player2} />
+            <Ball {...ballEntity} />
+            <Player {...player1} />
+            <Board {...boardEntity} />
+          </Suspense>
         </Canvas>
       ) : (
-        <button onClick={toggleComponent}>Toggle Component</button>
+        <button onClick={toggleComponent}>JoinMatch</button>
       )}
     </>
   );
