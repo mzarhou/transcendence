@@ -29,6 +29,9 @@ export function Player(playerProps: playerType) {
       player.current.position.y = playerProps.posi[1];
       player.current.position.z = playerProps.posi[2];
     }
+    console.log("user=>", user.id);
+    console.log("player1=>", player1.nmPl);
+    console.log("player2=>", player2.nmPl);
     if (user?.id == player1.nmPl) {
       if (arrowLeft) socket?.emit("moveLeft", { matchId }, player1.nmPl);
       if (arrowRight) socket?.emit("moveRight", { matchId }, player1.nmPl);

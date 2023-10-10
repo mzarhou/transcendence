@@ -53,7 +53,7 @@ export const socketEventListener = async (socket: Socket | null) => {
       });
       socket?.on(EventGame.UPDTGAME, (data) => {
         const parsedData = JSON.parse(data);
-        console.log("UpdateGame", parsedData);
+        // console.log("UpdateGame", parsedData);
         player1.posi[0] = parsedData.home.posi[0];
         player1.posi[1] = parsedData.home.posi[1];
         player2.posi[0] = parsedData.adversary.posi[0];
