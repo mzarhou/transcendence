@@ -1,6 +1,6 @@
 import Matter, { Events, Engine, World, Bodies, Runner, Body } from 'matter-js';
 import { walls, ballOptions, staticOption, GameData } from './gameData';
-import { updateBallPosition, updatePlayerS1SPosition } from './utils';
+import { updateBallPosition, updatePlayerPosition } from './utils';
 import { Game } from '../matches/match-game.interface';
 
 export class GamePlayService {
@@ -71,7 +71,7 @@ export class GamePlayService {
 
     Events.on(this.engine, 'beforeUpdate', () => {
       updateBallPosition(this.ball, this.game);
-      updatePlayerS1SPosition(this.pl1, this.pl2, this.game);
+      updatePlayerPosition(this.pl1, this.pl2, this.game);
     });
 
     Runner.run(this.engine);

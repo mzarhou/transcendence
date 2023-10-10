@@ -26,7 +26,7 @@ export function updateBallPosition(ball: Matter.Body, game: Game) {
   );
 }
 
-export function updatePlayerS1SPosition(
+export function updatePlayerPosition(
   pl1: Matter.Body,
   pl2: Matter.Body,
   game: Game,
@@ -54,6 +54,8 @@ export function updatePlayerS1SPosition(
     { x: 0, y: bdDt.size[1] },
     { x: -1, y: 1 },
   );
+  pl1.id = game.homeId;
+  pl2.id = game.adversaryId;
 }
 
 export const enum EventGame {
