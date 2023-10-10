@@ -49,6 +49,7 @@ export class GamePlayService {
           (ball == walls[0] && wall == this.ball)
         ) {
           console.log('Collision between Ball and WallPlayer1 detected!');
+          this.gmDt.scores.adversary += 1;
           Matter.Body.setPosition(this.ball, {
             x: this.gmDt.bdDt.size[0] / 2,
             y: this.gmDt.bdDt.size[1] / 2,
@@ -58,6 +59,7 @@ export class GamePlayService {
           (ball === this.ball && wall === walls[1]) ||
           (ball == walls[1] && wall == this.ball)
         ) {
+          this.gmDt.scores.home += 1;
           console.log('Collision between Ball and WallPlayer2 detected!');
           Matter.Body.setPosition(this.ball, {
             x: this.gmDt.bdDt.size[0] / 2,

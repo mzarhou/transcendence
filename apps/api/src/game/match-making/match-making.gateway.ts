@@ -15,8 +15,8 @@ import { EventGame } from '../gameplay/utils';
 @WebSocketGateway()
 export class MatchMakingGateway {
   @WebSocketServer()
-  queue: queueArr = new queueArr();
   server!: Server;
+  queue: queueArr = new queueArr();
 
   constructor(private matchesService: MatchesService) {}
 
@@ -27,27 +27,35 @@ export class MatchMakingGateway {
 
   //use the right Auth for the guard to authenticate the client
   // @UseGuards(Auth)  => to do
+
   @UseGuards(WsAuthGuard)
   @SubscribeMessage(EventGame.JNRNDMCH)
-  async joinRandomMatch(@ConnectedSocket() client: Socket) {
+  async JoinRandomMatch(@ConnectedSocket() client: Socket) {
+    console.log('joinRandomMatch\n');
     const user: ActiveUserData = client.data.user;
-
     //possible problem if user and adversary are the same
-    const adversary = this.queue.players[0];
+    const adversary = this.queue.players.find(
+      (player) => player.id !== user.sub,
+    );
+
+    console.log('client: ', client.id + '\n');
+    console.log('adversary: ', adversary?.socketId + '\n');
     if (adversary) {
       //if you found an already user waiting in the queue
       this.queue.deletePlayerById(adversary.id);
 
       //create a match between user and adversary => to do
       const match = await this.matchesService.create(user.sub, adversary.id);
-
+      console.log('=>', match.matchId);
       //emit event to client
-      this.server.to(client.id).emit(EventGame.MCHFOUND, { id: match.matchId });
+      this.server
+        .to(client.id)
+        .emit(EventGame.MCHFOUND, { matchId: match.matchId });
 
       //emit event to adversary
       this.server
         .to(adversary.socketId)
-        .emit(EventGame.MCHFOUND, { id: match.matchId });
+        .emit(EventGame.MCHFOUND, { matchId: match.matchId });
     } else {
       this.queue.addPlayer(user.sub, client);
     }

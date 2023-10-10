@@ -62,5 +62,5 @@ export const enum EventGame {
   PLAYMACH = 'playMatch',
   STARTSGM = 'startGame',
   UPDTGAME = 'updateGame',
-  GAMEOVER = 'gameOver'
+  GAMEOVER = 'gameOver',
 }

@@ -1,3 +1,3 @@
-function getMatchRoomId(matchId: number) {
+export function getMatchRoomId(matchId: number): string {
   return `games.${matchId}`;
 }

@@ -12,6 +12,7 @@ import { ActiveUserData } from '@src/iam/interface/active-user-data.interface';
 import { UseGuards } from '@nestjs/common';
 import { WsAuthGuard } from '@src/iam/authentication/guards/ws-auth.guard';
 import { MatchesStorage } from '../matches/matches.storage';
+import { getMatchRoomId } from '../matches/matches.helpers';
 
 @WebSocketGateway()
 export class GamePlayGateway {

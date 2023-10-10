@@ -16,6 +16,7 @@ import { UseGuards } from '@nestjs/common';
 import { GamePlayService } from '../gameplay/gameplay.service';
 import { MatchesStorage } from './matches.storage';
 import { EventGame } from '../gameplay/utils';
+import { getMatchRoomId } from './matches.helpers';
 
 @WebSocketGateway()
 export class MatchesGateway implements OnGatewayDisconnect {
@@ -40,6 +41,7 @@ export class MatchesGateway implements OnGatewayDisconnect {
     @ConnectedSocket() client: Socket,
     @MessageBody('matchId') matchId: number,
   ) {
+    console.log('PlayMatch: ' + matchId + '\n');
     const user: ActiveUserData = client.data.user;
     const match = await this.matchesService.findOneById(matchId);
     if (!match) throw new WsException('Match Not Found!');
@@ -47,6 +49,9 @@ export class MatchesGateway implements OnGatewayDisconnect {
 
     this.matchesStorage.connectPlayer(match, user.sub, client);
     const roomId = getMatchRoomId(matchId);
-    this.server.to(roomId).emit(EventGame.STARTSGM, this.matchesStorage[matchId]);
+    console.log({ roomId });
+    this.server
+      .to(roomId)
+      .emit(EventGame.STARTSGM, this.matchesStorage[matchId]);
   }
 }

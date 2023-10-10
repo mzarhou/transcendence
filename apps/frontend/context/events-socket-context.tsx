@@ -53,8 +53,8 @@ import { groupsKey } from "@/api-hooks/groups/use-groups";
 import { groupKey } from "@/api-hooks/groups/use-group";
 import { api } from "@/lib/api";
 import { friendsKey } from "@/api-hooks/use-friends";
-import { UNFRIEND_EVENT } from "@transcendence/db";
 import { GROUP_INVITATION_NOTIFICATION } from "@transcendence/db";
+import { UNFRIEND_EVENT } from "@transcendence/db";
 
 const EventsSocketContext = createContext<Socket | null>(null);
 
