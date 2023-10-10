@@ -54,8 +54,6 @@ export function updatePlayerPosition(
     { x: 0, y: bdDt.size[1] },
     { x: -1, y: 1 },
   );
-  pl1.id = game.homeId;
-  pl2.id = game.adversaryId;
 }
 
 export const enum EventGame {

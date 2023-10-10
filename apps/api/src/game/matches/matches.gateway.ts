@@ -50,8 +50,6 @@ export class MatchesGateway implements OnGatewayDisconnect {
     this.matchesStorage.connectPlayer(match, user.sub, client);
     const roomId = getMatchRoomId(matchId);
     console.log({ roomId });
-    this.server
-      .to(roomId)
-      .emit(EventGame.STARTSGM, this.matchesStorage[matchId]);
+    this.server.to(roomId).emit(EventGame.STARTSGM, { match: match });
   }
 }

@@ -55,16 +55,17 @@ export const socketEventListener = async (socket: Socket | null) => {
     if (!socket.hasListeners(EventGame.MCHFOUND)) {
       socket.on(EventGame.MCHFOUND, (data) => {
         match = data.match;
-        player1.nmPl = match.homeId;
-        player2.nmPl = match.adversaryId;
-        console.log("matchId: " + match.matchId + "\n");
-        console.log("matchId: " + match.homeId + "\n");
-        console.log("matchId: " + match.adversaryId + "\n");
         status.name = states.STRGAME;
         socket?.emit(EventGame.PLAYMACH, { matchId: match.matchId });
       });
       socket?.on(EventGame.STARTSGM, (data) => {
+        match = data.match;
         status.name = states.UPDGAME;
+        console.log("matchId: " + match.matchId + "\n");
+        player1.nmPl = match.homeId;
+        player2.nmPl = match.adversaryId;
+        console.log("player1: " + player1.nmPl + "\n");
+        console.log("player2: " + player2.nmPl + "\n");
         console.log(states.STRGAME, data);
       });
       socket?.on(EventGame.UPDTGAME, (data) => {
@@ -89,8 +90,7 @@ export const update = (socket: Socket | null) => {
   const intervalId = setInterval(() => {
     if (status.name == states.UPDGAME) {
       socket?.emit(states.UPDGAME, { matchId: match.matchId });
-      // status.name = states.GAMOVER;
     }
-  }, 1);
+  }, 16);
   return () => clearInterval(intervalId);
 };

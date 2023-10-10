@@ -30,7 +30,6 @@ export interface ballType {
   txtu: string;
 }
 export interface playerType {
-  id: number;
   posi: [x: number, y: number, z: number];
   size: [width: number, height: number, depth: number];
   txtu: string;
@@ -66,13 +65,11 @@ export class GameData {
     txtu: 'white',
   };
   home: playerType = {
-    id: 0,
     posi: [this.bdDt.size[0] / 2, 70, 15],
     size: [100, 10, 30],
     txtu: 'red',
   };
   adversary: playerType = {
-    id: 0,
     posi: [this.bdDt.size[0] / 2, this.bdDt.size[1] - 70, 15],
     size: [100, 10, 30],
     txtu: 'blue',

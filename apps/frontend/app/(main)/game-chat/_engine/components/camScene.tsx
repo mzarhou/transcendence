@@ -5,6 +5,7 @@ import { PointLight } from "three";
 import { player2 } from "../entity/entity";
 import { useSocket } from "@/context/events-socket-context";
 import { useUser } from "@/context/user-context";
+import { useFrame } from "@react-three/fiber";
 
 function Cam() {
   const { user } = useUser();
@@ -21,7 +22,7 @@ function Cam() {
       // ref.current.rotation.z = 0;
       // }
     }
-  });
+  }, [player2.nmPl]);
   return (
     <>
       <PerspectiveCamera
