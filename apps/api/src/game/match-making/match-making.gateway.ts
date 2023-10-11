@@ -20,10 +20,9 @@ export class MatchMakingGateway {
 
   constructor(private matchesService: MatchesService) {}
 
-  // TODO: use websocketService rxjs subject
-  // handleDisconnect(client: any) {
-  //   this.queue.deletePlayer(client);
-  // }
+  handleDisconnect(client: any) {
+    this.queue.deletePlayer(client);
+  }
 
   //use the right Auth for the guard to authenticate the client
   // @UseGuards(Auth)  => to do
@@ -46,7 +45,7 @@ export class MatchMakingGateway {
 
       //create a match between user and adversary => to do
       const match = await this.matchesService.create(user.sub, adversary.id);
-      console.log('=>', match.matchId);
+
       //emit event to client
       this.server.to(client.id).emit(EventGame.MCHFOUND, { match: match });
 

@@ -14,11 +14,40 @@ export class RankService {
     return this.prisma.user.findMany();
   }
 
+  //either return rank of user or whole user
   async getOneRank(id: number) {
     const user = await this.prisma.user.findUnique({
       where: { id },
     });
-    return user;
+    return user?.rank;
+  }
+
+  async getNumOfMatchesPlayed(id: number): Promise<any> {
+    const user = await this.prisma.user.findUnique({
+      where: { id },
+    });
+    return user?.numOfGames;
+  }
+
+  async getEloScore(id: number): Promise<any> {
+    const user = await this.prisma.user.findUnique({
+      where: { id },
+    });
+    return user?.eloRating;
+  }
+
+  async getNumOfWins(id: number): Promise<any> {
+    const user = await this.prisma.user.findUnique({
+      where: { id },
+      include: {
+        matches3: {
+          where: {
+            winnerId: id,
+          },
+        },
+      },
+    });
+    return user?.matches3.length;
   }
 
   async getProvRank() {
@@ -61,12 +90,10 @@ export class RankService {
   }
 
   async newElo(newElo: number, userId: number) {
-    // eslint-disable-next-line @typescript-eslint/no-unused-vars
-    const _player = await this.prisma.user.findUnique({
+    const player = await this.prisma.user.findUnique({
       where: { id: userId },
     });
-    // eslint-disable-next-line @typescript-eslint/no-unused-vars
-    const _uptPlayer = await this.prisma.user.update({
+    const uptPlayer = await this.prisma.user.update({
       where: { id: userId },
       data: {
         eloRating: newElo,
