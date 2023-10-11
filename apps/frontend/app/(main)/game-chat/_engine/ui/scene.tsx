@@ -10,6 +10,7 @@ import { EventGame, boardEntity } from "../entity/entity";
 import { useSetGameEvents, useUpdateGame } from "../utils/websocket-events";
 import { useSocket } from "@/context/events-socket-context";
 import { usePlayer1State, usePlayer2State } from "../state";
+import { Scores } from "../components/scores";
 
 export function SceneGame() {
   const socket = useSocket();
@@ -32,6 +33,7 @@ export function SceneGame() {
         <Canvas>
           <Suspense>
             <CamScene />
+            <Scores />
             <Player {...player2} />
             <Ball />
             <Player {...player1} />

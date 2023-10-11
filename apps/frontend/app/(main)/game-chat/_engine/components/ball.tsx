@@ -6,8 +6,8 @@ import { useFrame } from "@react-three/fiber";
 import { useBallState } from "../state/ball";
 
 export function Ball() {
-  const ball = useBallState();
   const ballRef = useRef<THREE.Mesh>(null);
+  const ball = useBallState();
 
   useFrame(() => {
     if (ballRef.current) {
