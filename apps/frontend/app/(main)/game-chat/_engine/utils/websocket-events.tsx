@@ -4,7 +4,7 @@ import { useSocket } from "@/context/events-socket-context";
 import { usePlayer1State, usePlayer2State } from "../state/player";
 import { useBallState } from "../state/ball";
 import { STATUS, useStatus } from "../state/status";
-import { useMatchState } from "../state";
+import { useMatchState, useScoreState } from "../state";
 
 export function usePlayerPosition(direction: string): boolean {
   const [arrowDirection, setArrowDirection] = useState(false);
@@ -42,6 +42,8 @@ export const useSetGameEvents = () => {
   const setBallPosition = useBallState((state) => state.setPosition);
   const setStatus = useStatus((s) => s.setStatus);
   const { setState: setMatch } = useMatchState();
+  const setHome = useScoreState((s) => s.setHomeScore);
+  const setAdversary = useScoreState((s) => s.setAdversary);
 
   useEffect(() => {
     if (!socket) return;
@@ -64,6 +66,8 @@ export const useSetGameEvents = () => {
     socket.on(EventGame.UPDTGAME, (data) => {
       const parsedData = JSON.parse(data);
       // console.log({ parsedData });
+      setHome(parsedData.scores.home);
+      setHome(parsedData.scores.adversary);
       setP1Position({
         x: parsedData.home.posi[0],
         y: parsedData.home.posi[1],

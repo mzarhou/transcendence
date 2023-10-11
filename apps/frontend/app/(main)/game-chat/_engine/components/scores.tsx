@@ -1,6 +1,8 @@
 import { Text } from "@react-three/drei";
+import { useScoreState } from "../state";
 
 export function Scores() {
+  const scores = useScoreState();
   return (
     <>
       <Text
@@ -10,7 +12,7 @@ export function Scores() {
         anchorX="center" // default
         anchorY="middle" // default
       >
-        0
+        {scores.adversary}
       </Text>
       <Text
         position={[125, -100, 0]}
@@ -19,7 +21,7 @@ export function Scores() {
         anchorX="center" // default
         anchorY="middle" // default
       >
-        0
+        {scores.home}
       </Text>
     </>
   );

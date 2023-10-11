@@ -50,7 +50,7 @@ export class GamePlayService {
           (ball === this.ball && wall === walls[0]) ||
           (ball == walls[0] && wall == this.ball)
         ) {
-          this.applyCollisionEffect(scores.adversary);
+          this.applyCollisionEffect(this.gmDt, 'adversary');
           this.game.winnerId = this.checkWinners(
             scores.adversary,
             scores.home,
@@ -61,7 +61,7 @@ export class GamePlayService {
           (ball === this.ball && wall === walls[1]) ||
           (ball == walls[1] && wall == this.ball)
         ) {
-          this.applyCollisionEffect(scores.home);
+          this.applyCollisionEffect(this.gmDt, 'home');
           this.game.winnerId = this.checkWinners(
             scores.adversary,
             scores.home,
@@ -70,6 +70,7 @@ export class GamePlayService {
           if (this.game.winnerId !== null) {
             this.game.state = State.OVER;
           }
+          console.log('home=>', scores.home);
         }
       });
     });
@@ -122,8 +123,9 @@ export class GamePlayService {
     const data: string = JSON.stringify(this.gmDt);
     return data;
   }
-  applyCollisionEffect(adversary: number) {
-    adversary += 1;
+  applyCollisionEffect(gmDt: GameData, op: string) {
+    if (op == 'adversary') gmDt.scores.adversary += 1;
+    if (op == 'home') gmDt.scores.home += 1;
     Matter.Body.setPosition(this.ball, {
       x: this.gmDt.bdDt.size[0] / 2,
       y: this.gmDt.bdDt.size[1] / 2,
