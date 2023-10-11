@@ -1,28 +1,32 @@
+"use client";
+
 import { PerspectiveCamera } from "@react-three/drei";
 import { Stats } from "@react-three/drei";
-import { useEffect, useRef, useState } from "react";
+import { useEffect, useRef } from "react";
 import { PointLight } from "three";
-import { player2 } from "../entity/entity";
-import { useSocket } from "@/context/events-socket-context";
 import { useUser } from "@/context/user-context";
-import { useFrame } from "@react-three/fiber";
+import { usePlayer2State } from "../state/player";
 
 function Cam() {
   const { user } = useUser();
+  const p2 = usePlayer2State();
   const ref = useRef<THREE.PerspectiveCamera>(null);
+
   useEffect(() => {
-    if (ref.current) {
-      if (user?.id == player2.nmPl) ref.current.rotateZ(Math.PI);
-      // if (threeD){
-      // ref.current.position.x = 0;
-      // ref.current.position.y = -540;
-      // ref.current.position.z = 270;
-      // ref.current.rotation.x = 1.108;
-      // ref.current.rotation.y = 0;
-      // ref.current.rotation.z = 0;
-      // }
-    }
-  }, [player2.nmPl]);
+    // console.log({ ref, player2Id: p2.id, userId: user?.id });
+    if (ref.current && user?.id == p2.id) ref.current.rotateZ(Math.PI);
+    // if (threeD){
+    // ref.current.position.x = 0;
+    // ref.current.position.y = -540;
+    // ref.current.position.z = 270;
+    // ref.current.rotation.x = 1.108;
+    // ref.current.rotation.y = 0;
+    // ref.current.rotation.z = 0;
+    // }
+
+    // return () => clearTimeout(to);
+  }, [p2.id, user.id, ref.current]);
+
   return (
     <>
       <PerspectiveCamera

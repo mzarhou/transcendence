@@ -13,6 +13,7 @@ export class Game {
   homeId: number;
   adversaryId: number;
   gameService!: GamePlayService;
+  winnerId: number | null;
 
   constructor(
     server: Server,
@@ -27,6 +28,7 @@ export class Game {
     this.matchId = matchId;
     this.users = [];
     this.homeId = homeId;
+    this.winnerId = null;
     this.adversaryId = adversaryId;
     this.gameData = new GameData();
   }

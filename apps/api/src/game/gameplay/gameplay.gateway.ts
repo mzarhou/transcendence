@@ -7,13 +7,14 @@ import {
   WsException,
 } from '@nestjs/websockets';
 import { Server, Socket } from 'socket.io';
-import { Direction } from './gameData';
+import { Direction, State } from './gameData';
 import { ActiveUserData } from '@src/iam/interface/active-user-data.interface';
 import { UseGuards } from '@nestjs/common';
 import { WsAuthGuard } from '@src/iam/authentication/guards/ws-auth.guard';
 import { MatchesStorage } from '../matches/matches.storage';
 import { getMatchRoomId } from '../matches/matches.helpers';
 import { Match } from '@transcendence/db';
+import { EventGame } from './utils';
 
 @WebSocketGateway()
 export class GamePlayGateway {
@@ -28,6 +29,7 @@ export class GamePlayGateway {
     @ConnectedSocket() client: Socket,
     @MessageBody('match') match: Match,
   ) {
+    console.log({ match });
     const user: ActiveUserData = client.data.user;
     const game = this.matchesStorage.findGame(match.matchId);
     if (!game) {
@@ -53,7 +55,7 @@ export class GamePlayGateway {
     game.gameService.movePlayer(Direction.LEFT, user.sub, match);
     this.server
       .to(getMatchRoomId(match.matchId))
-      .emit('updateGame', game.gameService.getGameData());
+      .emit(EventGame.UPDTGAME, game.gameService.getGameData());
   }
 
   @UseGuards(WsAuthGuard)
@@ -63,9 +65,15 @@ export class GamePlayGateway {
     if (!game) {
       throw new WsException('Invalid matchId');
     }
-
-    this.server
-      .to(getMatchRoomId(matchId))
-      .emit('updateGame', game.gameService.getGameData());
+    if (game.state === State.PLAYING)
+      this.server
+        .to(getMatchRoomId(matchId))
+        .emit(EventGame.UPDTGAME, game.gameService.getGameData());
+    if (game.state === State.OVER) {
+      game.gameService.stopGame();
+      this.server
+        .to(getMatchRoomId(matchId))
+        .emit(EventGame.GAMEOVER, { winnerId: game.winnerId });
+    }
   }
 }

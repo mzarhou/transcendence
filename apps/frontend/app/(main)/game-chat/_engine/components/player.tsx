@@ -1,45 +1,47 @@
+"use client";
+
 import { Box } from "@react-three/drei";
-import { useRef } from "react";
+import { useEffect, useRef } from "react";
 import { useFrame } from "@react-three/fiber";
-import { player1, player2 } from "../entity/entity";
-import { PlayerPosition, match } from "../utils/utils";
+import { usePlayerPosition } from "../utils/websocket-events";
 import { useSocket } from "@/context/events-socket-context";
 import { useUser } from "@/context/user-context";
+import { PlayerState, usePlayer1State, usePlayer2State } from "../state/player";
+import { useMatchState } from "../state";
 
-export interface playerType {
-  nmPl: number;
-  posi: [x: number, y: number, z: number];
-  size: [length: number, width: number, height: number];
-  txtu: string;
-}
-
-export interface statusType {
-  name: string;
-}
-
-export function Player(playerProps: playerType) {
+export function Player(playerProps: PlayerState) {
   const socket = useSocket();
+  const p1 = usePlayer1State();
+  const p2 = usePlayer2State();
   const { user } = useUser();
-  const player = useRef<THREE.Mesh>(null);
-  const arrowLeft = PlayerPosition("ArrowLeft");
-  const arrowRight = PlayerPosition("ArrowRight");
+  const playerRef = useRef<THREE.Mesh>(null);
+  const arrowLeft = usePlayerPosition("ArrowLeft");
+  const arrowRight = usePlayerPosition("ArrowRight");
+  const { setState, ...match } = useMatchState();
+
+  useEffect(() => {
+    console.log({ playerProps, p1, p2 });
+  }, [playerProps, p1, p2]);
+
   useFrame(() => {
-    if (player.current) {
-      player.current.position.x = playerProps.posi[0];
-      player.current.position.y = playerProps.posi[1];
-      player.current.position.z = playerProps.posi[2];
+    if (playerRef.current) {
+      playerRef.current.position.x = playerProps.posi[0];
+      playerRef.current.position.y = playerProps.posi[1];
+      playerRef.current.position.z = playerProps.posi[2];
     }
-    if (user?.id == player1.nmPl) {
+
+    if (user?.id == p1.id) {
       if (arrowLeft) socket?.emit("moveLeft", { match: match });
       if (arrowRight) socket?.emit("moveRight", { match: match });
     }
-    if (user?.id == player2.nmPl) {
+    if (user?.id == p2.id) {
       if (arrowLeft) socket?.emit("moveRight", { match: match });
       if (arrowRight) socket?.emit("moveLeft", { match: match });
     }
   });
+
   return (
-    <Box ref={player} args={playerProps.size}>
+    <Box ref={playerRef} args={playerProps.size}>
       <meshBasicMaterial color={playerProps.txtu} />
     </Box>
   );

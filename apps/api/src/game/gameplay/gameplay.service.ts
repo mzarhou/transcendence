@@ -1,5 +1,5 @@
 import Matter, { Events, Engine, World, Bodies, Runner, Body } from 'matter-js';
-import { walls, ballOptions, staticOption, GameData } from './gameData';
+import { walls, ballOptions, staticOption, GameData, State } from './gameData';
 import { updateBallPosition, updatePlayerPosition } from './utils';
 import { Game } from '../matches/match-game.interface';
 import { Match } from '@transcendence/db';
@@ -40,7 +40,7 @@ export class GamePlayService {
     World.add(this.engine.world, [this.ball, this.pl1, this.pl2]);
   }
 
-  startgame() {
+  startgame(match: Match) {
     Events.on(this.engine, 'collisionStart', (event) => {
       event.pairs.forEach((collision) => {
         const ball = collision.bodyA as Body;
@@ -50,13 +50,26 @@ export class GamePlayService {
           (ball === this.ball && wall === walls[0]) ||
           (ball == walls[0] && wall == this.ball)
         ) {
-          this.applyCollisionEffect(this.gmDt.scores.adversary);
+          this.applyCollisionEffect(scores.adversary);
+          this.game.winnerId = this.checkWinners(
+            scores.adversary,
+            scores.home,
+            match,
+          );
         }
         if (
           (ball === this.ball && wall === walls[1]) ||
           (ball == walls[1] && wall == this.ball)
         ) {
-          this.applyCollisionEffect(this.gmDt.scores.home);
+          this.applyCollisionEffect(scores.home);
+          this.game.winnerId = this.checkWinners(
+            scores.adversary,
+            scores.home,
+            match,
+          );
+          if (this.game.winnerId !== null) {
+            this.game.state = State.OVER;
+          }
         }
       });
     });
@@ -115,5 +128,10 @@ export class GamePlayService {
       x: this.gmDt.bdDt.size[0] / 2,
       y: this.gmDt.bdDt.size[1] / 2,
     });
+  }
+  checkWinners(adversary: number, home: number, match: Match): number | null {
+    if (adversary > home && adversary >= 7) return match.adversaryId;
+    if (adversary < home && home >= 7) return match.homeId;
+    return null;
   }
 }

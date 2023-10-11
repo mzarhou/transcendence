@@ -53,7 +53,7 @@ export class MatchesStorage {
       game.state = State.PLAYING;
 
       // start game simulation
-      game.gameService.startgame();
+      game.gameService.startgame(match);
     }
   }
 
