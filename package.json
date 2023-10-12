@@ -1,9 +1,17 @@
 {
   "name": "transcendence",
   "private": true,
+ "scripts": {
+    "db:push": "yarn workspace @transcendence/db push",
+    "frontend:dev": "yarn workspace @transcendence/frontend dev",
+    "frontend:build": "yarn workspace @transcendence/frontend dev",
+    "frontend:start": "yarn workspace @transcendence/frontend dev",
+    "api:dev": "yarn workspace @transcendence/api dev",
+    "api:build": "yarn workspace @transcendence/api build",
+    "api:start": "yarn workspace @transcendence/api start:prod"
+ },
   "workspaces": [
-    "api",
-    "frontend",
-    "common"
+    "apps/*",
+    "packages/*"
   ]
 }
