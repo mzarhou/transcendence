@@ -47,14 +47,7 @@ export const useSetGameEvents = () => {
 
   useEffect(() => {
     if (!socket) return;
-    if (socket.hasListeners(EventGame.MCHFOUND)) return;
-
-    socket.on(EventGame.MCHFOUND, (data) => {
-      console.log(EventGame.MCHFOUND, data.match);
-      setMatch(data.match);
-      setStatus(STATUS.STRGAME);
-      socket.emit(EventGame.PLAYMACH, { matchId: data.match.matchId });
-    });
+    if (socket.hasListeners(EventGame.STARTSGM)) return;
 
     socket.on(EventGame.STARTSGM, (data) => {
       setMatch(data.match);
@@ -67,7 +60,7 @@ export const useSetGameEvents = () => {
       const parsedData = JSON.parse(data);
       // console.log({ parsedData });
       setHome(parsedData.scores.home);
-      setHome(parsedData.scores.adversary);
+      setAdversary(parsedData.scores.adversary);
       setP1Position({
         x: parsedData.home.posi[0],
         y: parsedData.home.posi[1],
@@ -84,10 +77,35 @@ export const useSetGameEvents = () => {
         z: parsedData.bl.posi[2],
       });
     });
+
     socket.on(EventGame.GAMEOVER, (data) => {
       socket.emit("leaveGame");
       setStatus(STATUS.GAMOVER);
     });
+    return () => {
+      socket.off(EventGame.STARTSGM);
+      socket.off(EventGame.UPDTGAME);
+      socket.off(EventGame.GAMEOVER);
+    };
+  }, [socket]);
+};
+
+export const useMatchFoundEvent = () => {
+  const socket = useSocket();
+  const { setState: setMatch } = useMatchState();
+  const setStatus = useStatus((s) => s.setStatus);
+
+  useEffect(() => {
+    if (!socket) return;
+    if (socket.hasListeners(EventGame.MCHFOUND)) return;
+    socket.on(EventGame.MCHFOUND, (data) => {
+      console.log(EventGame.MCHFOUND, data.match);
+      setMatch(data.match);
+      setStatus(STATUS.STRGAME);
+    });
+    return () => {
+      socket.off(EventGame.MCHFOUND);
+    };
   }, [socket]);
 };
 

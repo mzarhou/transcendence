@@ -25,7 +25,7 @@ function Cam() {
     // }
 
     // return () => clearTimeout(to);
-  }, [p2.id, user.id, ref.current]);
+  }, [p2.id, user?.id, ref.current]);
 
   return (
     <>
