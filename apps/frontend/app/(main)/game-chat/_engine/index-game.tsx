@@ -1,20 +1,21 @@
 "use client";
 
 import { useEffect, useState } from "react";
-import {
-  Route,
-  Routes,
-  MemoryRouter,
-  useLocation,
-  Router,
-  useNavigate,
-} from "react-router";
+
 import { SceneGame } from "./ui/scene-game";
 import { JoinMatch } from "./ui/join-match";
 import { WaitingMatch } from "./ui/waitting-match";
 import { GameOver } from "./ui/game-over";
+import {
+  BrowserRouter as Router,
+  Route,
+  Routes,
+  useLocation,
+  MemoryRouter,
+  BrowserRouter,
+} from "react-router-dom";
 
-const InitialRouteKey = "game-route";
+const InitialRouteKey = "/";
 
 function DetectRouteChanges() {
   const location = useLocation();
@@ -22,19 +23,19 @@ function DetectRouteChanges() {
   useEffect(() => {
     window.localStorage.setItem(InitialRouteKey, location.pathname);
   }, [location]);
-  return <></>;
+  return <JoinMatch />;
 }
 
 export default function GameRouter() {
   const [initialRoute, setInitialRoute] = useState("");
-  const navi = useNavigate();
+
   useEffect(() => {
     const initialRoute = window.localStorage.getItem(InitialRouteKey);
     setInitialRoute(initialRoute ?? "/");
   }, []);
 
   if (initialRoute === "") {
-    navi("/");
+    return <></>;
   }
 
   return (
