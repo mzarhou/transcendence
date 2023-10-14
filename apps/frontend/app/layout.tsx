@@ -2,7 +2,7 @@ import "./globals.css";
 import { Toaster } from "@/components/ui/toaster";
 import { UserProvider } from "@/context/user-context";
 import { ThemeProvider } from "@/components/theme-provider";
-import { EventsSocketProvider } from "@/context/events-socket-context";
+import { EventsSocketProvider } from "@/context";
 
 export const metadata = {
   title: "Transcendence",

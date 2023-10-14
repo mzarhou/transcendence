@@ -56,6 +56,10 @@ import { friendsKey } from "@/api-hooks/use-friends";
 import { UNFRIEND_EVENT } from "@transcendence/db";
 import { GROUP_INVITATION_NOTIFICATION } from "@transcendence/db";
 
+const _socket = io(env.NEXT_PUBLIC_API_URL, {
+  withCredentials: true,
+});
+
 const EventsSocketContext = createContext<Socket | null>(null);
 
 export const useSocket = () => useContext(EventsSocketContext);
@@ -70,10 +74,6 @@ export const EventsSocketProvider = ({ children }: { children: ReactNode }) => {
   );
 };
 
-function getFriendIdFromMessage(userId: number, data: MessageType) {
-  return data.recipientId === userId ? data.senderId : data.recipientId;
-}
-
 function useSocket_() {
   const { user: currentUser } = useUser();
   const [socket, setSocket] = useState<Socket | null>(null);
@@ -86,10 +86,6 @@ function useSocket_() {
 
   useEffect(() => {
     if (!currentUser) return;
-
-    const _socket = io(env.NEXT_PUBLIC_API_URL, {
-      withCredentials: true,
-    });
 
     if (!_socket.hasListeners("connect")) {
       _socket.on("connect", () => {
@@ -170,6 +166,10 @@ function useSocket_() {
   }, [currentUser]);
 
   return socket;
+}
+
+function getFriendIdFromMessage(userId: number, data: MessageType) {
+  return data.recipientId === userId ? data.senderId : data.recipientId;
 }
 
 const useOnMessage = () => {
