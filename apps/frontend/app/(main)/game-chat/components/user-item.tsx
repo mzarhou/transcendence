@@ -8,9 +8,9 @@ import {
 import { DropdownMenuItem } from "@radix-ui/react-dropdown-menu";
 import { User } from "@transcendence/db";
 import { MoreVertical } from "lucide-react";
-import Image from "next/image";
 import { ReactNode } from "react";
 import { useBlockUser } from "@/api-hooks/use-block-user";
+import { useRouter } from "next/navigation";
 
 type UserItemProps = {
   user: User;
@@ -25,6 +25,13 @@ export default function UserItem({
   isBlocked,
 }: UserItemProps) {
   isBlocked ??= false;
+
+  const router = useRouter();
+
+  const goToUserProfile = () => {
+    // TODO: update with user profile link
+    router.push("/profile/general");
+  };
 
   return (
     <div className="relative flex justify-between">
@@ -54,7 +61,10 @@ export default function UserItem({
               <DropdownMenuItem className="cursor-pointer">
                 Play
               </DropdownMenuItem>
-              <DropdownMenuItem className="cursor-pointer">
+              <DropdownMenuItem
+                className="cursor-pointer"
+                onClick={goToUserProfile}
+              >
                 Profile
               </DropdownMenuItem>
               <BlockUserMenuItem userId={user.id} />
