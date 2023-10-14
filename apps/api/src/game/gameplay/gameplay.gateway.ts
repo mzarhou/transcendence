@@ -29,7 +29,6 @@ export class GamePlayGateway {
     @ConnectedSocket() client: Socket,
     @MessageBody('match') match: Match,
   ) {
-    console.log({ match });
     const user: ActiveUserData = client.data.user;
     const game = this.matchesStorage.findGame(match.matchId);
     if (!game) {
