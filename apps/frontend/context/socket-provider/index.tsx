@@ -22,6 +22,12 @@ export const EventsSocketProvider = ({ children }: { children: ReactNode }) => {
   useMessagesEvents(socket);
   useErrorsEvents(socket);
 
+  useEffect(() => {
+    return () => {
+      socket.removeAllListeners();
+    };
+  }, []);
+
   return (
     <EventsSocketContext.Provider value={socket}>
       {children}
