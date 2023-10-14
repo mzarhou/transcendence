@@ -69,11 +69,11 @@ export class GamePlayService {
             scores.home,
             match,
           );
-          if (this.game.winnerId !== null) {
-            this.game.state = State.OVER;
-          }
-          console.log('home=>', scores.home);
-          console.log('adversary=>', scores.adversary);
+        }
+        console.log('adversary=>', scores.adversary);
+        console.log('home=>', scores.home);
+        if (this.game.winnerId !== null) {
+          this.game.state = State.OVER;
         }
       });
     });
