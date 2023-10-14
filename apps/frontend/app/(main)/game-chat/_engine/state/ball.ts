@@ -8,14 +8,21 @@ export interface ballType {
 
 interface BallState extends ballType {
   setPosition: (data: { x: number; y: number; z: number }) => void;
+  reset: () => void;
 }
 
-export const useBallState = create<BallState>((set) => ({
+const ballState: ballType = {
   position: [0, 0, 20],
   size: [20, 15, 15],
   color: "white",
+};
 
+export const useBallState = create<BallState>((set) => ({
+  ...ballState,
   setPosition(data: { x: number; y: number; z: number }) {
     set({ position: [data.x, data.y, data.z] });
+  },
+  reset: () => {
+    set(ballState);
   },
 }));

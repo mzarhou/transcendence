@@ -13,8 +13,9 @@ function Cam() {
   const ref = useRef<THREE.PerspectiveCamera>(null);
 
   useEffect(() => {
-    // console.log({ ref, player2Id: p2.id, userId: user?.id });
-    if (ref.current && user?.id == p2.id) ref.current.rotateZ(Math.PI);
+    if (ref.current && user?.id == p2.id && ref.current?.rotation.z != Math.PI)
+      ref.current?.rotateZ(Math.PI);
+
     // if (threeD){
     // ref.current.position.x = 0;
     // ref.current.position.y = -540;
@@ -25,7 +26,7 @@ function Cam() {
     // }
 
     // return () => clearTimeout(to);
-  }, [p2.id, user?.id, ref.current]);
+  }, [ref, p2.id, user?.id]);
 
   return (
     <>

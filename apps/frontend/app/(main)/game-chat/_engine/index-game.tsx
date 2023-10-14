@@ -23,7 +23,7 @@ function DetectRouteChanges() {
   useEffect(() => {
     window.localStorage.setItem(InitialRouteKey, location.pathname);
   }, [location]);
-  return <JoinMatch />;
+  return <></>;
 }
 
 export default function GameRouter() {
@@ -33,10 +33,6 @@ export default function GameRouter() {
     const initialRoute = window.localStorage.getItem(InitialRouteKey);
     setInitialRoute(initialRoute ?? "/");
   }, []);
-
-  if (initialRoute === "") {
-    return <></>;
-  }
 
   return (
     <MemoryRouter initialEntries={[initialRoute]}>
