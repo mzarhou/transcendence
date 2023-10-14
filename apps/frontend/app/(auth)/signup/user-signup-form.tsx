@@ -34,10 +34,10 @@ export function UserSignUpForm({ className, ...props }: UserSignUpFormProps) {
     },
   });
 
-  function submit(data: SignUpType) {
-    signup(data).catch((err) => {
-      // Todo: handle error
-    });
+  async function submit(data: SignUpType) {
+    try {
+      await signup(data);
+    } catch (error) {}
   }
 
   return (
