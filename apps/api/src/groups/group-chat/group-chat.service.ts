@@ -3,8 +3,8 @@ import { ActiveUserData } from '@src/iam/interface/active-user-data.interface';
 import { SendGroupMessageDto } from '../dto/group-message';
 import { WebsocketService } from '@src/websocket/websocket.service';
 import { GroupsService } from '../groups.service';
-import { GroupsPolicy } from '../groups.policy';
-import { GroupsRepository } from '../repositories/_groups.repository';
+import { GroupsPolicy } from '../groups-common/groups.policy';
+import { GroupsRepository } from '../groups-common/repositories/_groups.repository';
 import { GROUP_MESSAGE_EVENT } from '@transcendence/db';
 import { PaginationQueryDto } from '@src/+common/dto/pagination-query';
 
