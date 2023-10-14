@@ -4,8 +4,6 @@ import { GroupsPrismaRepository } from './repositories/groups-prisma.repository'
 import { GroupsPolicy } from './groups.policy';
 import { GroupsMutedUsersStorage } from './groups-muted-users.storage';
 import { RedisModule } from '@src/redis/redis.module';
-import { UsersModule } from '@src/users/users.module';
-import { IamModule } from '@src/iam/iam.module';
 
 @Module({
   imports: [RedisModule],

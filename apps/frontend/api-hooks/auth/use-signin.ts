@@ -4,11 +4,9 @@ import { api } from "@/lib/api";
 import { getServerMessage } from "@/lib/utils";
 import { SignInType } from "@transcendence/db";
 import { AxiosError } from "axios";
-import { useSWRConfig } from "swr";
 import useSWRMutation from "swr/mutation";
 
 export const useSignIn = () => {
-  const { mutate } = useSWRConfig();
   const { toast } = useToast();
   const { refresh } = useUser();
 
@@ -18,7 +16,6 @@ export const useSignIn = () => {
     {
       onSuccess: async () => {
         await refresh();
-        toast({ description: "You are logged in" });
       },
       onError: (error) => {
         if (error instanceof AxiosError) {
