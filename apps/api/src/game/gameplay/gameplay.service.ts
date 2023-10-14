@@ -87,12 +87,10 @@ export class GamePlayService {
   }
 
   stopGame() {
-    Events.off(this.engine, 'beforeUpdate', () => {
-      console.log('event beforeUpdate killed');
-    });
-    Events.off(this.engine, 'collisionStart', () => {
-      console.log('event collisionStart killed');
-    });
+    Events.off(this.engine, 'beforeUpdate', () => {});
+    Events.off(this.engine, 'collisionStart', () => {});
+    console.log('event beforeUpdate killed');
+    console.log('event collisionStart killed');
     this.runner.enabled = false;
     Engine.clear(this.engine);
     Runner.stop(this.runner);
