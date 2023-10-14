@@ -1,7 +1,7 @@
 import { Injectable } from '@nestjs/common';
 import { UpdateUserDto } from '../dto/update-user.dto';
 import { FriendRequest, User, UserWithFriends } from '@transcendence/db';
-import { MakePropsUndefined } from '@src/groups/repositories/_groups.repository';
+import { MakePropsUndefined } from '@src/groups/groups-common/repositories/_groups.repository';
 import { UserWithSecrets } from '@transcendence/db';
 import { CreateUserDto } from '../dto/create-user.dto';
 import { UserWithBlockedUsers } from '@transcendence/db';

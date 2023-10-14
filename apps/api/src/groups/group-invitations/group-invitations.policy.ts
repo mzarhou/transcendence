@@ -1,7 +1,7 @@
 import { Injectable } from '@nestjs/common';
 import { ActiveUserData } from '@src/iam/interface/active-user-data.interface';
 import { Prisma } from '@prisma/client';
-import { BaseGroupsPolicy } from '../base-groups.policy';
+import { BaseGroupsPolicy } from '../groups-common/base-groups.policy';
 import { GroupWithUsers, mapGroup } from '@src/+prisma/helpers';
 
 type GroupInvitationWithUser = Prisma.GroupInvitationGetPayload<{
