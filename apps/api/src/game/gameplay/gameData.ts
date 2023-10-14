@@ -37,13 +37,23 @@ export interface playerType {
 
 export const ballOptions = {
   mass: 0.2,
-  force: { x: 0.001, y: 0.003 },
+  force: { x: 0.002, y: 0.004 },
   density: 0.001,
   friction: 0,
   restitution: 1,
   frictionAir: 0,
   inertia: Infinity,
 };
+
+// export const ballOptions = {
+//   mass: 0.2,
+//   force: { x: 0.001, y: 0.003 },
+//   density: 0.001,
+//   friction: 0,
+//   restitution: 1,
+//   frictionAir: 0,
+//   inertia: Infinity,
+// }
 
 export const staticOption = {
   isStatic: true,
