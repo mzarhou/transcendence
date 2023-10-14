@@ -11,11 +11,13 @@ export class GamePlayService {
   private pl2: Matter.Body;
   private gmDt: GameData;
   private game: Game;
+  private runner: Runner;
 
   constructor(game: Game) {
     this.gmDt = game.gameData;
     this.game = game;
     this.engine = Engine.create({ gravity: { x: 0, y: 0 } });
+    this.runner = Runner.create();
     this.ball = Bodies.circle(
       this.gmDt.bl.posi[0],
       this.gmDt.bl.posi[1],
@@ -71,6 +73,7 @@ export class GamePlayService {
             this.game.state = State.OVER;
           }
           console.log('home=>', scores.home);
+          console.log('adversary=>', scores.adversary);
         }
       });
     });
@@ -80,12 +83,19 @@ export class GamePlayService {
       updatePlayerPosition(this.pl1, this.pl2, this.game);
     });
 
-    Runner.run(this.engine);
+    Runner.start(this.runner, this.engine);
   }
 
   stopGame() {
+    Events.off(this.engine, 'beforeUpdate', () => {
+      console.log('event beforeUpdate killed');
+    });
+    Events.off(this.engine, 'collisionStart', () => {
+      console.log('event collisionStart killed');
+    });
+    this.runner.enabled = false;
     Engine.clear(this.engine);
-    Runner.stop(Runner.run(this.engine));
+    Runner.stop(this.runner);
   }
 
   movePlayer(direction: string, client: number, match: Match) {

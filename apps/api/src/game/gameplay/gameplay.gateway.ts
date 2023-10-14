@@ -70,10 +70,11 @@ export class GamePlayGateway {
         .to(getMatchRoomId(matchId))
         .emit(EventGame.UPDTGAME, game.gameService.getGameData());
     if (game.state === State.OVER) {
-      game.gameService.stopGame();
       this.server
         .to(getMatchRoomId(matchId))
         .emit(EventGame.GAMEOVER, { winnerId: game.winnerId });
+      game.gameService.stopGame();
+      console.log('GameOver Winner are =>', game.winnerId);
     }
   }
 }
