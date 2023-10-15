@@ -25,6 +25,7 @@ export class FriendRequestService {
     user: ActiveUserData,
     createFriendRequestDto: CreateFriendRequestDto,
   ) {
+    // ! TODO: check blocking status
     const { targetUserId } = createFriendRequestDto;
     this.friendRequestsPolicy.canCreate(user, targetUserId);
 
