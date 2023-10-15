@@ -1,5 +1,5 @@
 import { Button } from "@/components/ui/button";
-import { useSocket } from "@/context/events-socket-context";
+import { useSocket } from "@/context";
 import { Link, useNavigate } from "react-router-dom";
 import { EventGame } from "../entity/entity";
 

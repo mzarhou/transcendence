@@ -1,6 +1,6 @@
 import { Button } from "@/components/ui/button";
 import { useGameOver } from "../utils/websocket-events";
-import { useSocket } from "@/context/events-socket-context";
+import { useSocket } from "@/context";
 import { EventGame } from "../entity/entity";
 import { useNavigate } from "react-router";
 

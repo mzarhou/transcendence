@@ -16,12 +16,15 @@ import { GroupsModule } from './groups/groups.module';
 import { WebsocketModule } from './websocket/websocket.module';
 import { ZodExceptionFilter } from './+common/filters/zod-exception.filter';
 import { GameModule } from './game/game.module';
+import path from 'path';
+import { ServeStaticModule } from '@nestjs/serve-static';
+import { UploadsModule } from './uploads/uploads.module';
 
 @Module({
   imports: [
-    UsersModule,
     ConfigModule.forRoot(),
     IamModule,
+    UsersModule,
     RedisModule,
     PrismaModule,
     ChatModule,
@@ -31,6 +34,12 @@ import { GameModule } from './game/game.module';
     GroupsModule,
     WebsocketModule,
     GameModule,
+
+    ServeStaticModule.forRoot({
+      rootPath: path.join(__dirname, '..', '/static'),
+      serveRoot: '/static',
+    }),
+    UploadsModule,
   ],
   controllers: [AppController],
   providers: [

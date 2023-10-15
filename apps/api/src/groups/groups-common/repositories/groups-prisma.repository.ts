@@ -5,7 +5,7 @@ import {
   GroupsRepository,
 } from './_groups.repository';
 import { Injectable, NotFoundException } from '@nestjs/common';
-import { CreateGroupDto } from '../dto/create-group.dto';
+import { CreateGroupDto } from '../../dto/create-group.dto';
 import {
   GroupMessage,
   GroupMessageWithSender,
@@ -13,7 +13,7 @@ import {
   Group as GroupWithPassword,
   UserGroupRole,
 } from '@transcendence/db';
-import { UpdateGroupDto } from '../dto/update-group.dto';
+import { UpdateGroupDto } from '../../dto/update-group.dto';
 import { PaginationQueryDto } from '@src/+common/dto/pagination-query';
 
 @Injectable()

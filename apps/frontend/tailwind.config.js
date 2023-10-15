@@ -16,6 +16,10 @@ module.exports = {
       },
     },
     extend: {
+      fontFamily: {
+        sans: "var(--font-inter)",
+        boogaloo: "var(--font-boogaloo)",
+      },
       colors: {
         border: "hsl(var(--border))",
         input: "hsl(var(--input))",
@@ -80,7 +84,7 @@ module.exports = {
         "accordion-up": "accordion-up 0.2s ease-out",
       },
       dropShadow: {
-        'lp-cards': "0px 5px 15px hsl(var(--drop-shadow))",
+        "lp-cards": "0px 5px 15px hsl(var(--drop-shadow))",
       },
     },
   },

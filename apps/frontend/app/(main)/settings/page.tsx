@@ -20,7 +20,7 @@ export default function ProfilePage() {
 
   return (
     <>
-      <div className="space-y-12">
+      <div className="space-y-12 pb-16">
         <h2 className="text-h2 font-normal">General Settings</h2>
         <h4 className="border-t bg-gray-100"></h4>
         <ProfileInfo />

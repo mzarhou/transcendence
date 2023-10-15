@@ -1,5 +1,4 @@
 import { Injectable } from '@nestjs/common';
-import { CreateGroupDto } from '../dto/create-group.dto';
 import {
   GroupMessage,
   GroupMessageWithSender,
@@ -10,9 +9,10 @@ import {
   UserGroupRole,
   Group as GroupWithPassword,
 } from '@transcendence/db';
-import { UpdateGroupDto } from '../dto/update-group.dto';
 import { never } from 'zod';
 import { PaginationQueryDto } from '@src/+common/dto/pagination-query';
+import { CreateGroupDto } from '@src/groups/dto/create-group.dto';
+import { UpdateGroupDto } from '@src/groups/dto/update-group.dto';
 
 export type MakePropsUndefined<T> = {
   [P in keyof T]: undefined;

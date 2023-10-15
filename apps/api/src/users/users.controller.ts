@@ -8,20 +8,30 @@ import { ApiBearerAuth, ApiTags } from '@nestjs/swagger';
 import { Auth } from '@src/iam/authentication/decorators/auth.decorator';
 import { AuthType } from '@src/iam/authentication/enum/auth-type.enum';
 import { CurrentUser } from '@transcendence/db';
+import { FirstSigninStorage } from './first-signin.storage';
 
 @ApiBearerAuth()
 @ApiTags('users')
 @Controller('users')
 export class UsersController {
-  constructor(private readonly usersService: UsersService) {}
+  constructor(
+    private readonly usersService: UsersService,
+    private readonly firstSignInStorage: FirstSigninStorage,
+  ) {}
 
   @Auth(AuthType.BearerWithou2fa)
   @Get('me')
   async me(@ActiveUser() user: ActiveUserData) {
     const data = await this.usersService.findOne(user.sub);
+    const isFirstSignIn = await this.firstSignInStorage.isFirstSignin(user.sub);
+    if (isFirstSignIn) {
+      await this.firstSignInStorage.setAsSignedIn(user.sub);
+    }
+
     return {
       ...data,
       isTfaCodeProvided: user.isTfaCodeProvided,
+      isFirstSignIn,
     } satisfies CurrentUser;
   }
 

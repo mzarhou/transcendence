@@ -4,7 +4,7 @@ import { Box } from "@react-three/drei";
 import { useEffect, useRef } from "react";
 import { useFrame } from "@react-three/fiber";
 import { usePlayerPosition } from "../utils/websocket-events";
-import { useSocket } from "@/context/events-socket-context";
+import { useSocket } from "@/context";
 import { useUser } from "@/context/user-context";
 import { PlayerState, usePlayer1State, usePlayer2State } from "../state/player";
 import { useMatchState } from "../state";

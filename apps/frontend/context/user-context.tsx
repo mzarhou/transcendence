@@ -1,9 +1,10 @@
 "use client";
 
+import { useToast } from "@/components/ui/use-toast";
 import { api } from "@/lib/api";
 import { CurrentUser } from "@transcendence/db";
+import { useRouter } from "next/navigation";
 import { createContext, FC, useContext, useEffect, useState } from "react";
-import useSWR, { SWRResponse } from "swr";
 
 const UserContext = createContext<{
   user: CurrentUser | undefined;
@@ -27,6 +28,8 @@ async function fetchUser() {
 export const UserProvider: FC<UserProviderProps> = ({ children }) => {
   const [user, setUser] = useState<CurrentUser | undefined>();
   const [isLoading, setLoading] = useState(true);
+  const { toast } = useToast();
+  const router = useRouter();
 
   const refresh = async () => {
     setLoading(true);
@@ -39,6 +42,13 @@ export const UserProvider: FC<UserProviderProps> = ({ children }) => {
       setLoading(false);
     }
   };
+
+  useEffect(() => {
+    if (user?.isFirstSignIn) {
+      toast({ description: "Change your nickname and profile image" });
+      router.push("/settings");
+    }
+  }, [user]);
 
   useEffect(() => {
     refresh();

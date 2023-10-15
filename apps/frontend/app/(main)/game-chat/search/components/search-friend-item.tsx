@@ -7,10 +7,10 @@ import { Plus, X } from "lucide-react";
 import {
   AcceptFriendRequestBtn,
   RefuseFriendRequestBtn,
-} from "./friend-request-item";
+} from "../../components/friend-request-item";
 import { useDeleteFriendRequest } from "@/api-hooks/friend-requests/use-delete-friend-request";
-import { UnfriendDropdownMenuItem } from "./friend-item";
-import UserItem from "./user-item";
+import { UnfriendDropdownMenuItem } from "../../components/friend-item";
+import UserItem from "../../components/user-item";
 
 type SearchFriendItemProps = {
   user: SearchUser;

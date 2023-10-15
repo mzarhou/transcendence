@@ -1,6 +1,6 @@
 import { useCallback, useEffect, useState } from "react";
 import { EventGame } from "../entity/entity";
-import { useSocket } from "@/context/events-socket-context";
+import { useSocket } from "@/context";
 import { usePlayer1State, usePlayer2State } from "../state/player";
 import { useBallState } from "../state/ball";
 import { STATUS, useStatus } from "../state/status";

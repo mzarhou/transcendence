@@ -14,7 +14,7 @@ import {
 } from "./hooks/use-message-intersection-callback";
 import { Check, CheckCheck } from "lucide-react";
 import { useUser } from "@/context/user-context";
-import { useSocket } from "@/context/events-socket-context";
+import { useSocket } from "@/context";
 import { useMessages } from "@/api-hooks/use-messages";
 import { NEW_MESSAGES_LINE_ID, useScroll } from "./hooks/use-scroll";
 import GoBackBtn from "../components/chat-go-back";

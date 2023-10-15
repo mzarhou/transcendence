@@ -1,5 +1,5 @@
 import { useMatchFoundEvent } from "../utils/websocket-events";
-import { useSocket } from "@/context/events-socket-context";
+import { useSocket } from "@/context";
 import { EventGame } from "../entity/entity";
 import {
   STATUS,
