@@ -1,8 +1,9 @@
-import "./globals.css";
+import "../styles/globals.css";
 import { Toaster } from "@/components/ui/toaster";
 import { UserProvider } from "@/context/user-context";
 import { ThemeProvider } from "@/components/theme-provider";
 import { EventsSocketProvider } from "@/context";
+import { boogaloo, inter } from "@/styles/fonts";
 
 export const metadata = {
   title: "Transcendence",
@@ -18,7 +19,7 @@ export default async function RootLayout({
     <>
       <html lang="en" suppressHydrationWarning>
         <head />
-        <body>
+        <body className={`${boogaloo.variable} ${inter.variable} font-sans`}>
           <ThemeProvider attribute="class" defaultTheme="system" enableSystem>
             <UserProvider>
               <EventsSocketProvider>{children}</EventsSocketProvider>
