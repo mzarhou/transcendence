@@ -5,7 +5,7 @@ import { usePlayer1State, usePlayer2State } from "../state/player";
 import { useBallState } from "../state/ball";
 import { STATUS, useStatus } from "../state/status";
 import { useMatchState, useScoreState } from "../state";
-import { useNavigate } from "react-router-dom";
+import { useLocation, useNavigate } from "react-router-dom";
 
 export function usePlayerPosition(direction: string): boolean {
   const [arrowDirection, setArrowDirection] = useState(false);
@@ -46,6 +46,7 @@ export const useSetGameEvents = () => {
   const setHome = useScoreState((s) => s.setHomeScore);
   const setAdversary = useScoreState((s) => s.setAdversary);
   const navigate = useNavigate();
+  const location = useLocation();
 
   useEffect(() => {
     if (!socket) return;
@@ -56,9 +57,13 @@ export const useSetGameEvents = () => {
       setStatus(STATUS.UPDGAME);
       setP1Id(data.match.homeId);
       setP2Id(data.match.adversaryId);
+      navigate("/playing", { replace: true });
     });
 
     socket.on(EventGame.UPDTGAME, (data) => {
+      if (location.pathname !== "/playing") {
+        navigate("/playing", { replace: true });
+      }
       const parsedData = JSON.parse(data);
       // console.log({ parsedData });
       setHome(parsedData.scores.home);
@@ -90,15 +95,6 @@ export const useSetGameEvents = () => {
       socket.off(EventGame.STARTSGM);
       socket.off(EventGame.UPDTGAME);
       socket.off(EventGame.MCHFOUND);
-    };
-  }, [socket]);
-};
-
-export const useGameOver = () => {
-  const socket = useSocket();
-  useEffect(() => {
-    if (!socket) return;
-    return () => {
       socket.off(EventGame.GAMEOVER);
     };
   }, [socket]);

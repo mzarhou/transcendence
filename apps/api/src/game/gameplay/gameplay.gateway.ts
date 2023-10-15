@@ -12,16 +12,19 @@ import { ActiveUserData } from '@src/iam/interface/active-user-data.interface';
 import { UseGuards } from '@nestjs/common';
 import { WsAuthGuard } from '@src/iam/authentication/guards/ws-auth.guard';
 import { MatchesStorage } from '../matches/matches.storage';
-import { getMatchRoomId } from '../matches/matches.helpers';
 import { Match } from '@transcendence/db';
 import { EventGame } from './utils';
+import { WebsocketService } from '@src/websocket/websocket.service';
 
 @WebSocketGateway()
 export class GamePlayGateway {
   @WebSocketServer()
   server!: Server;
 
-  constructor(private readonly matchesStorage: MatchesStorage) {}
+  constructor(
+    private readonly matchesStorage: MatchesStorage,
+    private readonly websocketService: WebsocketService,
+  ) {}
 
   @UseGuards(WsAuthGuard)
   @SubscribeMessage('moveRight')
@@ -35,9 +38,11 @@ export class GamePlayGateway {
       throw new WsException('Invalid matchId');
     }
     game.gameService.movePlayer(Direction.RIGHT, user.sub, match);
-    this.server
-      .to(getMatchRoomId(match.matchId))
-      .emit('updateGame', game.gameService.getGameData());
+    this.websocketService.addEvent(
+      [match.adversaryId, match.homeId],
+      EventGame.UPDTGAME,
+      game.gameService.getGameData(),
+    );
   }
 
   @UseGuards(WsAuthGuard)
@@ -52,9 +57,11 @@ export class GamePlayGateway {
       throw new WsException('Invalid matchId');
     }
     game.gameService.movePlayer(Direction.LEFT, user.sub, match);
-    this.server
-      .to(getMatchRoomId(match.matchId))
-      .emit(EventGame.UPDTGAME, game.gameService.getGameData());
+    this.websocketService.addEvent(
+      [match.adversaryId, match.homeId],
+      EventGame.UPDTGAME,
+      game.gameService.getGameData(),
+    );
   }
 
   @UseGuards(WsAuthGuard)
@@ -64,14 +71,21 @@ export class GamePlayGateway {
     if (!game) {
       throw new WsException('Invalid matchId');
     }
-    if (game.state === State.PLAYING)
-      this.server
-        .to(getMatchRoomId(matchId))
-        .emit(EventGame.UPDTGAME, game.gameService.getGameData());
+
+    if (game.state === State.PLAYING) {
+      this.websocketService.addEvent(
+        [game.adversaryId, game.homeId],
+        EventGame.UPDTGAME,
+        game.gameService.getGameData(),
+      );
+    }
+
     if (game.state === State.OVER) {
-      this.server
-        .to(getMatchRoomId(matchId))
-        .emit(EventGame.GAMEOVER, { winnerId: game.winnerId });
+      this.websocketService.addEvent(
+        [game.adversaryId, game.homeId],
+        EventGame.GAMEOVER,
+        { winnerId: game.winnerId },
+      );
       game.gameService.stopGame();
       console.log('GameOver Winner are =>', game.winnerId);
     }

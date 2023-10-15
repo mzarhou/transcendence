@@ -1,14 +1,12 @@
-import { Server } from 'socket.io';
-import { GameData, State, User } from '../gameplay/gameData';
+import { GameData, State } from '../gameplay/gameData';
 import { GamePlayService } from '../gameplay/gameplay.service';
 import { MatchesService } from './matches.service';
 
 export class Game {
   state: State;
-  server: Server;
   matchesService: MatchesService;
   matchId: number;
-  users: User[];
+  users: number[];
   gameData: GameData;
   homeId: number;
   adversaryId: number;
@@ -16,14 +14,12 @@ export class Game {
   winnerId: number | null;
 
   constructor(
-    server: Server,
     matchesService: MatchesService,
     matchId: number,
     homeId: number,
     adversaryId: number,
   ) {
     this.state = State.WAITING;
-    this.server = server;
     this.matchesService = matchesService;
     this.matchId = matchId;
     this.users = [];

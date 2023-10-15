@@ -11,7 +11,7 @@ import {
   useStatus,
 } from "../state";
 import { Button } from "@/components/ui/button";
-import { Link, useNavigate } from "react-router-dom";
+import { useNavigate } from "react-router-dom";
 
 export function WaitingMatch() {
   const socket = useSocket();
@@ -31,7 +31,6 @@ export function WaitingMatch() {
     scores.reset();
     if (status.name == STATUS.STRGAME) {
       socket?.emit(EventGame.PLAYMACH, { matchId: matchId });
-      navigate("/playing");
     }
   };
   return (

@@ -7,13 +7,17 @@ import { JoinMatch } from "./ui/join-match";
 import { WaitingMatch } from "./ui/waitting-match";
 import { GameOver } from "./ui/game-over";
 import {
-  BrowserRouter as Router,
   Route,
   Routes,
   useLocation,
   MemoryRouter,
-  BrowserRouter,
+  useNavigate,
 } from "react-router-dom";
+import {
+  useMatchFoundEvent,
+  useSetGameEvents,
+  useUpdateGame,
+} from "./utils/websocket-events";
 
 const InitialRouteKey = "/";
 
@@ -23,6 +27,16 @@ function DetectRouteChanges() {
   useEffect(() => {
     window.localStorage.setItem(InitialRouteKey, location.pathname);
   }, [location]);
+  return <></>;
+}
+
+function GameEvents() {
+  const navigate = useNavigate();
+
+  useSetGameEvents();
+  useMatchFoundEvent();
+  useUpdateGame();
+
   return <></>;
 }
 
@@ -37,6 +51,7 @@ export default function GameRouter() {
   return (
     <MemoryRouter initialEntries={[initialRoute]}>
       <DetectRouteChanges />
+      <GameEvents />
       <Routes>
         <Route path="/" element={<JoinMatch />} />
         <Route path="/waiting" element={<WaitingMatch />} />

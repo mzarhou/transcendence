@@ -1,25 +1,17 @@
-import { Server, Socket } from 'socket.io';
 import { MatchesService } from '@src/game/matches/matches.service';
 import { Match } from '@prisma/client';
 import { State } from '@src/game/gameplay/gameData';
 import { Injectable } from '@nestjs/common';
 import { Game } from './match-game.interface';
-import { getMatchRoomId } from './matches.helpers';
 
 @Injectable()
 export class MatchesStorage {
   games: Game[] = [];
-  server!: Server;
-
-  setServer(server: Server) {
-    this.server = server;
-  }
 
   constructor(private readonly matchesService: MatchesService) {}
 
   private createGame(match: Match): Game {
     const game = new Game(
-      this.server,
       this.matchesService,
       match.matchId,
       match.homeId,
@@ -34,21 +26,17 @@ export class MatchesStorage {
     return this.games.find((game) => game.matchId === matchId);
   }
 
-  connectPlayer(match: Match, userId: number, client: Socket) {
-    this.removePlayer(client);
+  connectPlayer(match: Match, userId: number) {
+    this.removePlayer(userId);
     let game = this.findGame(match.matchId);
     if (!game) {
       game = this.createGame(match);
     }
-    game.users.push({
-      id: userId,
-      socketId: client.id,
-    });
-    client.join(getMatchRoomId(game.matchId));
+    game.users.push(userId);
     if (
       game.state === State.WAITING &&
-      game.users.find((user) => user.id === match.homeId) &&
-      game.users.find((user) => user.id === match.adversaryId)
+      game.users.find((id) => id === match.homeId) &&
+      game.users.find((id) => id === match.adversaryId)
     ) {
       game.state = State.PLAYING;
 
@@ -57,13 +45,12 @@ export class MatchesStorage {
     }
   }
 
-  removePlayer(client: Socket) {
+  removePlayer(userId: number) {
     this.games.forEach((game) => {
-      const user = game.users.find((user) => user.socketId === client.id);
+      const user = game.users.find((id) => id === userId);
       if (user) {
-        game.users = game.users.filter((user) => user.socketId !== client.id);
+        game.users = game.users.filter((id) => id !== userId);
       }
-      client.leave(getMatchRoomId(game.matchId));
       if (game.users.length === 0 && game.state !== State.PLAYING) {
         this.games = this.games.filter((g) => g.matchId !== game.matchId);
       }

@@ -1,9 +1,5 @@
 import { Bodies } from 'matter-js';
 
-export interface User {
-  id: number;
-  socketId: string;
-}
 export enum Direction {
   LEFT = 'left',
   RIGHT = 'right',

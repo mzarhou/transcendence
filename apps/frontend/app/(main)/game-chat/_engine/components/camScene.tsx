@@ -52,7 +52,7 @@ function Cam() {
         aspect={4 / 4}
         up={[0, 0, 1]}
       />
-      <OrbitControls />
+      {/* <OrbitControls /> */}
       <Stats />
     </>
   );

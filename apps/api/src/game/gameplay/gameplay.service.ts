@@ -140,8 +140,8 @@ export class GamePlayService {
     });
   }
   checkWinners(adversary: number, home: number, match: Match): number | null {
-    if (adversary > home && adversary >= 7) return match.adversaryId;
-    if (adversary < home && home >= 7) return match.homeId;
+    if (adversary > home && adversary >= 1000) return match.adversaryId;
+    if (adversary < home && home >= 1000) return match.homeId;
     return null;
   }
 }

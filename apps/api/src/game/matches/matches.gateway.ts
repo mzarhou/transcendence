@@ -16,10 +16,14 @@ import { UseGuards } from '@nestjs/common';
 import { GamePlayService } from '../gameplay/gameplay.service';
 import { MatchesStorage } from './matches.storage';
 import { EventGame } from '../gameplay/utils';
-import { getMatchRoomId } from './matches.helpers';
+import { WebsocketService } from '@src/websocket/websocket.service';
+import { Subscription } from 'rxjs';
+import { CONNECTION_STATUS } from '@src/websocket/websocket.enum';
 
 @WebSocketGateway()
-export class MatchesGateway implements OnGatewayDisconnect {
+export class MatchesGateway {
+  private subscription!: Subscription;
+
   @WebSocketServer()
   server!: Server;
   gamePlay!: GamePlayService;
@@ -27,12 +31,22 @@ export class MatchesGateway implements OnGatewayDisconnect {
   constructor(
     private matchesService: MatchesService,
     private matchesStorage: MatchesStorage,
-  ) {
-    matchesStorage.setServer(this.server);
+    private readonly websocketService: WebsocketService,
+  ) {}
+
+  onApplicationShutdown(_signal?: string | undefined) {
+    this.subscription.unsubscribe();
   }
 
-  handleDisconnect(client: any) {
-    this.matchesStorage.removePlayer(client);
+  afterInit(_server: Server) {
+    this.subscription = this.websocketService.getEventSubject$().subscribe({
+      next: (event) => {
+        if (event.name === CONNECTION_STATUS.DISCONNECTED) {
+          const user = event.data as ActiveUserData;
+          this.matchesStorage.removePlayer(user.sub);
+        }
+      },
+    });
   }
 
   @UseGuards(WsAuthGuard)
@@ -47,9 +61,9 @@ export class MatchesGateway implements OnGatewayDisconnect {
     if (!match) throw new WsException('Match Not Found!');
     if (match.winnerId !== null) throw new WsException('Match is Over!');
 
-    this.matchesStorage.connectPlayer(match, user.sub, client);
-    const roomId = getMatchRoomId(matchId);
-    console.log({ roomId });
-    this.server.to(roomId).emit(EventGame.STARTSGM, { match: match });
+    this.matchesStorage.connectPlayer(match, user.sub);
+    this.websocketService.addEvent([user.sub], EventGame.STARTSGM, {
+      match: match,
+    });
   }
 }

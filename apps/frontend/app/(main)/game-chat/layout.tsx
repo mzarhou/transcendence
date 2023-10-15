@@ -4,7 +4,7 @@ import { Button } from "@/components/ui/button";
 import { Dialog, DialogContent, DialogTrigger } from "@/components/ui/dialog";
 import { MessagesSquare } from "lucide-react";
 import { ReactNode, useEffect, useState } from "react";
-import GameRouter from "./_engine/index-game";
+import GameRouter from "./_engine";
 
 type Props = {
   children: ReactNode;
