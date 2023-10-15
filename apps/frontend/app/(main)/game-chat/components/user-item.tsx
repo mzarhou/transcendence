@@ -29,8 +29,7 @@ export default function UserItem({
   const router = useRouter();
 
   const goToUserProfile = () => {
-    // TODO: update with user profile link
-    router.push("/settings");
+    router.push(`/game-chat/profile/${user.id}`);
   };
 
   return (
