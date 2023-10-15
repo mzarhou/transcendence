@@ -30,7 +30,7 @@ export default function UserItem({
 
   const goToUserProfile = () => {
     // TODO: update with user profile link
-    router.push("/profile/general");
+    router.push("/settings");
   };
 
   return (

@@ -98,7 +98,7 @@ function NavUserPopup() {
         </Button>
       </PopoverTrigger>
       <PopoverContent align="end" className="mr-3 max-w-xs rounded-xl p-4">
-        <Link href="/profile/general" onClick={closePoppup}>
+        <Link href="/settings" onClick={closePoppup}>
           <div className="mt-8 flex flex-col items-center justify-center">
             <img src={user?.avatar} className="h-20 w-20 rounded-full" />
             <div className="mt-1 font-semibold">{user?.name}</div>
