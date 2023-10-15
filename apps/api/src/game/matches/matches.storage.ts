@@ -65,7 +65,10 @@ export class MatchesStorage {
       }
       client.leave(getMatchRoomId(game.matchId));
       if (game.users.length === 0 && game.state !== State.PLAYING) {
-        this.games = this.games.filter((game) => game.matchId !== game.matchId);
+        this.games = this.games.filter((g) => g.matchId !== game.matchId);
+      }
+      if (game.users.length === 1 && game.state === State.PLAYING) {
+        game.state = State.OVER;
       }
     });
   }
