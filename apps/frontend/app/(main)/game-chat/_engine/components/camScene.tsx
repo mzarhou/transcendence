@@ -1,11 +1,12 @@
 "use client";
 
-import { PerspectiveCamera } from "@react-three/drei";
+import { OrbitControls, PerspectiveCamera } from "@react-three/drei";
 import { Stats } from "@react-three/drei";
 import { useEffect, useRef } from "react";
 import { PointLight } from "three";
 import { useUser } from "@/context/user-context";
 import { usePlayer2State } from "../state/player";
+import { useFrame } from "@react-three/fiber";
 
 function Cam() {
   const { user } = useUser();
@@ -26,7 +27,18 @@ function Cam() {
     // }
 
     // return () => clearTimeout(to);
-  }, [ref, p2.id, user?.id]);
+  }, [ref, p2.id, user?.id, ref.current?.zoom, ref.current?.fov]);
+
+  useFrame(() => {
+    if (ref.current) {
+      console.log("rotateX=>", ref.current?.rotation.x);
+      console.log("rotateY=>", ref.current?.rotation.z);
+      console.log("rotateZ=>", ref.current?.rotation.y);
+      console.log("positionZ=>", ref.current?.position.z);
+      console.log("fov=>", ref.current?.fov);
+      console.log("zoom=>", ref.current?.zoom);
+    }
+  });
 
   return (
     <>
@@ -37,10 +49,10 @@ function Cam() {
         fov={80}
         near={0.1}
         far={5000}
-        aspect={window.innerWidth / window.innerHeight}
+        aspect={4 / 4}
         up={[0, 0, 1]}
       />
-      {/* <OrbitControls  /> */}
+      <OrbitControls />
       <Stats />
     </>
   );
