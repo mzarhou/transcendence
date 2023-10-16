@@ -1,14 +1,14 @@
 import { create } from "zustand";
 
-export interface zoomType {
+export interface ZoomType {
   z: number;
 }
 
-interface ZoomState extends zoomType {
+interface ZoomState extends ZoomType {
   setZoom: (width: number) => void;
 }
 
-const zoomState: zoomType = {
+const zoomState: ZoomType = {
   z: 545,
 };
 

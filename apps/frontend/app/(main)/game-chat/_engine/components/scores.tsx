@@ -1,8 +1,6 @@
 import { Text } from "@react-three/drei";
 import { usePlayer2State, useScoreState } from "../state";
 import { useEffect, useRef } from "react";
-import { ForwardRefComponent } from "@react-three/drei/helpers/ts-utils";
-import { Props } from "@react-three/fiber";
 import { useUser } from "@/context/user-context";
 
 export function Scores() {

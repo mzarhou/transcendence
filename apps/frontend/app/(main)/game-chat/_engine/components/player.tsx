@@ -8,6 +8,11 @@ import { useSocket } from "@/context";
 import { useUser } from "@/context/user-context";
 import { PlayerState, usePlayer1State, usePlayer2State } from "../state/player";
 import { useMatchState } from "../state";
+import {
+  ClientGameEvents,
+  MoveLeftData,
+  MoveRightData,
+} from "@transcendence/db";
 
 export function Player(playerProps: PlayerState) {
   const socket = useSocket();
@@ -31,12 +36,24 @@ export function Player(playerProps: PlayerState) {
     }
 
     if (user?.id == p1.id) {
-      if (arrowLeft) socket?.emit("moveLeft", { match: match });
-      if (arrowRight) socket?.emit("moveRight", { match: match });
+      if (arrowLeft)
+        socket?.emit(ClientGameEvents.MoveLeft, {
+          match: match,
+        } satisfies MoveLeftData);
+      if (arrowRight)
+        socket?.emit(ClientGameEvents.MoveRight, {
+          match: match,
+        } satisfies MoveRightData);
     }
     if (user?.id == p2.id) {
-      if (arrowLeft) socket?.emit("moveRight", { match: match });
-      if (arrowRight) socket?.emit("moveLeft", { match: match });
+      if (arrowLeft)
+        socket?.emit(ClientGameEvents.MoveRight, {
+          match: match,
+        } satisfies MoveRightData);
+      if (arrowRight)
+        socket?.emit(ClientGameEvents.MoveLeft, {
+          match: match,
+        } satisfies MoveLeftData);
     }
   });
 

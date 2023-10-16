@@ -1,35 +1,5 @@
+import { BallType, BoardType, PlayerType, ScoreType } from '@transcendence/db';
 import { Bodies } from 'matter-js';
-
-export enum Direction {
-  LEFT = 'left',
-  RIGHT = 'right',
-}
-export enum State {
-  WAITING,
-  PLAYING,
-  OVER,
-}
-
-export interface scoreType {
-  home: number;
-  adversary: number;
-}
-
-export interface boardType {
-  posi: [number, number, number];
-  size: [number, number];
-  txtu: string;
-}
-export interface ballType {
-  posi: [x: number, y: number, z: number];
-  size: [rad: number, w: number, h: number];
-  txtu: string;
-}
-export interface playerType {
-  posi: [x: number, y: number, z: number];
-  size: [width: number, height: number, depth: number];
-  txtu: string;
-}
 
 export const ballOptions = {
   mass: 0.2,
@@ -41,41 +11,33 @@ export const ballOptions = {
   inertia: Infinity,
 };
 
-// export const ballOptions = {
-//   mass: 0.2,
-//   force: { x: 0.001, y: 0.003 },
-//   density: 0.001,
-//   friction: 0,
-//   restitution: 1,
-//   frictionAir: 0,
-//   inertia: Infinity,
-// }
-
 export const staticOption = {
   isStatic: true,
 };
 
 export class GameData {
-  scores: scoreType = {
+  scores: ScoreType = {
     home: 0,
     adversary: 0,
   };
-  bdDt: boardType = {
+  bdDt: BoardType = {
     posi: [0, 0, 0],
     size: [600, 800],
     txtu: 'green',
   };
-  bl: ballType = {
+  bl: BallType = {
     posi: [this.bdDt.size[0] / 2, this.bdDt.size[1] / 2, 20],
     size: [20, 15, 15],
     txtu: 'white',
   };
-  home: playerType = {
+  home: PlayerType = {
+    id: 0,
     posi: [this.bdDt.size[0] / 2, 70, 15],
     size: [100, 10, 30],
     txtu: 'red',
   };
-  adversary: playerType = {
+  adversary: PlayerType = {
+    id: 0,
     posi: [this.bdDt.size[0] / 2, this.bdDt.size[1] - 70, 15],
     size: [100, 10, 30],
     txtu: 'blue',

@@ -2,7 +2,6 @@ import {
   WebSocketGateway,
   SubscribeMessage,
   MessageBody,
-  OnGatewayDisconnect,
   WebSocketServer,
   ConnectedSocket,
   WsException,
@@ -13,12 +12,13 @@ import { Socket } from 'socket.io';
 import { ActiveUserData } from '@src/iam/interface/active-user-data.interface';
 import { WsAuthGuard } from '@src/iam/authentication/guards/ws-auth.guard';
 import { UseGuards } from '@nestjs/common';
-import { GamePlayService } from '../gameplay/gameplay.service';
 import { MatchesStorage } from './matches.storage';
-import { EventGame } from '../gameplay/utils';
 import { WebsocketService } from '@src/websocket/websocket.service';
 import { Subscription } from 'rxjs';
 import { CONNECTION_STATUS } from '@src/websocket/websocket.enum';
+import { ServerGameEvents, StartGameData } from '@transcendence/db';
+import { ClientGameEvents } from '@transcendence/db';
+import { PlayMatchData } from '@transcendence/db';
 
 @WebSocketGateway()
 export class MatchesGateway {
@@ -26,11 +26,10 @@ export class MatchesGateway {
 
   @WebSocketServer()
   server!: Server;
-  gamePlay!: GamePlayService;
 
   constructor(
-    private matchesService: MatchesService,
-    private matchesStorage: MatchesStorage,
+    private readonly matchesService: MatchesService,
+    private readonly matchesStorage: MatchesStorage,
     private readonly websocketService: WebsocketService,
   ) {}
 
@@ -50,20 +49,19 @@ export class MatchesGateway {
   }
 
   @UseGuards(WsAuthGuard)
-  @SubscribeMessage(EventGame.PLAYMACH)
+  @SubscribeMessage(ClientGameEvents.PLAYMACH)
   async PlayMatch(
     @ConnectedSocket() client: Socket,
-    @MessageBody('matchId') matchId: number,
+    @MessageBody() { matchId }: PlayMatchData,
   ) {
-    console.log('PlayMatch: ' + matchId + '\n');
     const user: ActiveUserData = client.data.user;
     const match = await this.matchesService.findOneById(matchId);
     if (!match) throw new WsException('Match Not Found!');
     if (match.winnerId !== null) throw new WsException('Match is Over!');
 
     this.matchesStorage.connectPlayer(match, user.sub);
-    this.websocketService.addEvent([user.sub], EventGame.STARTSGM, {
-      match: match,
-    });
+    this.websocketService.addEvent([user.sub], ServerGameEvents.STARTSGM, {
+      match,
+    } satisfies StartGameData);
   }
 }

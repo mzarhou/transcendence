@@ -1,11 +1,5 @@
+import { PlayerType } from "@transcendence/db";
 import { create } from "zustand";
-
-interface PlayerType {
-  id: number;
-  posi: [x: number, y: number, z: number];
-  size: [length: number, width: number, height: number];
-  txtu: string;
-}
 
 export interface PlayerState extends PlayerType {
   setId: (id: number) => void;

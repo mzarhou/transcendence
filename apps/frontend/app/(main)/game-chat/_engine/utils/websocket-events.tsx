@@ -1,11 +1,17 @@
 import { useCallback, useEffect, useState } from "react";
-import { EventGame } from "../entity/entity";
 import { useSocket } from "@/context";
 import { usePlayer1State, usePlayer2State } from "../state/player";
 import { useBallState } from "../state/ball";
 import { STATUS, useStatus } from "../state/status";
 import { useMatchState, useScoreState } from "../state";
 import { useLocation, useNavigate } from "react-router-dom";
+import {
+  GameOverData,
+  MatchFoundData,
+  ServerGameEvents,
+  StartGameData,
+  UpdateGameData,
+} from "@transcendence/db";
 
 export function usePlayerPosition(direction: string): boolean {
   const [arrowDirection, setArrowDirection] = useState(false);
@@ -50,9 +56,9 @@ export const useSetGameEvents = () => {
 
   useEffect(() => {
     if (!socket) return;
-    if (socket.hasListeners(EventGame.STARTSGM)) return;
+    if (socket.hasListeners(ServerGameEvents.STARTSGM)) return;
 
-    socket.on(EventGame.STARTSGM, (data) => {
+    socket.on(ServerGameEvents.STARTSGM, (data: StartGameData) => {
       setMatch(data.match);
       setStatus(STATUS.UPDGAME);
       setP1Id(data.match.homeId);
@@ -60,41 +66,41 @@ export const useSetGameEvents = () => {
       navigate("/playing", { replace: true });
     });
 
-    socket.on(EventGame.UPDTGAME, (data) => {
+    socket.on(ServerGameEvents.UPDTGAME, (data: UpdateGameData) => {
       if (location.pathname !== "/playing") {
         navigate("/playing", { replace: true });
       }
-      const parsedData = JSON.parse(data);
-      setHome(parsedData.scores.home);
-      setAdversary(parsedData.scores.adversary);
+      setP1Id(data.home.id);
+      setP2Id(data.adversary.id);
+      setHome(data.scores.home);
+      setAdversary(data.scores.adversary);
       setP1Position({
-        x: parsedData.home.posi[0],
-        y: parsedData.home.posi[1],
-        z: parsedData.home.posi[2],
+        x: data.home.posi[0],
+        y: data.home.posi[1],
+        z: data.home.posi[2],
       });
       setP2Position({
-        x: parsedData.adversary.posi[0],
-        y: parsedData.adversary.posi[1],
-        z: parsedData.adversary.posi[2],
+        x: data.adversary.posi[0],
+        y: data.adversary.posi[1],
+        z: data.adversary.posi[2],
       });
       setBallPosition({
-        x: parsedData.bl.posi[0],
-        y: parsedData.bl.posi[1],
-        z: parsedData.bl.posi[2],
+        x: data.bl.posi[0],
+        y: data.bl.posi[1],
+        z: data.bl.posi[2],
       });
     });
 
-    socket.on(EventGame.GAMEOVER, (data) => {
-      socket.emit("leaveGame");
+    socket.on(ServerGameEvents.GAMEOVER, (data: GameOverData) => {
       setStatus(STATUS.GAMOVER);
       setMatch({ winnerId: data.winnerId });
       navigate("/gameover");
     });
     return () => {
-      socket.off(EventGame.STARTSGM);
-      socket.off(EventGame.UPDTGAME);
-      socket.off(EventGame.MCHFOUND);
-      socket.off(EventGame.GAMEOVER);
+      socket.off(ServerGameEvents.STARTSGM);
+      socket.off(ServerGameEvents.UPDTGAME);
+      socket.off(ServerGameEvents.MCHFOUND);
+      socket.off(ServerGameEvents.GAMEOVER);
     };
   }, [socket]);
 };
@@ -106,27 +112,10 @@ export const useMatchFoundEvent = () => {
 
   useEffect(() => {
     if (!socket) return;
-    if (socket.hasListeners(EventGame.MCHFOUND)) return;
-    socket.on(EventGame.MCHFOUND, (data) => {
-      console.log(EventGame.MCHFOUND, data.match);
+    if (socket.hasListeners(ServerGameEvents.MCHFOUND)) return;
+    socket.on(ServerGameEvents.MCHFOUND, (data: MatchFoundData) => {
       setMatch(data.match);
       setStatus(STATUS.STRGAME);
     });
   }, [socket]);
-};
-
-export const useUpdateGame = () => {
-  const status = useStatus();
-  const socket = useSocket();
-  const matchId = useMatchState((st) => st.matchId);
-
-  useEffect(() => {
-    const intervalId = setInterval(() => {
-      if (status.name == STATUS.UPDGAME) {
-        socket?.emit(STATUS.UPDGAME, { matchId });
-      }
-    }, 16);
-
-    return () => clearInterval(intervalId);
-  });
 };

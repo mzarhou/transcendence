@@ -1,8 +1,9 @@
-import Matter, { Events, Engine, World, Bodies, Runner, Body } from 'matter-js';
-import { walls, ballOptions, staticOption, GameData, State } from './gameData';
+import Matter, { Events, Engine, World, Bodies, Body } from 'matter-js';
+import { walls, ballOptions, staticOption, GameData } from './gameData';
 import { updateBallPosition, updatePlayerPosition } from './utils';
 import { Game } from '../matches/match-game.interface';
-import { Match } from '@transcendence/db';
+import { Match, ServerGameEvents, State } from '@transcendence/db';
+import { UpdateGameData } from '@transcendence/db';
 
 export class GamePlayService {
   private engine: Engine;
@@ -11,13 +12,15 @@ export class GamePlayService {
   private pl2: Matter.Body;
   private gmDt: GameData;
   private game: Game;
-  private runner: Runner;
+  readonly frameRate = 1000 / 30;
+  interval!: NodeJS.Timeout;
 
   constructor(game: Game) {
     this.gmDt = game.gameData;
     this.game = game;
     this.engine = Engine.create({ gravity: { x: 0, y: 0 } });
-    this.runner = Runner.create();
+    this.gmDt.home.id = game.homeId;
+    this.gmDt.adversary.id = game.adversaryId;
     this.ball = Bodies.circle(
       this.gmDt.bl.posi[0],
       this.gmDt.bl.posi[1],
@@ -43,6 +46,7 @@ export class GamePlayService {
   }
 
   startgame(match: Match) {
+    console.log('start game: ', this.game.matchId);
     Events.on(this.engine, 'collisionStart', (event) => {
       event.pairs.forEach((collision) => {
         const ball = collision.bodyA as Body;
@@ -70,8 +74,6 @@ export class GamePlayService {
             match,
           );
         }
-        console.log('adversary=>', scores.adversary);
-        console.log('home=>', scores.home);
         if (this.game.winnerId !== null) {
           this.game.state = State.OVER;
         }
@@ -83,15 +85,35 @@ export class GamePlayService {
       updatePlayerPosition(this.pl1, this.pl2, this.game);
     });
 
-    Runner.start(this.runner, this.engine);
+    this.interval = setInterval(() => this.gameUpdate(), this.frameRate);
+  }
+
+  private gameUpdate() {
+    Engine.update(this.engine, this.frameRate);
+    if (this.game.state === State.PLAYING) {
+      this.game.websocketService.addEvent(
+        [this.game.adversaryId, this.game.homeId],
+        ServerGameEvents.UPDTGAME,
+        this.gmDt satisfies UpdateGameData,
+      );
+    }
+
+    if (this.game.state === State.OVER) {
+      this.game.websocketService.addEvent(
+        [this.game.adversaryId, this.game.homeId],
+        ServerGameEvents.GAMEOVER,
+        { winnerId: this.game.winnerId },
+      );
+      this.game.gameService.stopGame();
+    }
   }
 
   stopGame() {
+    console.log('stop game: ', this.game.matchId);
+    clearInterval(this.interval);
     Events.off(this.engine, 'beforeUpdate', () => {});
     Events.off(this.engine, 'collisionStart', () => {});
-    this.runner.enabled = false;
     Engine.clear(this.engine);
-    Runner.stop(this.runner);
   }
 
   movePlayer(direction: string, client: number, match: Match) {
@@ -125,10 +147,6 @@ export class GamePlayService {
     }
   }
 
-  getGameData(): any {
-    const data: string = JSON.stringify(this.gmDt);
-    return data;
-  }
   applyCollisionEffect(gmDt: GameData, op: string) {
     if (op == 'adversary') gmDt.scores.adversary += 1;
     if (op == 'home') gmDt.scores.home += 1;
@@ -138,8 +156,8 @@ export class GamePlayService {
     });
   }
   checkWinners(adversary: number, home: number, match: Match): number | null {
-    if (adversary > home && adversary >= 100) return match.adversaryId;
-    if (adversary < home && home >= 100) return match.homeId;
+    if (adversary > home && adversary >= 10000) return match.adversaryId;
+    if (adversary < home && home >= 10000) return match.homeId;
     return null;
   }
 }

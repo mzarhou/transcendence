@@ -1,14 +1,14 @@
 import { Button } from "@/components/ui/button";
 import { useSocket } from "@/context";
 import { useNavigate } from "react-router-dom";
-import { EventGame } from "../entity/entity";
+import { ClientGameEvents } from "@transcendence/db";
 
 export function JoinMatch() {
   const socket = useSocket();
   const navigate = useNavigate();
 
   const joinMatch = () => {
-    socket?.emit(EventGame.JNRNDMCH);
+    socket?.emit(ClientGameEvents.JNRNDMCH);
     // TODO: emit waiting event from server
     navigate("/waiting");
   };

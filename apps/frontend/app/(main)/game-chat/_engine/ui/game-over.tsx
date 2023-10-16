@@ -1,6 +1,6 @@
 import { Button } from "@/components/ui/button";
 import { useSocket } from "@/context";
-import { EventGame } from "../entity/entity";
+import { ClientGameEvents } from "@transcendence/db";
 import { useNavigate } from "react-router";
 
 export function GameOver() {
@@ -8,7 +8,7 @@ export function GameOver() {
   const navigate = useNavigate();
 
   const retryAction = () => {
-    socket?.emit(EventGame.JNRNDMCH);
+    socket?.emit(ClientGameEvents.JNRNDMCH);
     // Todo: emit event from server
     navigate("/waiting");
   };

@@ -11,14 +11,14 @@ export function Ball() {
 
   useFrame(() => {
     if (ballRef.current) {
-      ballRef.current.position.x = ball.position[0];
-      ballRef.current.position.y = ball.position[1];
-      ballRef.current.position.z = ball.position[2];
+      ballRef.current.position.x = ball.posi[0];
+      ballRef.current.position.y = ball.posi[1];
+      ballRef.current.position.z = ball.posi[2];
     }
   });
   return (
     <Sphere ref={ballRef} args={ball.size}>
-      <meshBasicMaterial color={ball.color} />
+      <meshBasicMaterial color={ball.txtu} />
     </Sphere>
   );
 }

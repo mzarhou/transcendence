@@ -1,18 +1,18 @@
-import { MatchesService } from '@src/game/matches/matches.service';
 import { Match } from '@prisma/client';
-import { State } from '@src/game/gameplay/gameData';
 import { Injectable } from '@nestjs/common';
 import { Game } from './match-game.interface';
+import { WebsocketService } from '@src/websocket/websocket.service';
+import { State } from '@transcendence/db';
 
 @Injectable()
 export class MatchesStorage {
   games: Game[] = [];
 
-  constructor(private readonly matchesService: MatchesService) {}
+  constructor(private readonly websocketService: WebsocketService) {}
 
   private createGame(match: Match): Game {
     const game = new Game(
-      this.matchesService,
+      this.websocketService,
       match.matchId,
       match.homeId,
       match.adversaryId,

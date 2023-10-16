@@ -1,9 +1,5 @@
+import { ScoreType } from "@transcendence/db";
 import { create } from "zustand";
-
-export interface ScoreType {
-  home: number;
-  adversary: number;
-}
 
 interface ScoreState extends ScoreType {
   setHomeScore: (home: number) => void;

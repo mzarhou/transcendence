@@ -1,6 +1,6 @@
 "use client";
 
-import { OrbitControls, PerspectiveCamera } from "@react-three/drei";
+import { PerspectiveCamera } from "@react-three/drei";
 import { Stats } from "@react-three/drei";
 import { useEffect, useLayoutEffect, useRef } from "react";
 import { PointLight } from "three";

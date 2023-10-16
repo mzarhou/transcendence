@@ -6,18 +6,8 @@ import { SceneGame } from "./ui/scene-game";
 import { JoinMatch } from "./ui/join-match";
 import { WaitingMatch } from "./ui/waitting-match";
 import { GameOver } from "./ui/game-over";
-import {
-  Route,
-  Routes,
-  useLocation,
-  MemoryRouter,
-  useNavigate,
-} from "react-router-dom";
-import {
-  useMatchFoundEvent,
-  useSetGameEvents,
-  useUpdateGame,
-} from "./utils/websocket-events";
+import { Route, Routes, useLocation, MemoryRouter } from "react-router-dom";
+import { useMatchFoundEvent, useSetGameEvents } from "./utils/websocket-events";
 
 const InitialRouteKey = "/";
 
@@ -33,7 +23,6 @@ function DetectRouteChanges() {
 function GameEvents() {
   useSetGameEvents();
   useMatchFoundEvent();
-  useUpdateGame();
 
   return <></>;
 }

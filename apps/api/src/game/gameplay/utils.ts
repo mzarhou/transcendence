@@ -55,12 +55,3 @@ export function updatePlayerPosition(
     { x: -1, y: 1 },
   );
 }
-
-export const enum EventGame {
-  MCHFOUND = 'matchingFound',
-  JNRNDMCH = 'joinRandomMatch',
-  PLAYMACH = 'playMatch',
-  STARTSGM = 'startGame',
-  UPDTGAME = 'updateGame',
-  GAMEOVER = 'gameOver',
-}

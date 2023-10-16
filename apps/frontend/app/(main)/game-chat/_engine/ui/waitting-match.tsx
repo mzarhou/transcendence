@@ -1,6 +1,5 @@
 import { useMatchFoundEvent } from "../utils/websocket-events";
 import { useSocket } from "@/context";
-import { EventGame } from "../entity/entity";
 import {
   STATUS,
   useBallState,
@@ -12,6 +11,7 @@ import {
 } from "../state";
 import { Button } from "@/components/ui/button";
 import { useNavigate } from "react-router-dom";
+import { ClientGameEvents } from "@transcendence/db";
 
 export function WaitingMatch() {
   const socket = useSocket();
@@ -30,7 +30,7 @@ export function WaitingMatch() {
     ball.reset();
     scores.reset();
     if (status.name == STATUS.STRGAME) {
-      socket?.emit(EventGame.PLAYMACH, { matchId: matchId });
+      socket?.emit(ClientGameEvents.PLAYMACH, { matchId: matchId });
     }
   };
   return (

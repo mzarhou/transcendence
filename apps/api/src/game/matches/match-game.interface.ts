@@ -1,10 +1,11 @@
-import { GameData, State } from '../gameplay/gameData';
+import { WebsocketService } from '@src/websocket/websocket.service';
+import { GameData } from '../gameplay/gameData';
 import { GamePlayService } from '../gameplay/gameplay.service';
 import { MatchesService } from './matches.service';
+import { State } from '@transcendence/db';
 
 export class Game {
   state: State;
-  matchesService: MatchesService;
   matchId: number;
   users: number[];
   gameData: GameData;
@@ -14,13 +15,12 @@ export class Game {
   winnerId: number | null;
 
   constructor(
-    matchesService: MatchesService,
+    public readonly websocketService: WebsocketService,
     matchId: number,
     homeId: number,
     adversaryId: number,
   ) {
     this.state = State.WAITING;
-    this.matchesService = matchesService;
     this.matchId = matchId;
     this.users = [];
     this.homeId = homeId;
