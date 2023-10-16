@@ -70,8 +70,9 @@ export const useSetGameEvents = () => {
       if (location.pathname !== "/playing") {
         navigate("/playing", { replace: true });
       }
-      setP1Id(data.home.id);
-      setP2Id(data.adversary.id);
+      setMatch(data.match);
+      setP1Id(data.match.homeId);
+      setP2Id(data.match.adversaryId);
       setHome(data.scores.home);
       setAdversary(data.scores.adversary);
       setP1Position({

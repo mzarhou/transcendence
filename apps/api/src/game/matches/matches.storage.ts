@@ -13,6 +13,7 @@ export class MatchesStorage {
   private createGame(match: Match): Game {
     const game = new Game(
       this.websocketService,
+      match,
       match.matchId,
       match.homeId,
       match.adversaryId,

@@ -29,7 +29,6 @@ export interface MoveRightData {
   match: Match;
 }
 
-export interface UpdateGameData {}
 export interface MatchFoundData {
   match: Match;
 }
@@ -44,6 +43,7 @@ export interface UpdateGameData {
   bl: BallType;
   home: PlayerType;
   adversary: PlayerType;
+  match: Match;
 }
 
 export enum Direction {
@@ -74,7 +74,6 @@ export interface BallType {
 }
 
 export interface PlayerType {
-  id: number;
   posi: [x: number, y: number, z: number];
   size: [width: number, height: number, depth: number];
   txtu: string;

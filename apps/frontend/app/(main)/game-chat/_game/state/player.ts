@@ -1,19 +1,23 @@
 import { PlayerType } from "@transcendence/db";
 import { create } from "zustand";
 
-export interface PlayerState extends PlayerType {
+interface ExtendedPlayerType extends PlayerType {
+  id: number;
+}
+
+export interface PlayerState extends ExtendedPlayerType {
   setId: (id: number) => void;
   setPosition: (data: { x: number; y: number; z: number }) => void;
   reset: () => void;
 }
 
-const player2State: PlayerType = {
+const player2State: ExtendedPlayerType = {
   id: 0,
   posi: [0, 330, 15],
   size: [100, 10, 30],
   txtu: "blue",
 };
-const player1State: PlayerType = {
+const player1State: ExtendedPlayerType = {
   id: 0,
   posi: [0, -330, 15],
   size: [100, 10, 30],

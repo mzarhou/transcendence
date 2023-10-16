@@ -19,8 +19,6 @@ export class GamePlayService {
     this.gmDt = game.gameData;
     this.game = game;
     this.engine = Engine.create({ gravity: { x: 0, y: 0 } });
-    this.gmDt.home.id = game.homeId;
-    this.gmDt.adversary.id = game.adversaryId;
     this.ball = Bodies.circle(
       this.gmDt.bl.posi[0],
       this.gmDt.bl.posi[1],

@@ -6,18 +6,29 @@ import { useEffect, useLayoutEffect, useRef } from "react";
 import { PointLight } from "three";
 import { useUser } from "@/context/user-context";
 import { usePlayer2State } from "../state/player";
-import { useFrame } from "@react-three/fiber";
 
 function Cam() {
   const { user } = useUser();
   const p2 = usePlayer2State();
   const ref = useRef<THREE.PerspectiveCamera>(null);
 
-  useLayoutEffect(() => {});
+  const handleResize = () => {
+    if (ref.current) {
+      if (window.innerWidth <= 1274) ref.current.position.z = 900;
+      else ref.current.position.z = 545;
+    }
+  };
 
   useEffect(() => {
     if (ref.current && user?.id == p2.id && ref.current?.rotation.z != Math.PI)
       ref.current?.rotateZ(Math.PI);
+    if (ref.current) {
+      if (window.innerWidth <= 1274) ref.current.position.z = 900;
+      else ref.current.position.z = 545;
+
+      window.addEventListener("resize", handleResize);
+      return () => window.removeEventListener("resize", handleResize);
+    }
 
     // if (threeD){
     // ref.current.position.x = 0;
@@ -31,17 +42,6 @@ function Cam() {
     // return () => clearTimeout(to);
   }, [ref, p2.id, user?.id, ref.current?.zoom, ref.current?.fov]);
 
-  useFrame(() => {
-    if (ref.current) {
-      console.log("rotateX=>", ref.current?.rotation.x);
-      console.log("rotateY=>", ref.current?.rotation.z);
-      console.log("rotateZ=>", ref.current?.rotation.y);
-      console.log("positionZ=>", ref.current?.position.z);
-      console.log("fov=>", ref.current?.fov);
-      console.log("zoom=>", ref.current?.zoom);
-    }
-  });
-
   return (
     <>
       <PerspectiveCamera
@@ -51,7 +51,7 @@ function Cam() {
         fov={80}
         near={0.1}
         far={5000}
-        aspect={innerWidth / innerHeight}
+        aspect={window.innerWidth / window.innerHeight}
         up={[0, 0, 1]}
       />
       {/* <OrbitControls /> */}

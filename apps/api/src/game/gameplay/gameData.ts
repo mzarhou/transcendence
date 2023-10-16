@@ -1,4 +1,10 @@
-import { BallType, BoardType, PlayerType, ScoreType } from '@transcendence/db';
+import {
+  BallType,
+  BoardType,
+  Match,
+  PlayerType,
+  ScoreType,
+} from '@transcendence/db';
 import { Bodies } from 'matter-js';
 
 export const ballOptions = {
@@ -16,6 +22,8 @@ export const staticOption = {
 };
 
 export class GameData {
+  constructor(public match: Match) {}
+
   scores: ScoreType = {
     home: 0,
     adversary: 0,
@@ -31,20 +39,23 @@ export class GameData {
     txtu: 'white',
   };
   home: PlayerType = {
-    id: 0,
     posi: [this.bdDt.size[0] / 2, 70, 15],
     size: [100, 10, 30],
     txtu: 'red',
   };
   adversary: PlayerType = {
-    id: 0,
     posi: [this.bdDt.size[0] / 2, this.bdDt.size[1] - 70, 15],
     size: [100, 10, 30],
     txtu: 'blue',
   };
 }
 
-const bdDt = new GameData().bdDt;
+const bdDt = new GameData({
+  homeId: 0,
+  winnerId: 0,
+  adversaryId: 0,
+  matchId: 0,
+}).bdDt;
 
 export const walls = [
   Bodies.rectangle(bdDt.size[0] / 2, 0, bdDt.size[0], 40, { isStatic: true }), // Top wall
