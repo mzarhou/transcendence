@@ -1,7 +1,7 @@
 import { Button } from "@/components/ui/button";
 import { ChevronLeft } from "lucide-react";
 import FakeChatSearch from "../components/fake-chat-search";
-import FriendsCards from "./components/friends-cards";
+import FriendsCards from "../_engine/components/friends-cards";
 
 export default function Profile() {
   return (

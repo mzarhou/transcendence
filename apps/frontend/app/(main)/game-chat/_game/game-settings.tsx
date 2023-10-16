@@ -1,8 +1,8 @@
 import { ChevronLeft } from "lucide-react";
-import MapsCard from "./components/maps-card";
-import ViewCard from "./components/view-card";
 import { Button } from "@/components/ui/button";
-import BotCard from "./components/bot-card";
+import MapsCard from "../_engine/components/maps-card";
+import ViewCard from "../_engine/components/view-card";
+import BotCard from "../_engine/components/bot-card";
 
 export default function GameSettings() {
   return (
