@@ -6,6 +6,7 @@ import profile from "public/images/profile.png";
 import settings from "public/images/settings.png";
 import { useTheme } from "next-themes";
 import { Gamepad2, User2 } from "lucide-react";
+import { Link } from "react-router-dom";
 
 export default function ProfileSettings() {
   const { theme } = useTheme();
@@ -15,14 +16,8 @@ export default function ProfileSettings() {
   }
 
   return (
-    <>
-      <div className="mt-10 flex flex-col">
-        <Button className="group flex h-24 w-full flex-col bg-transparent hover:border-2 hover:border-border hover:bg-transparent">
-          <User2 className="h-[20px] w-[20px]" />
-          <span className="text-md group invisible text-foreground group-hover:visible">
-            Profile
-          </span>
-        </Button>
+    <div className="brr absolute right-2 top-2 flex flex-col">
+      <Link to="/game-settings">
         <Button className="group flex h-24 w-full flex-col bg-transparent hover:border-2 hover:border-border hover:bg-transparent">
           <Gamepad2 className="h-[20px] w-[20px]" />
           <span className="text-md group invisible text-foreground group-hover:visible">
@@ -31,7 +26,7 @@ export default function ProfileSettings() {
             Settings
           </span>
         </Button>
-      </div>
-    </>
+      </Link>
+    </div>
   );
 }

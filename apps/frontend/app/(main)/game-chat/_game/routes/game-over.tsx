@@ -16,13 +16,15 @@ export function GameOver() {
     navigate("/");
   };
   return (
-    <>
-      <Button color={"green"} onClick={retryAction}>
-        Retry
-      </Button>
-      <Button color={"red"} onClick={homeAction}>
-        Return
-      </Button>
-    </>
+    <div className="grid h-full place-items-center">
+      <div className="space-x-4">
+        <Button color={"green"} onClick={retryAction}>
+          Retry
+        </Button>
+        <Button color={"red"} onClick={homeAction}>
+          Return
+        </Button>
+      </div>
+    </div>
   );
 }

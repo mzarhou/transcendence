@@ -1,28 +1,54 @@
 "use client";
 
-import Image from "next/image";
-import pong from "/public/images/pong.gif";
-import lightPong from "public/images/light-pong.gif";
-import { useTheme } from "next-themes";
-import ProfileSettings from "./components/profile-settings"
-import PlayButtons from "./components/play_buttons";
+import { useEffect, useState } from "react";
 
-export default function Game() {
-  const { theme } = useTheme();
+import { SceneGame } from "./routes/scene-game";
+import { Route, Routes, useLocation, MemoryRouter } from "react-router-dom";
+import { useMatchFoundEvent, useSetGameEvents } from "./utils/websocket-events";
+import GameSettings from "./routes/game-settings";
+import MatchMaking from "./routes/match-making";
+import GameHome from "./routes/game-home";
+import { GameOver } from "./routes/game-over";
 
-  if (!theme) {
-    return <></>;
-  }
+const InitialRouteKey = "/";
+
+function DetectRouteChanges() {
+  const location = useLocation();
+
+  useEffect(() => {
+    window.localStorage.setItem(InitialRouteKey, location.pathname);
+  }, [location]);
+  return <></>;
+}
+
+function GameEvents() {
+  useSetGameEvents();
+  useMatchFoundEvent();
+
+  return <></>;
+}
+
+export default function GameRouter() {
+  const [initialRoute, setInitialRoute] = useState("");
+
+  useEffect(() => {
+    const initialRoute = window.localStorage.getItem(InitialRouteKey);
+    setInitialRoute(initialRoute ?? "/");
+  }, []);
 
   return (
-    <>
-      <Image
-        src={theme === "dark" ? pong : lightPong}
-        alt="pong gif"
-        className="mx-auto xl:mt-32 h-[50%] w-[60%] lg:block"
-      />
-      <ProfileSettings />
-      <PlayButtons />
-    </>
+    <MemoryRouter initialEntries={[initialRoute]}>
+      <DetectRouteChanges />
+      <GameEvents />
+      <div className="h-full overflow-y-auto">
+        <Routes>
+          <Route path="/" element={<GameHome />} />
+          <Route path="/waiting" element={<MatchMaking />} />
+          <Route path="/playing" element={<SceneGame />} />
+          <Route path="/game-settings" element={<GameSettings />} />
+          <Route path="/gameover" element={<GameOver />} />
+        </Routes>
+      </div>
+    </MemoryRouter>
   );
 }
