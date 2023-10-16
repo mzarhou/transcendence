@@ -2,7 +2,7 @@
 
 import { OrbitControls, PerspectiveCamera } from "@react-three/drei";
 import { Stats } from "@react-three/drei";
-import { useEffect, useRef } from "react";
+import { useEffect, useLayoutEffect, useRef } from "react";
 import { PointLight } from "three";
 import { useUser } from "@/context/user-context";
 import { usePlayer2State } from "../state/player";
@@ -12,6 +12,8 @@ function Cam() {
   const { user } = useUser();
   const p2 = usePlayer2State();
   const ref = useRef<THREE.PerspectiveCamera>(null);
+
+  useLayoutEffect(() => {});
 
   useEffect(() => {
     if (ref.current && user?.id == p2.id && ref.current?.rotation.z != Math.PI)
@@ -49,7 +51,7 @@ function Cam() {
         fov={80}
         near={0.1}
         far={5000}
-        aspect={4 / 4}
+        aspect={innerWidth / innerHeight}
         up={[0, 0, 1]}
       />
       {/* <OrbitControls /> */}

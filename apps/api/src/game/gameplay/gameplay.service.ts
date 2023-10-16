@@ -89,8 +89,6 @@ export class GamePlayService {
   stopGame() {
     Events.off(this.engine, 'beforeUpdate', () => {});
     Events.off(this.engine, 'collisionStart', () => {});
-    console.log('event beforeUpdate killed');
-    console.log('event collisionStart killed');
     this.runner.enabled = false;
     Engine.clear(this.engine);
     Runner.stop(this.runner);
@@ -140,8 +138,8 @@ export class GamePlayService {
     });
   }
   checkWinners(adversary: number, home: number, match: Match): number | null {
-    if (adversary > home && adversary >= 1000) return match.adversaryId;
-    if (adversary < home && home >= 1000) return match.homeId;
+    if (adversary > home && adversary >= 100) return match.adversaryId;
+    if (adversary < home && home >= 100) return match.homeId;
     return null;
   }
 }

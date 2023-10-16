@@ -31,8 +31,6 @@ function DetectRouteChanges() {
 }
 
 function GameEvents() {
-  const navigate = useNavigate();
-
   useSetGameEvents();
   useMatchFoundEvent();
   useUpdateGame();

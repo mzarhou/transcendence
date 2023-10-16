@@ -65,7 +65,6 @@ export const useSetGameEvents = () => {
         navigate("/playing", { replace: true });
       }
       const parsedData = JSON.parse(data);
-      // console.log({ parsedData });
       setHome(parsedData.scores.home);
       setAdversary(parsedData.scores.adversary);
       setP1Position({
