@@ -44,7 +44,7 @@ export class GamePlayService {
   }
 
   startgame(match: Match) {
-    console.log('start game: ', this.game.matchId);
+    console.log('start game: ', this.game.match.matchId);
     Events.on(this.engine, 'collisionStart', (event) => {
       event.pairs.forEach((collision) => {
         const ball = collision.bodyA as Body;
@@ -55,7 +55,7 @@ export class GamePlayService {
           (ball == walls[0] && wall == this.ball)
         ) {
           this.applyCollisionEffect(this.gmDt, 'adversary');
-          this.game.winnerId = this.checkWinners(
+          this.game.match.winnerId = this.checkWinners(
             scores.adversary,
             scores.home,
             match,
@@ -66,13 +66,13 @@ export class GamePlayService {
           (ball == walls[1] && wall == this.ball)
         ) {
           this.applyCollisionEffect(this.gmDt, 'home');
-          this.game.winnerId = this.checkWinners(
+          this.game.match.winnerId = this.checkWinners(
             scores.adversary,
             scores.home,
             match,
           );
         }
-        if (this.game.winnerId !== null) {
+        if (this.game.match.winnerId !== null) {
           this.game.state = State.OVER;
         }
       });
@@ -90,7 +90,7 @@ export class GamePlayService {
     Engine.update(this.engine, this.frameRate);
     if (this.game.state === State.PLAYING) {
       this.game.websocketService.addEvent(
-        [this.game.adversaryId, this.game.homeId],
+        [this.game.match.adversaryId, this.game.match.homeId],
         ServerGameEvents.UPDTGAME,
         this.gmDt satisfies UpdateGameData,
       );
@@ -98,16 +98,16 @@ export class GamePlayService {
 
     if (this.game.state === State.OVER) {
       this.game.websocketService.addEvent(
-        [this.game.adversaryId, this.game.homeId],
+        [this.game.match.adversaryId, this.game.match.homeId],
         ServerGameEvents.GAMEOVER,
-        { winnerId: this.game.winnerId },
+        { winnerId: this.game.match.winnerId },
       );
       this.game.gameService.stopGame();
     }
   }
 
   stopGame() {
-    console.log('stop game: ', this.game.matchId);
+    console.log('stop game: ', this.game.match.matchId);
     clearInterval(this.interval);
     Events.off(this.engine, 'beforeUpdate', () => {});
     Events.off(this.engine, 'collisionStart', () => {});
@@ -154,8 +154,8 @@ export class GamePlayService {
     });
   }
   checkWinners(adversary: number, home: number, match: Match): number | null {
-    if (adversary > home && adversary >= 10000) return match.adversaryId;
-    if (adversary < home && home >= 10000) return match.homeId;
+    if (adversary > home && adversary >= 100) return match.adversaryId;
+    if (adversary < home && home >= 100) return match.homeId;
     return null;
   }
 }

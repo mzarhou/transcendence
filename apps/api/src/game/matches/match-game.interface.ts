@@ -7,29 +7,20 @@ import { Match } from '@transcendence/db';
 
 export class Game {
   state: State;
-  matchId: number;
   users: number[];
   gameData: GameData;
-  homeId: number;
-  adversaryId: number;
   gameService!: GamePlayService;
-  winnerId: number | null;
+  match: any;
 
   // TODO: refactor use match only
   constructor(
     public readonly websocketService: WebsocketService,
     match: Match,
-    matchId: number,
-    homeId: number,
-    adversaryId: number,
   ) {
     this.state = State.WAITING;
-    this.matchId = matchId;
     this.users = [];
-    this.homeId = homeId;
-    this.winnerId = null;
-    this.adversaryId = adversaryId;
     this.gameData = new GameData(match);
+    this.match = match;
   }
 
   setGameService() {

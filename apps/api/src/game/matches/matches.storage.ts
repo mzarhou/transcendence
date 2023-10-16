@@ -11,20 +11,14 @@ export class MatchesStorage {
   constructor(private readonly websocketService: WebsocketService) {}
 
   private createGame(match: Match): Game {
-    const game = new Game(
-      this.websocketService,
-      match,
-      match.matchId,
-      match.homeId,
-      match.adversaryId,
-    );
+    const game = new Game(this.websocketService, match);
     game.setGameService();
     this.games.push(game);
     return game;
   }
 
   findGame(matchId: number): Game | undefined {
-    return this.games.find((game) => game.matchId === matchId);
+    return this.games.find((game) => game.match.matchId === matchId);
   }
 
   connectPlayer(match: Match, userId: number) {
@@ -53,7 +47,9 @@ export class MatchesStorage {
         game.users = game.users.filter((id) => id !== userId);
       }
       if (game.users.length === 0 && game.state !== State.PLAYING) {
-        this.games = this.games.filter((g) => g.matchId !== game.matchId);
+        this.games = this.games.filter(
+          (g) => g.match.matchId !== game.match.matchId,
+        );
       }
       if (game.users.length === 1 && game.state === State.PLAYING) {
         game.state = State.OVER;
