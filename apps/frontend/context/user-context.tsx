@@ -46,7 +46,7 @@ export const UserProvider: FC<UserProviderProps> = ({ children }) => {
   useEffect(() => {
     if (user?.isFirstSignIn) {
       toast({ description: "Change your nickname and profile image" });
-      router.push("/settings");
+      router.push("/onboarding");
     }
   }, [user]);
 
