@@ -19,7 +19,7 @@ export default function Game() {
       <Image
         src={pong}
         alt="pong gif"
-        className="mx-auto md:h-[50%] md:w-[50%]"
+        className="mx-auto aspect-square w-[90%] md:w-[60%]"
       />
       <PlayButtons />
     </div>
