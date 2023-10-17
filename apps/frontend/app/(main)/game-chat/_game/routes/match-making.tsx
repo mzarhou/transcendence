@@ -19,7 +19,7 @@ export default function MatchMaking() {
   const navigate = useNavigate();
 
   const socket = useSocket();
-  const { matchId } = useMatchState();
+  const { matchId, homeId, adversaryId } = useMatchState();
   const p1 = usePlayer1State();
   const p2 = usePlayer2State();
   const ball = useBallState();
@@ -30,7 +30,8 @@ export default function MatchMaking() {
     p2.reset();
     ball.reset();
     scores.reset();
-    socket?.emit(ClientGameEvents.PLAYMACH, { matchId: matchId });
+    if (matchId > 0 && homeId != undefined && adversaryId != undefined)
+      socket?.emit(ClientGameEvents.PLAYMACH, { matchId: matchId });
   };
 
   const cancelGame = () => {
