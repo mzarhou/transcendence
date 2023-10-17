@@ -4,8 +4,8 @@ import { useMessages } from "@/api-hooks/use-messages";
 import { RefObject, useEffect, useRef, useState } from "react";
 import { isMessageVisible } from "../utils/is-message-visible";
 import { useUser } from "@/context/user-context";
-import { MessageType } from "@transcendence/db";
 import { useFirstUnreadMessage } from "./use-first-unread-message";
+import { MessageType } from "@transcendence/db";
 
 const NEW_MESSAGES_LINE_ID = "new-messages-line-id";
 

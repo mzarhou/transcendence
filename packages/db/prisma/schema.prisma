@@ -43,6 +43,20 @@ model User {
   groupInvitations GroupInvitation[] @relation("privateGroupInvitaions")
   invitedUsersByMe GroupInvitation[] @relation("invitingUsersToGroups")
 
+  // game
+  eloRating  Int       @default(1500)
+  numOfGames Int       @default(0)
+  rank       Int       @default(1)
+  division   Division  @default(Nooby)
+  rankBoard  RankBoard @default(Provisional)
+
+  // Define a one-to-many relationship between player and matches
+  matches1 Match[] @relation("home")
+  matches2 Match[] @relation("adver")
+  matches3 Match[] @relation("winner")
+
+  // @@map("players")
+
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
 }
@@ -170,4 +184,29 @@ model GroupInvitation {
 
   group   Group @relation(fields: [groupId], references: [id], onDelete: Cascade)
   groupId Int
+}
+
+model Match {
+  matchId Int @id @default(autoincrement())
+
+  home   User @relation("home", fields: [homeId], references: [id])
+  homeId Int
+
+  adversary   User @relation("adver", fields: [adversaryId], references: [id])
+  adversaryId Int
+
+  winner   User? @relation("winner", fields: [winnerId], references: [id])
+  winnerId Int?
+}
+
+enum Division {
+  Nooby
+  Bronze
+  Gold
+  Legend
+}
+
+enum RankBoard {
+  Provisional
+  Established
 }
