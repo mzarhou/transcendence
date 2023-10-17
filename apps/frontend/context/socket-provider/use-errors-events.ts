@@ -3,6 +3,7 @@ import { Socket } from "socket.io-client";
 import { ERROR_EVENT, WsErrorData } from "@transcendence/db";
 import { useToast } from "@/components/ui/use-toast";
 import { api } from "@/lib/api";
+import { useUser } from "../user-context";
 
 export default function useErrorsEvents(socket: Socket) {
   const onError = useOnError();
@@ -15,22 +16,27 @@ export default function useErrorsEvents(socket: Socket) {
 
 const useOnError = () => {
   const { toast } = useToast();
+  const { user } = useUser();
 
-  const onError = useCallback(async (socket: Socket, data: WsErrorData) => {
-    if (data.statusCode !== 401) {
-      toast({
-        variant: "destructive",
-        description: data.message,
-      });
-      return;
-    }
-    try {
-      // try to refresh tokens
-      await api.post("/authentication/refresh-tokens");
-      setTimeout(() => {
-        socket.connect();
-      }, 200);
-    } catch (error) {}
-  }, []);
+  const onError = useCallback(
+    async (socket: Socket, data: WsErrorData) => {
+      if (!user) return;
+      if (data.statusCode !== 401) {
+        toast({
+          variant: "destructive",
+          description: data.message,
+        });
+        return;
+      }
+      try {
+        // try to refresh tokens
+        await api.post("/authentication/refresh-tokens");
+        setTimeout(() => {
+          socket.connect();
+        }, 200);
+      } catch (error) {}
+    },
+    [user]
+  );
   return onError;
 };
