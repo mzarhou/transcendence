@@ -24,13 +24,27 @@ import {
 } from "@/components/ui/tooltip";
 import { truncateText } from "@/lib/utils";
 import GroupInvitationsLink from "./components/group-invitations-link";
+import { useUser } from "@/context";
+import UserRankImage from "@/components/user-rank-image";
 
 export default function Game() {
+  const { user } = useUser();
   const { data: friends, isLoading } = useFriends();
 
   return (
-    <div className="mt-9 flex h-0 flex-grow flex-col space-y-10 overflow-y-auto p-4">
-      <FakeChatSearch />
+    <div className="mt-9 flex h-0 flex-grow flex-col space-y-8 overflow-y-auto p-4 pt-0">
+      <div className="flex space-x-4">
+        <Link
+          href="/game-chat/profile"
+          className="flex cursor-pointer items-center space-x-2"
+        >
+          <UserRankImage
+            user={user}
+            className="h-9 min-h-[36px] w-9 min-w-[36px]"
+          />
+        </Link>
+        <FakeChatSearch className="flex-grow " />
+      </div>
 
       {/* Groups */}
       <div className="space-y-4">

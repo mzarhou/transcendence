@@ -40,7 +40,7 @@ export default function GameRouter() {
     <MemoryRouter initialEntries={[initialRoute]}>
       <DetectRouteChanges />
       <GameEvents />
-      <div className="h-full overflow-y-auto px-6">
+      <div className="relative h-full overflow-y-auto px-6">
         <Routes>
           <Route path="/" element={<GameHome />} />
           <Route path="/waiting" element={<MatchMaking />} />

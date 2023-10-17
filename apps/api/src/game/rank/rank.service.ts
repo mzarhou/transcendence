@@ -1,6 +1,9 @@
-import { Injectable } from '@nestjs/common';
+import { ForbiddenException, Injectable } from '@nestjs/common';
 import { PrismaService } from '@src/+prisma/prisma.service';
 import { MatchesService } from '@src/game/matches/matches.service';
+import { ActiveUserData } from '@src/iam/interface/active-user-data.interface';
+import { UsersService } from '@src/users/users.service';
+import { GameProfile } from '@transcendence/db';
 
 @Injectable()
 export class RankService {
@@ -8,46 +11,39 @@ export class RankService {
   constructor(
     private prisma: PrismaService,
     private matches: MatchesService,
+    private readonly usersService: UsersService,
   ) {}
 
-  async getAllRank() {
-    return this.prisma.user.findMany();
-  }
+  async getGameProfile(currentUser: ActiveUserData, userId: number) {
+    if (await this.usersService.isUserBlocked(currentUser.sub, userId)) {
+      throw new ForbiddenException("You can't send this friend request");
+    }
 
-  //either return rank of user or whole user
-  async getOneRank(id: number) {
-    const user = await this.prisma.user.findUnique({
-      where: { id },
-    });
-    return user?.rank;
-  }
-
-  async getNumOfMatchesPlayed(id: number): Promise<any> {
-    const user = await this.prisma.user.findUnique({
-      where: { id },
-    });
-    return user?.numOfGames;
-  }
-
-  async getEloScore(id: number): Promise<any> {
-    const user = await this.prisma.user.findUnique({
-      where: { id },
-    });
-    return user?.eloRating;
-  }
-
-  async getNumOfWins(id: number): Promise<any> {
-    const user = await this.prisma.user.findUnique({
-      where: { id },
-      include: {
-        matches3: {
-          where: {
-            winnerId: id,
+    const { numOfGames, eloRating, ...user } =
+      await this.prisma.user.findUniqueOrThrow({
+        where: { id: userId },
+        include: {
+          matches3: {
+            where: {
+              winnerId: userId,
+            },
           },
         },
-      },
-    });
-    return user?.matches3.length;
+      });
+
+    const nbWins = user.matches3.length;
+    return {
+      id: user.id,
+      name: user.name,
+      avatar: user.avatar,
+      division: user.division,
+      eloRating,
+      rank: user.rank,
+      rankBoard: user.rankBoard,
+      numOfGames,
+      nbWins,
+      nbLoses: numOfGames - nbWins,
+    } satisfies GameProfile;
   }
 
   async getProvRank() {
