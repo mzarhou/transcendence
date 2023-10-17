@@ -19,7 +19,9 @@ export default async function RootLayout({
     <>
       <html lang="en" suppressHydrationWarning>
         <head />
-        <body className={`${boogaloo.variable} ${inter.variable} font-sans`}>
+        <body
+          className={`${boogaloo.variable} ${inter.variable} mx-auto max-w-[2000px] font-sans`}
+        >
           <ThemeProvider attribute="class" defaultTheme="system" enableSystem>
             <UserProvider>
               <EventsSocketProvider>{children}</EventsSocketProvider>
