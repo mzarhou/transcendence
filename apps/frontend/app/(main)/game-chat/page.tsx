@@ -25,6 +25,7 @@ import {
 import { truncateText } from "@/lib/utils";
 import GroupInvitationsLink from "./components/group-invitations-link";
 import { useUser } from "@/context";
+import UserRankImage from "@/components/user-rank-image";
 
 export default function Game() {
   const { user } = useUser();
@@ -32,18 +33,18 @@ export default function Game() {
 
   return (
     <div className="mt-9 flex h-0 flex-grow flex-col space-y-8 overflow-y-auto p-4 pt-0">
-      <Link
-        href="/game-chat/profile"
-        className="flex cursor-pointer items-center space-x-2"
-      >
-        <img src={user?.avatar} className="h-9 w-9 rounded-full" />
-        {/* TODO: update info */}
-        <div className="text-sm leading-tight text-foreground/80">
-          <p>{user?.name}</p>
-          <div>#55</div>
-        </div>
-      </Link>
-      <FakeChatSearch />
+      <div className="flex space-x-4">
+        <Link
+          href="/game-chat/profile"
+          className="flex cursor-pointer items-center space-x-2"
+        >
+          <UserRankImage
+            user={user}
+            className="h-9 min-h-[36px] w-9 min-w-[36px]"
+          />
+        </Link>
+        <FakeChatSearch className="flex-grow " />
+      </div>
 
       {/* Groups */}
       <div className="space-y-4">

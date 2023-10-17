@@ -1,4 +1,5 @@
 import { LoaderButton } from "@/components/ui/loader-button";
+import UserRankImage from "@/components/user-rank-image";
 import { useUser } from "@/context";
 import { User } from "@transcendence/db";
 
@@ -8,10 +9,10 @@ export default function UserGameProfile({ user }: { user: User }) {
   const { user: currentUser } = useUser();
 
   return (
-    <div>
-      <div className="flex flex-col items-center space-y-1">
-        <img src={user?.avatar} className="h-16 w-16 rounded-full" />
-        <p className="">{user.name}</p>
+    <div className="text-foreground/80">
+      <div className="flex flex-col items-center space-y-2">
+        <UserRankImage user={user} className="h-16 w-16" />
+        <p>{user.name}</p>
       </div>
       <div className="mt-4 flex justify-center">
         {currentUser?.id !== user.id ? (

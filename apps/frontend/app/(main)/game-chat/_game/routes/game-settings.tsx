@@ -9,7 +9,7 @@ export default function GameSettings() {
   return (
     <>
       <Link to="/" replace={true}>
-        <Button className="absolute left-8 mt-5 border border-border bg-transparent">
+        <Button className="absolute left-8 top-0 mt-5 border border-border bg-transparent">
           <ChevronLeft />
         </Button>
       </Link>
