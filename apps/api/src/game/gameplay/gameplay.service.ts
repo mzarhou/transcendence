@@ -4,8 +4,10 @@ import { updateBallPosition, updatePlayerPosition } from './utils';
 import { Game } from '../matches/match-game.interface';
 import { Match, ServerGameEvents, State } from '@transcendence/db';
 import { UpdateGameData } from '@transcendence/db';
+import { Logger } from '@nestjs/common';
 
 export class GamePlayService {
+  private readonly logger = new Logger(GamePlayService.name);
   private engine: Engine;
   private ball: Matter.Body;
   private pl1: Matter.Body;
@@ -44,7 +46,7 @@ export class GamePlayService {
   }
 
   startgame(match: Match) {
-    console.log('start game: ', this.game.match.matchId);
+    this.logger.debug('start game: ', this.game.match.matchId);
     Events.on(this.engine, 'collisionStart', (event) => {
       event.pairs.forEach((collision) => {
         const ball = collision.bodyA as Body;
@@ -107,7 +109,7 @@ export class GamePlayService {
   }
 
   stopGame() {
-    console.log('stop game: ', this.game.match.matchId);
+    this.logger.debug('stop game: ', this.game.match.matchId);
     clearInterval(this.interval);
     Events.off(this.engine, 'beforeUpdate', () => {});
     Events.off(this.engine, 'collisionStart', () => {});
