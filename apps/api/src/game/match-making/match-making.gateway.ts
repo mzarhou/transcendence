@@ -50,6 +50,7 @@ export class MatchMakingGateway {
   async JoinRandomMatch(@ConnectedSocket() client: Socket) {
     const user: ActiveUserData = client.data.user;
     //possible problem if user and adversary are the same
+    console.log('JownRandomMatch\n');
     const adversaryId = Array.from(this.queue.players)[0] as number | undefined;
 
     // if same user

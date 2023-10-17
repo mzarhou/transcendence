@@ -2,7 +2,6 @@ import { useCallback, useEffect, useState } from "react";
 import { useSocket } from "@/context";
 import { usePlayer1State, usePlayer2State } from "../state/player";
 import { useBallState } from "../state/ball";
-import { STATUS, useStatus } from "../state/status";
 import { useMatchState, useScoreState } from "../state";
 import { useLocation, useNavigate } from "react-router-dom";
 import {
@@ -47,7 +46,6 @@ export const useSetGameEvents = () => {
   const setP1Id = usePlayer1State((state) => state.setId);
   const setP2Id = usePlayer2State((state) => state.setId);
   const setBallPosition = useBallState((state) => state.setPosition);
-  const setStatus = useStatus((s) => s.setStatus);
   const { setState: setMatch } = useMatchState();
   const setHome = useScoreState((s) => s.setHomeScore);
   const setAdversary = useScoreState((s) => s.setAdversary);
@@ -60,7 +58,6 @@ export const useSetGameEvents = () => {
 
     socket.on(ServerGameEvents.STARTSGM, (data: StartGameData) => {
       setMatch(data.match);
-      setStatus(STATUS.UPDGAME);
       setP1Id(data.match.homeId);
       setP2Id(data.match.adversaryId);
       navigate("/playing", { replace: true });
@@ -93,7 +90,6 @@ export const useSetGameEvents = () => {
     });
 
     socket.on(ServerGameEvents.GAMEOVER, (data: GameOverData) => {
-      setStatus(STATUS.GAMOVER);
       setMatch({ winnerId: data.winnerId });
       navigate("/gameover");
     });
@@ -109,14 +105,13 @@ export const useSetGameEvents = () => {
 export const useMatchFoundEvent = () => {
   const socket = useSocket();
   const { setState: setMatch } = useMatchState();
-  const setStatus = useStatus((s) => s.setStatus);
 
   useEffect(() => {
     if (!socket) return;
     if (socket.hasListeners(ServerGameEvents.MCHFOUND)) return;
     socket.on(ServerGameEvents.MCHFOUND, (data: MatchFoundData) => {
+      console.log(data);
       setMatch(data.match);
-      setStatus(STATUS.STRGAME);
     });
   }, [socket]);
 };

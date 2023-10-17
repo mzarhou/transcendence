@@ -1,9 +1,8 @@
 import { Button } from "@/components/ui/button";
 import { useSocket } from "@/context";
-import { ClientGameEvents } from "@transcendence/db";
 import { Gamepad2, Settings } from "lucide-react";
 import { useNavigate } from "react-router";
-import { Link } from "react-router-dom";
+import { ClientGameEvents } from "@transcendence/db";
 
 export default function PlayButtons() {
   const socket = useSocket();

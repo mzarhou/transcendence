@@ -6,23 +6,20 @@ import player1 from "/public/images/sismaili.jpeg";
 import player2 from "public/images/mzarhou.jpeg";
 import { useNavigate } from "react-router";
 import {
-  STATUS,
   useBallState,
   useMatchState,
   usePlayer1State,
   usePlayer2State,
   useScoreState,
-  useStatus,
 } from "../state";
-import { ClientGameEvents } from "@transcendence/db";
 import { useSocket } from "@/context";
+import { ClientGameEvents } from "@transcendence/db";
 
 export default function MatchMaking() {
   const navigate = useNavigate();
 
   const socket = useSocket();
   const { matchId } = useMatchState();
-  const status = useStatus();
   const p1 = usePlayer1State();
   const p2 = usePlayer2State();
   const ball = useBallState();
@@ -33,9 +30,7 @@ export default function MatchMaking() {
     p2.reset();
     ball.reset();
     scores.reset();
-    if (status.name == STATUS.STRGAME) {
-      socket?.emit(ClientGameEvents.PLAYMACH, { matchId: matchId });
-    }
+    socket?.emit(ClientGameEvents.PLAYMACH, { matchId: matchId });
   };
 
   const cancelGame = () => {
