@@ -5,7 +5,7 @@ import pong from "/public/images/pong.gif";
 import lightPong from "public/images/light-pong.gif";
 import { useTheme } from "next-themes";
 import ProfileSettings from "./components/profile-settings";
-import PlayButtons from "./components/play_buttons";
+import PlayButtons from "./components/play-buttons";
 
 export default function Game() {
   const { theme } = useTheme();
@@ -15,13 +15,12 @@ export default function Game() {
   }
 
   return (
-    <div>
+    <div className="relative flex h-full flex-col justify-center md:space-y-20">
       <Image
-        src={theme === "dark" ? pong : lightPong}
+        src={pong}
         alt="pong gif"
-        className="mx-auto h-[50%] w-[60%] lg:block xl:mt-32"
+        className="mx-auto md:h-[50%] md:w-[50%]"
       />
-      <ProfileSettings />
       <PlayButtons />
     </div>
   );

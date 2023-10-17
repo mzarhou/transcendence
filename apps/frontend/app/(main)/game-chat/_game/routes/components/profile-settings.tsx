@@ -16,7 +16,7 @@ export default function ProfileSettings() {
   }
 
   return (
-    <div className="brr absolute right-2 top-2 flex flex-col">
+    <div className="absolute right-2 top-2 flex flex-col">
       <Link to="/game-settings">
         <Button className="group flex h-24 w-full flex-col bg-transparent hover:border-2 hover:border-border hover:bg-transparent">
           <Gamepad2 className="h-[20px] w-[20px]" />
