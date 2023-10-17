@@ -15,6 +15,7 @@ import { FriendRequestModule } from './friend-request/friend-request.module';
 import { GroupsModule } from './groups/groups.module';
 import { WebsocketModule } from './websocket/websocket.module';
 import { ZodExceptionFilter } from './+common/filters/zod-exception.filter';
+import { GameModule } from './game/game.module';
 import path from 'path';
 import { ServeStaticModule } from '@nestjs/serve-static';
 import { UploadsModule } from './uploads/uploads.module';
@@ -32,6 +33,7 @@ import { UploadsModule } from './uploads/uploads.module';
     FriendRequestModule,
     GroupsModule,
     WebsocketModule,
+    GameModule,
 
     ServeStaticModule.forRoot({
       rootPath: path.join(__dirname, '..', '/static'),
