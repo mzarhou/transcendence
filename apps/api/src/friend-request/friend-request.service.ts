@@ -16,12 +16,13 @@ import { FriendRequestsRepository } from './repositories/_friend-requests.reposi
 import { FriendRequestPolicy } from './friend-request.policy';
 import { WebsocketService } from '@src/websocket/websocket.service';
 import { UsersRepository } from '@src/users/repositories/users.repository';
+import { UsersService } from '@src/users/users.service';
 
 @Injectable()
 export class FriendRequestService {
   constructor(
     private readonly friendRequestsRepository: FriendRequestsRepository,
-    private readonly usersRepository: UsersRepository,
+    private readonly usersService: UsersService,
     private readonly friendRequestsPolicy: FriendRequestPolicy,
     private readonly notificationsService: NotificationsService,
     private readonly websocketService: WebsocketService,
@@ -32,7 +33,7 @@ export class FriendRequestService {
     createFriendRequestDto: CreateFriendRequestDto,
   ) {
     const { targetUserId } = createFriendRequestDto;
-    if (await this.isUserBlocked({ userId: user.sub, targetUserId })) {
+    if (await this.usersService.isUserBlocked(user.sub, targetUserId)) {
       throw new ForbiddenException("You can't send this friend request");
     }
     this.friendRequestsPolicy.canCreate(user, targetUserId);
@@ -114,15 +115,5 @@ export class FriendRequestService {
       FRIEND_CONNECTED,
       { friendId: friendRequest.recipientId } satisfies FriendConnectedData,
     );
-  }
-
-  private async isUserBlocked(data: { userId: number; targetUserId: number }) {
-    const { blockedUsers, blockingUsers } =
-      await this.usersRepository.findOneOrThrow(data.userId, {
-        includeBlockedUsers: true,
-        includeBlockingUsers: true,
-      });
-    const ids = [...blockedUsers, ...blockingUsers].map((u) => u.id);
-    return ids.includes(data.targetUserId);
   }
 }

@@ -3,7 +3,7 @@ import { RankImage } from "./rank-image";
 import { cn } from "@/lib/utils";
 
 interface UserRankImageProps {
-  user: User | undefined;
+  user: Pick<User, "rank" | "division" | "avatar"> | undefined;
   rankImageWidth?: number;
   className?: string;
 }

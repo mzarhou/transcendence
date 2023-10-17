@@ -10,7 +10,6 @@ import { useIsFriendConnected } from "@/stores/connected-users-atom";
 import { DropdownMenuItem } from "@radix-ui/react-dropdown-menu";
 import { User } from "@transcendence/db";
 import { MoreVertical } from "lucide-react";
-import Image from "next/image";
 import { BlockUserMenuItem } from "./user-item";
 import { useFriendUreadMessagesCount } from "@/api-hooks/use-unread-messages";
 import { cn } from "@/lib/utils";
@@ -68,8 +67,11 @@ export default function FriendItem({
             <p>{friend.name}</p>
             {size === "default" && (
               <>
+                {/* TODO: update game status */}
                 <p className="text-sm text-chat-card-foreground/60">In game</p>
-                <p className="text-sm text-chat-card-foreground/60">#60</p>
+                <p className="text-sm text-chat-card-foreground/60">
+                  #{friend.rank}
+                </p>
               </>
             )}
           </div>

@@ -13,7 +13,7 @@ export default function GameProfile() {
         <h3 className="sm">Your Profile</h3>
       </GoBackBtn>
       <div className="flex h-0 w-full flex-grow flex-col space-y-8 px-1 pt-8  md:p-4 md:px-6 md:pt-0">
-        {user && <UserGameProfile user={user} />}
+        {user && <UserGameProfile userId={user.id} />}
       </div>
     </>
   );

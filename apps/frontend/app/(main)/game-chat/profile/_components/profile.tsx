@@ -1,71 +1,84 @@
+import { useGameProfile } from "@/api-hooks/game/use-game-profile";
+import FullLoader from "@/components/ui/full-loader";
+import FullPlaceHolder from "@/components/ui/full-placeholder";
 import { LoaderButton } from "@/components/ui/loader-button";
 import UserRankImage from "@/components/user-rank-image";
 import { useUser } from "@/context";
-import { User } from "@transcendence/db";
+import { GameProfile } from "@transcendence/db";
+import { Gamepad2, Plus, UserPlus } from "lucide-react";
+import { Gamepad } from "lucide-react";
 
-// TODO: use real data
-
-export default function UserGameProfile({ user }: { user: User }) {
+export default function UserGameProfile({ userId }: { userId: number }) {
   const { user: currentUser } = useUser();
+  const { data: profile, isLoading } = useGameProfile(userId);
+
+  if (isLoading) return <FullLoader />;
+
+  if (!profile)
+    return <FullPlaceHolder text="Failed fetching user game profile" />;
 
   return (
     <div className="text-foreground/80">
       <div className="flex flex-col items-center space-y-2">
-        <UserRankImage user={user} className="h-16 w-16" />
-        <p>{user.name}</p>
+        <UserRankImage user={profile} className="h-16 w-16" />
+        <p>{profile.name}</p>
       </div>
       <div className="mt-4 flex justify-center">
-        {currentUser?.id !== user.id ? (
-          <PlayButton user={user} />
+        {currentUser?.id === profile.id ? (
+          <PlayButton profile={profile} />
         ) : (
-          <AddFriendButton user={user} />
+          <AddFriendButton profile={profile} />
         )}
       </div>
-      <MatchesHistory user={user} />
+      <MatchesHistory profile={profile} />
     </div>
   );
 }
 
-function PlayButton({ user }: { user: User }) {
+function PlayButton({ profile }: { profile: GameProfile }) {
+  // TODO: invite user to play
   const play = () => {};
   return (
-    <LoaderButton onClick={play} isLoading={false}>
-      Play
+    <LoaderButton onClick={play} isLoading={false} className="space-x-2">
+      <Gamepad2 size={20} />
+      <span>Play</span>
     </LoaderButton>
   );
 }
 
-function AddFriendButton({ user }: { user: User }) {
+function AddFriendButton({ profile }: { profile: GameProfile }) {
+  // Todo
   const addFriend = () => {};
   return (
-    <LoaderButton onClick={addFriend} isLoading={false}>
-      Add Friend
+    <LoaderButton onClick={addFriend} isLoading={false} className="space-x-2">
+      <UserPlus size={20} />
+      <span>Add Friend</span>
     </LoaderButton>
   );
 }
 
-function MatchesHistory({ user }: { user: User }) {
+function MatchesHistory({ profile }: { profile: GameProfile }) {
   return (
     <div className="mx-auto mt-10 max-w-[290px] space-y-4 font-boogaloo text-2xl">
       <div className="flex justify-between">
         <p>Matches played</p>
-        <p>20</p>
+        <p>{profile.numOfGames}</p>
       </div>
       <div className="flex justify-between">
         <p>Wins</p>
-        <p>20</p>
+        <p>{profile.nbWins}</p>
       </div>
       <div className="flex justify-between">
         <p>Loses</p>
-        <p>20</p>
+        <p>{profile.nbLoses}</p>
       </div>
       <div className="flex justify-between">
         <p>Points</p>
-        <p>20</p>
+        <p>{profile.eloRating}</p>
       </div>
       <div className="flex flex-col items-center">
         <p className="text-3xl">Rank</p>
-        <p className="text-7xl">29</p>
+        <p className="text-7xl">{profile.rank}</p>
       </div>
     </div>
   );
