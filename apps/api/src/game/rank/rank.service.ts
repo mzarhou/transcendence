@@ -1,5 +1,6 @@
 import { ForbiddenException, Injectable } from '@nestjs/common';
 import { PrismaService } from '@src/+prisma/prisma.service';
+import { ChatService } from '@src/chat/chat.service';
 import { MatchesService } from '@src/game/matches/matches.service';
 import { ActiveUserData } from '@src/iam/interface/active-user-data.interface';
 import { UsersService } from '@src/users/users.service';
@@ -12,6 +13,7 @@ export class RankService {
     private prisma: PrismaService,
     private matches: MatchesService,
     private readonly usersService: UsersService,
+    private readonly chatService: ChatService,
   ) {}
 
   async getGameProfile(currentUser: ActiveUserData, userId: number) {
@@ -32,6 +34,8 @@ export class RankService {
       });
 
     const nbWins = user.matches3.length;
+    const isFriend = await this.chatService.isFriendOf(currentUser, userId);
+
     return {
       id: user.id,
       name: user.name,
@@ -43,6 +47,7 @@ export class RankService {
       numOfGames,
       nbWins,
       nbLoses: numOfGames - nbWins,
+      isFriend,
     } satisfies GameProfile;
   }
 

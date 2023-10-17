@@ -12,5 +12,6 @@ export type GameProfile = Prettify<
   Omit<User, UserDangerProps> & {
     nbWins: number;
     nbLoses: number;
+    isFriend: boolean;
   }
 >;

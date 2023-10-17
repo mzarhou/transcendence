@@ -46,7 +46,7 @@ export default function GameLayout({ children }: Props) {
         </DialogContent>
       </Dialog>
       <div className="h-full space-x-4 md:flex">
-        <div className="h-[calc(100vh-220px)] flex-grow overflow-y-auto border text-card-foreground/40 md:h-[calc(100vh-160px)]">
+        <div className="h-[calc(100vh-220px)] flex-grow overflow-y-auto rounded-md border text-card-foreground/40 md:h-[calc(100vh-160px)]">
           <GameRouter />
         </div>
         <div className="relative hidden h-full w-full overflow-y-hidden md:block md:max-w-sm">

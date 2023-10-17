@@ -9,12 +9,12 @@ import { Gamepad2, Plus, UserPlus } from "lucide-react";
 import { Gamepad } from "lucide-react";
 
 export default function UserGameProfile({ userId }: { userId: number }) {
-  const { user: currentUser } = useUser();
+  const { user: currentUser, isLoading: isLoadingUser } = useUser();
   const { data: profile, isLoading } = useGameProfile(userId);
 
-  if (isLoading) return <FullLoader />;
+  if (isLoading || isLoadingUser) return <FullLoader />;
 
-  if (!profile)
+  if (!profile || !currentUser)
     return <FullPlaceHolder text="Failed fetching user game profile" />;
 
   return (
@@ -24,11 +24,12 @@ export default function UserGameProfile({ userId }: { userId: number }) {
         <p>{profile.name}</p>
       </div>
       <div className="mt-4 flex justify-center">
-        {currentUser?.id === profile.id ? (
-          <PlayButton profile={profile} />
-        ) : (
-          <AddFriendButton profile={profile} />
-        )}
+        {currentUser.id !== profile.id &&
+          (profile.isFriend ? (
+            <PlayButton profile={profile} />
+          ) : (
+            <AddFriendButton profile={profile} />
+          ))}
       </div>
       <MatchesHistory profile={profile} />
     </div>
