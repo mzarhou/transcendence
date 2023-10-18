@@ -124,6 +124,9 @@ export const useMatchFoundEvent = () => {
       setStatus(STATUS.STRGAME);
       navigate("/waiting", { replace: true });
     });
+    socket.on(ServerGameEvents.GAME_CANCELED, (_data: null) => {
+      navigate("/", { replace: true });
+    });
   }, [socket]);
 };
 

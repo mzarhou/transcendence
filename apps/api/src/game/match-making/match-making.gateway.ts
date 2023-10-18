@@ -12,7 +12,7 @@ import { UseGuards } from '@nestjs/common';
 import { WebsocketService } from '@src/websocket/websocket.service';
 import { CONNECTION_STATUS } from '@src/websocket/websocket.enum';
 import { Subscription } from 'rxjs';
-import { MatchFoundData } from '@transcendence/db';
+import { GameCanceledData, MatchFoundData } from '@transcendence/db';
 import { ClientGameEvents } from '@transcendence/db';
 import { ServerGameEvents } from '@transcendence/db';
 import { PlayersQueueStorage } from './players-queue.storage';
@@ -40,6 +40,15 @@ export class MatchMakingGateway {
         if (event.name === CONNECTION_STATUS.DISCONNECTED) {
           const user = event.data as ActiveUserData;
           await this.playersQueue.deletePlayerById(user.sub);
+        }
+
+        /**
+         * if user exists in queue should be removed
+         * when game canceled
+         */
+        if (event.name === ServerGameEvents.GAME_CANCELED) {
+          const { canceledById } = event.data as GameCanceledData;
+          await this.playersQueue.deletePlayerById(canceledById);
         }
       },
     });

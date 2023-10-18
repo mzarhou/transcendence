@@ -11,6 +11,8 @@ export enum ServerGameEvents {
   GAMEOVER = "gameOver",
   IN_GAME = "ingame",
   Invitation = "game-invitation",
+  WAITING = "game-waiting",
+  GAME_CANCELED = "game-canceled",
 }
 
 /**
@@ -21,6 +23,10 @@ export enum ClientGameEvents {
   PLAYMACH = "playMatch",
   MoveLeft = "MoveLeft",
   MoveRight = "MoveRight",
+}
+
+export interface GameCanceledData {
+  canceledById: number;
 }
 
 export interface GameInvitationData {
