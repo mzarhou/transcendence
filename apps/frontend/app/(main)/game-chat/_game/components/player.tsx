@@ -24,10 +24,6 @@ export function Player(playerProps: PlayerState) {
   const arrowRight = usePlayerPosition("ArrowRight");
   const { setState, ...match } = useMatchState();
 
-  useEffect(() => {
-    console.log({ playerProps, p1, p2 });
-  }, [playerProps, p1, p2]);
-
   useFrame(() => {
     if (playerRef.current) {
       playerRef.current.position.x = playerProps.posi[0];

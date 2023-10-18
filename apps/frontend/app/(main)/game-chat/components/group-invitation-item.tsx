@@ -20,9 +20,7 @@ export function GroupInvitationItem({ invitation }: GroupInvitationItemProps) {
   const removeGroupInvitation = async () => {
     try {
       await refuse();
-    } catch (error) {
-      console.log({ error });
-    }
+    } catch (error) {}
   };
 
   const acceptInvitation = async () => {

@@ -21,10 +21,6 @@ export const useSignIn = () => {
         await refresh();
       },
       onError: (error) => {
-        if (error instanceof AxiosError) {
-          const { response, code } = error;
-          console.log({ response, code });
-        }
         toast({
           description: getServerMessage(error, "Failed to sign in"),
           variant: "destructive",
