@@ -10,6 +10,8 @@ import {
   FriendConnectedData,
   FriendDisconnectedData,
   FriendRequest,
+  InGameEventData,
+  ServerGameEvents,
   UNFRIEND_EVENT,
 } from "@transcendence/db";
 import { friendsKey } from "@/api-hooks/use-friends";
@@ -17,6 +19,7 @@ import { friendRequestsKey } from "@/api-hooks/friend-requests/use-friend-reques
 import { notificationsKey } from "@/api-hooks/notifications/use-notifications";
 import { connectedFriendsAtom } from "@/stores/connected-users-atom";
 import { useAtom } from "jotai";
+import { inGameFriendsAtom } from "@/stores/in-game-users-atom";
 
 export default function useFriendsEvents(socket: Socket) {
   const { user } = useUser();
@@ -24,6 +27,7 @@ export default function useFriendsEvents(socket: Socket) {
 
   const onFriendConnected = useOnFriendConnected();
   const onFriendDisconnected = useOnFriendDisconnected();
+  const onFriendInGameStatusChanged = useOnFriendInGameStatusChanged();
 
   useEffect(() => {
     if (!user) return;
@@ -33,8 +37,13 @@ export default function useFriendsEvents(socket: Socket) {
       onFriendConnected(data);
       mutate(friendsKey);
     });
+
     socket.on(FRIEND_DISCONNECTED, (data: FriendDisconnectedData) => {
       onFriendDisconnected(data);
+    });
+
+    socket.on(ServerGameEvents.IN_GAME, (data: InGameEventData) => {
+      onFriendInGameStatusChanged(data);
     });
 
     socket.on(FRIEND_REQUEST_EVENT, (_data: FriendRequest) => {
@@ -78,4 +87,21 @@ const useOnFriendDisconnected = () => {
   );
 
   return onFriendDisconnected;
+};
+
+const useOnFriendInGameStatusChanged = () => {
+  const [, setInGameFriends] = useAtom(inGameFriendsAtom);
+
+  const onFriendConnected = ({ inGame, friendId }: InGameEventData) => {
+    if (inGame) {
+      setInGameFriends((oldFriendsSet) => new Set(oldFriendsSet.add(friendId)));
+    } else {
+      setInGameFriends((oldFriendsSet) => {
+        oldFriendsSet.delete(friendId);
+        return new Set(oldFriendsSet);
+      });
+    }
+  };
+
+  return onFriendConnected;
 };
