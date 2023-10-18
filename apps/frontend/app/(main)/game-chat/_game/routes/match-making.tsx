@@ -16,6 +16,7 @@ import {
 } from "../state";
 import { ClientGameEvents } from "@transcendence/db";
 import { useSocket } from "@/context";
+import { useCancelGame } from "@/api-hooks/game/user-cancel-game";
 
 export default function MatchMaking() {
   const navigate = useNavigate();
@@ -28,6 +29,8 @@ export default function MatchMaking() {
   const ball = useBallState();
   const scores = useScoreState();
 
+  const { trigger: cancel } = useCancelGame(matchId);
+
   const startGame = () => {
     p1.reset();
     p2.reset();
@@ -38,9 +41,10 @@ export default function MatchMaking() {
     }
   };
 
-  const cancelGame = () => {
-    // TODO: cancel game
-    navigate("/", { replace: true });
+  const cancelGame = async () => {
+    try {
+      await cancel();
+    } catch (error) {}
   };
 
   return (
