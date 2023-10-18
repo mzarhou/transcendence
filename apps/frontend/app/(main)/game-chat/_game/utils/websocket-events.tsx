@@ -62,6 +62,14 @@ export const useSetGameEvents = () => {
     if (!socket) return;
     if (socket.hasListeners(ServerGameEvents.STARTSGM)) return;
 
+    socket.on(ServerGameEvents.WAITING, (data: StartGameData) => {
+      setMatch(data.match);
+      setStatus(STATUS.UPDGAME);
+      setP1Id(data.match.homeId);
+      setP2Id(data.match.adversaryId);
+      navigate("/playing", { replace: true });
+    });
+
     socket.on(ServerGameEvents.STARTSGM, (data: StartGameData) => {
       setMatch(data.match);
       setStatus(STATUS.UPDGAME);
@@ -115,11 +123,15 @@ export const useMatchFoundEvent = () => {
   const { setState: setMatch } = useMatchState();
   const setStatus = useStatus((s) => s.setStatus);
   const navigate = useNavigate();
+  const setP1Id = usePlayer1State((state) => state.setId);
+  const setP2Id = usePlayer2State((state) => state.setId);
 
   useEffect(() => {
     if (!socket) return;
     if (socket.hasListeners(ServerGameEvents.MCHFOUND)) return;
     socket.on(ServerGameEvents.MCHFOUND, (data: MatchFoundData) => {
+      setP1Id(data.match.homeId);
+      setP2Id(data.match.adversaryId);
       setMatch(data.match);
       setStatus(STATUS.STRGAME);
       navigate("/waiting", { replace: true });

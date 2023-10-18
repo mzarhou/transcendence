@@ -2,40 +2,42 @@ import { Button } from "@/components/ui/button";
 import { X } from "lucide-react";
 import Image from "next/image";
 import Vs from "/public/images/vs.png";
-import player1 from "/public/images/sismaili.jpeg";
-import player2 from "public/images/mzarhou.jpeg";
-import { useNavigate } from "react-router";
 import {
   STATUS,
-  useBallState,
   useMatchState,
   usePlayer1State,
   usePlayer2State,
-  useScoreState,
   useStatus,
 } from "../state";
 import { ClientGameEvents } from "@transcendence/db";
-import { useSocket } from "@/context";
+import { useSocket, useUser } from "@/context";
 import { useCancelGame } from "@/api-hooks/game/user-cancel-game";
+import { useGameProfile } from "@/api-hooks/game/use-game-profile";
+import UserRankImage from "@/components/user-rank-image";
+import { useEffect } from "react";
+import { useResetGameState } from "../state/use-reset-state";
+import Lottie from "react-lottie";
+import WaintingAnimationData from "lotties/waiting-match.json";
 
 export default function MatchMaking() {
-  const navigate = useNavigate();
-
   const socket = useSocket();
   const { matchId } = useMatchState();
   const status = useStatus();
   const p1 = usePlayer1State();
   const p2 = usePlayer2State();
-  const ball = useBallState();
-  const scores = useScoreState();
+  const { user } = useUser();
+
+  const { data: user1Profile } = useGameProfile(p1.id);
+  const { data: user2Profile } = useGameProfile(p2.id);
+
+  const resetGameState = useResetGameState();
+  useEffect(() => {
+    resetGameState();
+  }, []);
 
   const { trigger: cancel } = useCancelGame(matchId);
 
   const startGame = () => {
-    p1.reset();
-    p2.reset();
-    ball.reset();
-    scores.reset();
     if (status.name == STATUS.STRGAME) {
       socket?.emit(ClientGameEvents.PLAYMACH, { matchId: matchId });
     }
@@ -55,18 +57,30 @@ export default function MatchMaking() {
       >
         <X />
       </Button>
-      <div className="flex px-4">
-        <Image
-          src={player1}
-          alt="player 1"
-          className="mt-40 h-[40%] w-[30%] rounded-full"
-        />
-        <Image src={Vs} alt="Vs" className="mt-36 h-[50%] w-[50%]" />
-        <Image
-          src={player2}
-          alt="player 2"
-          className="mt-40 h-[40%] w-[30%] rounded-full"
-        />
+      <div className="mt-40 flex px-4">
+        {
+          <UserRankImage
+            user={user1Profile ?? user}
+            className="h-[40%] w-[30%] rounded-full"
+          />
+        }
+        <Image src={Vs} alt="Vs" className="-mt-4 h-[50%] w-[50%]" />
+        {user2Profile ? (
+          <UserRankImage
+            user={user2Profile ?? user}
+            className="h-[40%] w-[30%] rounded-full"
+          />
+        ) : (
+          <div className="h-[40%] w-[30%] rounded-full bg-white/5">
+            <Lottie
+              options={{
+                animationData: WaintingAnimationData,
+                loop: true,
+                autoplay: true,
+              }}
+            />
+          </div>
+        )}
       </div>
       <Button onClick={startGame} className="mx-auto mt-4 block">
         Start Game
