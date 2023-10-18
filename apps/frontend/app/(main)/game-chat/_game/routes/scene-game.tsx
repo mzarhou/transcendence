@@ -6,13 +6,14 @@ import { Canvas } from "@react-three/fiber";
 import { Board } from "../components/board";
 import { CamScene } from "../components/camScene";
 import { Player } from "../components/player";
-import { boardEntity } from "../entity/entity";
 import { usePlayer1State, usePlayer2State } from "../state";
 import { Scores } from "../components/scores";
+import { useBoardState } from "../state/board";
 
 export function SceneGame() {
   const player1 = usePlayer1State();
   const player2 = usePlayer2State();
+  const board = useBoardState();
 
   return (
     <>
@@ -23,7 +24,7 @@ export function SceneGame() {
           <Ball />
           <Player {...player2} />
           <Player {...player1} />
-          <Board {...boardEntity} />
+          <Board {...board} />
         </Suspense>
       </Canvas>
     </>

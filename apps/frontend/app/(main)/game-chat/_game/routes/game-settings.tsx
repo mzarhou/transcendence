@@ -1,5 +1,5 @@
 import { ChevronLeft } from "lucide-react";
-import MapsCard from "./components/maps-card";
+import MapsCard from "./components/MapsCard";
 import ViewCard from "./components/view-card";
 import { Button } from "@/components/ui/button";
 import BotCard from "./components/bot-card";
@@ -16,7 +16,6 @@ export default function GameSettings() {
       <div className="pb-8 pt-20 xl:w-full">
         <MapsCard />
         <ViewCard />
-        <BotCard />
       </div>
     </>
   );
