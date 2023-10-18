@@ -7,6 +7,7 @@ import { IamModule } from '@src/iam/iam.module';
 import { WebsocketModule } from '@src/websocket/websocket.module';
 import { GameStatusGateway } from './game-status.gateway';
 import { ChatModule } from '@src/chat/chat.module';
+import { GameInvitationsModule } from './game-invitations/game-invitations.module';
 
 @Module({
   imports: [
@@ -17,6 +18,7 @@ import { ChatModule } from '@src/chat/chat.module';
     MatchMakingModule,
     GamePlayModule,
     WebsocketModule,
+    GameInvitationsModule,
   ],
   providers: [GameStatusGateway],
 })

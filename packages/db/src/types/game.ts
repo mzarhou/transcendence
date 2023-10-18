@@ -1,7 +1,7 @@
 import { User } from "@prisma/client";
 import { Prettify } from "../utils";
 
-type UserDangerProps =
+export type UserDangerProps =
   | "email"
   | "school42Id"
   | "isTfaEnabled"

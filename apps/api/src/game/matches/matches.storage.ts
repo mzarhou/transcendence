@@ -42,22 +42,24 @@ export class MatchesStorage {
 
   removePlayer(userId: number) {
     const game = this.games.find((g) => g.users.includes(userId));
-    if (!game) return;
+    if (!game || game.state === State.PLAYING) return;
 
-    if (game.state !== State.PLAYING) {
-      this.websocketService.addEvent(
-        [game.match.adversaryId, game.match.homeId],
-        ServerGameEvents.GAMEOVER,
-        {
-          winnerId: game.match.winnerId!,
-          match: game.match,
-        } satisfies GameOverData,
-      );
-    }
+    this.websocketService.addEvent(
+      [game.match.adversaryId, game.match.homeId],
+      ServerGameEvents.GAMEOVER,
+      {
+        winnerId: game.match.winnerId!,
+        match: game.match,
+      } satisfies GameOverData,
+    );
 
-    game.state = State.OVER;
     this.games = this.games.filter(
       (g) => g.match.matchId !== game.match.matchId,
     );
+  }
+
+  isUserInGame(userId: number) {
+    const game = this.games.find((g) => g.users.includes(userId));
+    return !!game;
   }
 }

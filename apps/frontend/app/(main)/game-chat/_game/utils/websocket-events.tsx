@@ -6,12 +6,16 @@ import { STATUS, useStatus } from "../state/status";
 import { useMatchState, useScoreState } from "../state";
 import { useLocation, useNavigate } from "react-router-dom";
 import {
+  GameInvitationData,
   GameOverData,
   MatchFoundData,
   ServerGameEvents,
   StartGameData,
   UpdateGameData,
 } from "@transcendence/db";
+import { useToast } from "@/components/ui/use-toast";
+import { ToastAction } from "@radix-ui/react-toast";
+import { useAcceptGameInvitation } from "@/api-hooks/game/use-accept-game-invitation";
 
 export function usePlayerPosition(direction: string): boolean {
   const [arrowDirection, setArrowDirection] = useState(false);
@@ -110,6 +114,7 @@ export const useMatchFoundEvent = () => {
   const socket = useSocket();
   const { setState: setMatch } = useMatchState();
   const setStatus = useStatus((s) => s.setStatus);
+  const navigate = useNavigate();
 
   useEffect(() => {
     if (!socket) return;
@@ -117,6 +122,49 @@ export const useMatchFoundEvent = () => {
     socket.on(ServerGameEvents.MCHFOUND, (data: MatchFoundData) => {
       setMatch(data.match);
       setStatus(STATUS.STRGAME);
+      navigate("/waiting", { replace: true });
     });
   }, [socket]);
 };
+
+export const useGameInvitationEvents = () => {
+  const socket = useSocket();
+  const { toast } = useToast();
+
+  useEffect(() => {
+    if (!socket) return;
+    if (socket.hasListeners(ServerGameEvents.Invitation)) return;
+    socket.on(
+      ServerGameEvents.Invitation,
+      ({ profile, invitationId }: GameInvitationData) => {
+        toast({
+          duration: 10 * 1000,
+          title: "Game Invitation",
+          description: `${profile.name} wants to play against you`,
+          action: <AcceptGameInvitationBtn invitationId={invitationId} />,
+        });
+      }
+    );
+  }, []);
+};
+
+function AcceptGameInvitationBtn({ invitationId }: { invitationId: string }) {
+  const { trigger, isMutating } = useAcceptGameInvitation(invitationId);
+
+  const acceptGameInvitation = () => {
+    // TODO: send game invitation
+    try {
+      trigger();
+    } catch (error) {}
+  };
+
+  return (
+    <ToastAction
+      altText="Accept"
+      onClick={acceptGameInvitation}
+      disabled={isMutating}
+    >
+      {isMutating ? <>Accepting...</> : <>Accept</>}
+    </ToastAction>
+  );
+}
