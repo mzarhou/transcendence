@@ -15,7 +15,10 @@ import { UseGuards } from '@nestjs/common';
 import { MatchesStorage } from './matches.storage';
 import { WebsocketService } from '@src/websocket/websocket.service';
 import { Subscription } from 'rxjs';
-import { CONNECTION_STATUS } from '@src/websocket/websocket.enum';
+import {
+  CONNECTION_STATUS,
+  NewSocketData,
+} from '@src/websocket/websocket.enum';
 import { ServerGameEvents, StartGameData } from '@transcendence/db';
 import { ClientGameEvents } from '@transcendence/db';
 import { PlayMatchData } from '@transcendence/db';

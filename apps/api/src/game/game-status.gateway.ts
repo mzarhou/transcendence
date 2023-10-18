@@ -1,8 +1,14 @@
 import { Logger, OnApplicationShutdown } from '@nestjs/common';
 import { OnGatewayInit, WebSocketGateway } from '@nestjs/websockets';
 import { ChatService } from '@src/chat/chat.service';
+import { ActiveUserData } from '@src/iam/interface/active-user-data.interface';
 import { WebsocketEvent } from '@src/websocket/weboscket-event.interface';
+import {
+  CONNECTION_STATUS,
+  NewSocketData,
+} from '@src/websocket/websocket.enum';
 import { WebsocketService } from '@src/websocket/websocket.service';
+import { StartGameData, User } from '@transcendence/db';
 import {
   GameOverData,
   InGameEventData,
@@ -12,6 +18,7 @@ import {
 } from '@transcendence/db';
 import { Subscription } from 'rxjs';
 import { z } from 'zod';
+import { MatchesStorage } from './matches/matches.storage';
 
 @WebSocketGateway()
 export class GameStatusGateway implements OnGatewayInit, OnApplicationShutdown {
@@ -21,6 +28,7 @@ export class GameStatusGateway implements OnGatewayInit, OnApplicationShutdown {
   constructor(
     private readonly websocketService: WebsocketService,
     private readonly chatService: ChatService,
+    private readonly matchesStorage: MatchesStorage,
   ) {}
 
   onApplicationShutdown(_signal?: string | undefined) {
@@ -30,8 +38,8 @@ export class GameStatusGateway implements OnGatewayInit, OnApplicationShutdown {
   afterInit(_server: any) {
     this.subscription = this.websocketService.getEventSubject$().subscribe({
       next: (event: WebsocketEvent) => {
-        if (event.name === ServerGameEvents.MCHFOUND) {
-          const { match } = event.data as MatchFoundData;
+        if (event.name === ServerGameEvents.STARTSGM) {
+          const { match } = event.data as StartGameData;
           this.onStartGame(match);
         } else if (event.name === ServerGameEvents.GAMEOVER) {
           const { match } = event.data as GameOverData;
@@ -39,6 +47,9 @@ export class GameStatusGateway implements OnGatewayInit, OnApplicationShutdown {
           if (usersIdsResult.success) {
             this.onGameOver(match);
           }
+        } else if (event.name === CONNECTION_STATUS.NEW_SOCKET) {
+          const { user } = event.data as NewSocketData;
+          this.onNewSocket(user);
         }
       },
     });
@@ -82,5 +93,17 @@ export class GameStatusGateway implements OnGatewayInit, OnApplicationShutdown {
       ServerGameEvents.IN_GAME,
       { inGame: false, friendId: adversaryId } satisfies InGameEventData,
     );
+  }
+
+  private async onNewSocket(user: ActiveUserData) {
+    const friendIds = await this.getFriendsIds(user.sub);
+    for (const fId of friendIds) {
+      if (this.matchesStorage.isUserInGame(fId)) {
+        this.websocketService.addEvent([user.sub], ServerGameEvents.IN_GAME, {
+          inGame: true,
+          friendId: fId,
+        } satisfies InGameEventData);
+      }
+    }
   }
 }

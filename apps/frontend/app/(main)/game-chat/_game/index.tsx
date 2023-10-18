@@ -4,7 +4,11 @@ import { useEffect, useState } from "react";
 
 import { SceneGame } from "./routes/scene-game";
 import { Route, Routes, useLocation, MemoryRouter } from "react-router-dom";
-import { useMatchFoundEvent, useSetGameEvents } from "./utils/websocket-events";
+import {
+  useGameInvitationEvents,
+  useMatchFoundEvent,
+  useSetGameEvents,
+} from "./utils/websocket-events";
 import GameSettings from "./routes/game-settings";
 import MatchMaking from "./routes/match-making";
 import GameHome from "./routes/game-home";
@@ -24,6 +28,7 @@ function DetectRouteChanges() {
 function GameEvents() {
   useSetGameEvents();
   useMatchFoundEvent();
+  useGameInvitationEvents();
 
   return <></>;
 }

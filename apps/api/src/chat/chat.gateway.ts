@@ -4,7 +4,10 @@ import { OnApplicationShutdown } from '@nestjs/common';
 import { WebsocketService } from '@src/websocket/websocket.service';
 import { Subscription } from 'rxjs';
 import { Server } from 'socket.io';
-import { CONNECTION_STATUS } from '@src/websocket/websocket.enum';
+import {
+  CONNECTION_STATUS,
+  NewSocketData,
+} from '@src/websocket/websocket.enum';
 import { ActiveUserData } from '@src/iam/interface/active-user-data.interface';
 import { ChatService } from '@src/chat/chat.service';
 import { FRIEND_CONNECTED } from '@transcendence/db';
@@ -33,10 +36,13 @@ export class ChatGateway implements OnGatewayInit, OnApplicationShutdown {
   afterInit(_server: Server) {
     this.subscription = this.websocketService.getEventSubject$().subscribe({
       next: (event) => {
-        if (
-          event.name === CONNECTION_STATUS.CONNECTED ||
-          event.name === CONNECTION_STATUS.DISCONNECTED
-        ) {
+        if (event.name === CONNECTION_STATUS.NEW_SOCKET) {
+          this.onConnectionStatusChanged(
+            event.name,
+            (event.data as NewSocketData).user,
+          );
+        }
+        if (event.name === CONNECTION_STATUS.DISCONNECTED) {
           this.onConnectionStatusChanged(
             event.name,
             event.data as ActiveUserData,
@@ -55,7 +61,7 @@ export class ChatGateway implements OnGatewayInit, OnApplicationShutdown {
       this.websocketService.filterConnectedUsers(_friends);
 
     /** let user know all connected friends */
-    if (event === CONNECTION_STATUS.CONNECTED) {
+    if (event === CONNECTION_STATUS.NEW_SOCKET) {
       for (const friendId of connectedFriends) {
         this.websocketService.addEvent([user.sub], FRIEND_CONNECTED, {
           friendId,

@@ -15,6 +15,7 @@ import { useFriendUreadMessagesCount } from "@/api-hooks/use-unread-messages";
 import { cn } from "@/lib/utils";
 import Link from "next/link";
 import { useIsFriendInGame } from "@/stores/in-game-users-atom";
+import { useCreateGameInvitation } from "@/api-hooks/game/use-create-game-invitation";
 
 type FriendItemProps = {
   friend: User;
@@ -31,6 +32,7 @@ export default function FriendItem({
   const inGame = useIsFriendInGame(friend.id);
   const isConnected = useIsFriendConnected(friend.id);
   const unreadMessagesCount = useFriendUreadMessagesCount(friend.id);
+  const { trigger: sendGameInvitation } = useCreateGameInvitation();
 
   return (
     <div className={cn("relative flex justify-between", className)}>
@@ -92,7 +94,16 @@ export default function FriendItem({
             />
           </DropdownMenuTrigger>
           <DropdownMenuContent align="end">
-            <DropdownMenuItem className="cursor-pointer">Play</DropdownMenuItem>
+            <DropdownMenuItem
+              className="cursor-pointer"
+              onClick={() => {
+                try {
+                  sendGameInvitation({ friendId: friend.id });
+                } catch (error) {}
+              }}
+            >
+              Play
+            </DropdownMenuItem>
             <DropdownMenuItem className="cursor-pointer">
               Profile
             </DropdownMenuItem>

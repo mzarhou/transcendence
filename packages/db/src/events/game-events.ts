@@ -1,4 +1,5 @@
 import { Match } from "@prisma/client";
+import { GameProfile } from "../types";
 
 /**
  * events sent by Server
@@ -9,6 +10,7 @@ export enum ServerGameEvents {
   UPDTGAME = "updateGame",
   GAMEOVER = "gameOver",
   IN_GAME = "ingame",
+  Invitation = "game-invitation",
 }
 
 /**
@@ -20,6 +22,12 @@ export enum ClientGameEvents {
   MoveLeft = "MoveLeft",
   MoveRight = "MoveRight",
 }
+
+export interface GameInvitationData {
+  invitationId: string;
+  profile: GameProfile;
+}
+
 export interface PlayMatchData {
   matchId: number;
 }

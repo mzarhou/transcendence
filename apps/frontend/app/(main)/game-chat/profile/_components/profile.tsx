@@ -1,3 +1,4 @@
+import { useCreateGameInvitation } from "@/api-hooks/game/use-create-game-invitation";
 import { useGameProfile } from "@/api-hooks/game/use-game-profile";
 import FullLoader from "@/components/ui/full-loader";
 import FullPlaceHolder from "@/components/ui/full-placeholder";
@@ -37,10 +38,16 @@ export default function UserGameProfile({ userId }: { userId: number }) {
 }
 
 function PlayButton({ profile }: { profile: GameProfile }) {
-  // TODO: invite user to play
-  const play = () => {};
+  const { trigger: sendGameInvitation, isMutating } = useCreateGameInvitation();
+
+  const play = () => {
+    try {
+      sendGameInvitation({ friendId: profile.id });
+    } catch (error) {}
+  };
+
   return (
-    <LoaderButton onClick={play} isLoading={false} className="space-x-2">
+    <LoaderButton onClick={play} isLoading={isMutating} className="space-x-2">
       <Gamepad2 size={20} />
       <span>Play</span>
     </LoaderButton>
