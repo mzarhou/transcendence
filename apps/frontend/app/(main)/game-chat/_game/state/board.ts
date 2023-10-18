@@ -2,10 +2,10 @@ import { BoardType } from "@transcendence/db";
 import { create } from "zustand";
 
 export enum STATUS {
-  BBLACK = "board_black.png",
-  BBLUE = "board_blue.png",
-  BGREEN = "board_green.png",
-  BORANGE = "board_orange.png",
+  BBLACK = "/board_black.png",
+  BBLUE = "/board_blue.png",
+  BGREEN = "/board_green.png",
+  BORANGE = "/board_orange.png",
 }
 
 interface BoardState extends BoardType {
