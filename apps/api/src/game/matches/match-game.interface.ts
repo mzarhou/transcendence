@@ -1,7 +1,6 @@
 import { WebsocketService } from '@src/websocket/websocket.service';
 import { GameData } from '../gameplay/gameData';
 import { GamePlayService } from '../gameplay/gameplay.service';
-import { MatchesService } from './matches.service';
 import { State } from '@transcendence/db';
 import { Match } from '@transcendence/db';
 
@@ -10,7 +9,7 @@ export class Game {
   users: number[];
   gameData: GameData;
   gameService!: GamePlayService;
-  match: any;
+  match: Match;
 
   // TODO: refactor use match only
   constructor(

@@ -8,6 +8,7 @@ export enum ServerGameEvents {
   STARTSGM = "startGame",
   UPDTGAME = "updateGame",
   GAMEOVER = "gameOver",
+  IN_GAME = "ingame",
 }
 
 /**
@@ -29,12 +30,17 @@ export interface MoveRightData {
   match: Match;
 }
 
+export interface InGameEventData {
+  friendId: number;
+  inGame: boolean;
+}
 export interface MatchFoundData {
   match: Match;
 }
 export interface StartGameData extends MatchFoundData {}
 export interface GameOverData {
   winnerId: number;
+  match: Match;
 }
 
 export interface UpdateGameData {

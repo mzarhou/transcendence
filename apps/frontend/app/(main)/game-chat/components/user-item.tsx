@@ -12,6 +12,7 @@ import { ReactNode } from "react";
 import { useBlockUser } from "@/api-hooks/use-block-user";
 import { useRouter } from "next/navigation";
 import { cn } from "@/lib/utils";
+import { useIsFriendInGame } from "@/stores/in-game-users-atom";
 
 type UserItemProps = {
   user: User;
@@ -28,6 +29,7 @@ export default function UserItem({
 }: UserItemProps) {
   isBlocked ??= false;
 
+  const inGame = useIsFriendInGame(user.id);
   const router = useRouter();
 
   const goToUserProfile = () => {
@@ -57,8 +59,7 @@ export default function UserItem({
           className={cn("mt-0.5", { "cursor-pointer": !isBlocked })}
         >
           <p>{user.name}</p>
-          {/* TODO: update with real data */}
-          <p className="text-sm text-chat-card-foreground/60">In game</p>
+          <p className="text-sm text-chat-card-foreground/60">{inGame}</p>
           <p className="text-sm text-chat-card-foreground/60">#{user.rank}</p>
         </div>
         <div className="absolute bottom-0 right-2">{children}</div>

@@ -14,6 +14,7 @@ import { BlockUserMenuItem } from "./user-item";
 import { useFriendUreadMessagesCount } from "@/api-hooks/use-unread-messages";
 import { cn } from "@/lib/utils";
 import Link from "next/link";
+import { useIsFriendInGame } from "@/stores/in-game-users-atom";
 
 type FriendItemProps = {
   friend: User;
@@ -27,7 +28,8 @@ export default function FriendItem({
 }: FriendItemProps) {
   size ??= "default";
 
-  const isFriendConnected = useIsFriendConnected();
+  const inGame = useIsFriendInGame(friend.id);
+  const isConnected = useIsFriendConnected(friend.id);
   const unreadMessagesCount = useFriendUreadMessagesCount(friend.id);
 
   return (
@@ -47,7 +49,7 @@ export default function FriendItem({
               alt=""
               className="rounded-full"
             />
-            {isFriendConnected(friend.id) && (
+            {isConnected && (
               <div
                 className={cn(
                   "absolute  bottom-1.5 right-0.5 h-4 w-4 rounded-full border-2 border-card bg-green-400",
@@ -67,8 +69,11 @@ export default function FriendItem({
             <p>{friend.name}</p>
             {size === "default" && (
               <>
-                {/* TODO: update game status */}
-                <p className="text-sm text-chat-card-foreground/60">In game</p>
+                {inGame && (
+                  <p className="text-sm text-chat-card-foreground/60">
+                    In game
+                  </p>
+                )}
                 <p className="text-sm text-chat-card-foreground/60">
                   #{friend.rank}
                 </p>

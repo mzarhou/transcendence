@@ -4,14 +4,20 @@ import { MatchMakingModule } from './match-making/match-making.module';
 import { GamePlayModule } from './gameplay/gameplay.module';
 import { MatchesModule } from './matches/matches.module';
 import { IamModule } from '@src/iam/iam.module';
+import { WebsocketModule } from '@src/websocket/websocket.module';
+import { GameStatusGateway } from './game-status.gateway';
+import { ChatModule } from '@src/chat/chat.module';
 
 @Module({
   imports: [
+    ChatModule,
     IamModule,
     RankModule,
     MatchesModule,
     MatchMakingModule,
     GamePlayModule,
+    WebsocketModule,
   ],
+  providers: [GameStatusGateway],
 })
 export class GameModule {}
