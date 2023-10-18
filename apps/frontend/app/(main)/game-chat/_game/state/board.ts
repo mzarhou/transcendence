@@ -1,4 +1,5 @@
 import { BoardType } from "@transcendence/db";
+import { StaticImport } from "next/dist/shared/lib/get-img-props";
 import { create } from "zustand";
 
 export enum COURT {
@@ -9,7 +10,7 @@ export enum COURT {
 }
 
 interface BoardState extends BoardType {
-  setTexture: (txtu: { txtu: string }) => void;
+  setTexture: () => void;
 }
 
 const boardState: BoardType = {
@@ -20,7 +21,9 @@ const boardState: BoardType = {
 
 export const useBoardState = create<BoardState>((set) => ({
   ...boardState,
-  setTexture(txtu: { txtu: string }) {
-    set(txtu);
+  setTexture() {
+    let texture = localStorage.getItem("court");
+    if (texture) set({ txtu: texture });
+    else set({ txtu: COURT.BORANGE });
   },
 }));

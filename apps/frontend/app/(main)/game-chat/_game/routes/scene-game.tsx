@@ -1,6 +1,6 @@
 "use client";
 
-import { Suspense } from "react";
+import { Suspense, useEffect } from "react";
 import { Ball } from "../components/ball";
 import { Canvas } from "@react-three/fiber";
 import { Board } from "../components/board";
@@ -14,7 +14,9 @@ export function SceneGame() {
   const player1 = usePlayer1State();
   const player2 = usePlayer2State();
   const board = useBoardState();
-
+  useEffect(() => {
+    board.setTexture();
+  }, []);
   return (
     <>
       <Canvas>
