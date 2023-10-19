@@ -2,7 +2,7 @@
 
 import { PerspectiveCamera } from "@react-three/drei";
 import { Stats } from "@react-three/drei";
-import { useEffect, useLayoutEffect, useRef } from "react";
+import { useEffect, useRef } from "react";
 import { PointLight } from "three";
 import { useUser } from "@/context/user-context";
 import { usePlayer2State } from "../state/player";
@@ -33,7 +33,7 @@ function Cam() {
       }
     }
   };
-
+  
   useEffect(() => {
     if (ref.current && user?.id == p2.id && ref.current?.rotation.z != Math.PI)
       ref.current?.rotateZ(Math.PI);

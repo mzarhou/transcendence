@@ -62,11 +62,15 @@ export const useSetGameEvents = () => {
     if (!socket) return;
     if (socket.hasListeners(ServerGameEvents.STARTSGM)) return;
 
+<<<<<<< HEAD
     socket.on(ServerGameEvents.WAITING, (data: StartGameData) => {
       setMatch(data.match);
       setStatus(STATUS.UPDGAME);
       setP1Id(data.match.homeId);
       setP2Id(data.match.adversaryId);
+=======
+    socket.on(ServerGameEvents.WAITING, (_data: null) => {
+>>>>>>> develop
       navigate("/waiting", { replace: true });
     });
 

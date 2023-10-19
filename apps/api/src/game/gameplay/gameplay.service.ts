@@ -101,19 +101,20 @@ export class GamePlayService {
     }
 
     if (this.game.state === State.OVER) {
-      this.game.websocketService.addEvent(
-        [this.game.match.adversaryId, this.game.match.homeId],
-        ServerGameEvents.GAMEOVER,
-        {
-          winnerId: this.game.match.winnerId!,
-          match: this.game.match,
-        } satisfies GameOverData,
-      );
       this.game.gameService.stopGame();
     }
   }
 
   stopGame() {
+    this.game.websocketService.addEvent(
+      [this.game.match.adversaryId, this.game.match.homeId],
+      ServerGameEvents.GAMEOVER,
+      {
+        winnerId: this.game.match.winnerId!,
+        match: this.game.match,
+      } satisfies GameOverData,
+    );
+
     clearInterval(this.interval);
     Events.off(this.engine, 'beforeUpdate', () => {});
     Events.off(this.engine, 'collisionStart', () => {});

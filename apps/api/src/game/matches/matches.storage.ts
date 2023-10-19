@@ -41,17 +41,9 @@ export class MatchesStorage {
 
   removePlayer(userId: number) {
     const game = this.games.find((g) => g.users.includes(userId));
-    if (!game || game.state === State.PLAYING) return;
+    if (!game) return;
 
-    this.websocketService.addEvent(
-      [game.match.adversaryId, game.match.homeId],
-      ServerGameEvents.GAMEOVER,
-      {
-        winnerId: game.match.winnerId!,
-        match: game.match,
-      } satisfies GameOverData,
-    );
-
+    game.gameService.stopGame();
     this.games = this.games.filter(
       (g) => g.match.matchId !== game.match.matchId,
     );

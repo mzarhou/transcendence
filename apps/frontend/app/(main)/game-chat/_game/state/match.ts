@@ -9,17 +9,20 @@ interface MatchState {
   winnerId: number | null;
 }
 
-export const useMatchState = create<
-  MatchState & {
-    setState: (newState: Partial<MatchState>) => void;
-  }
->((set) => ({
+const matchState = {
   matchId: 0,
   homeId: 0,
   adversaryId: 0,
   winnerId: null,
+};
 
-  setState: (newState) => {
-    set(newState);
-  },
+export const useMatchState = create<
+  MatchState & {
+    setState: (newState: Partial<MatchState>) => void;
+    reset: () => void;
+  }
+>((set) => ({
+  ...matchState,
+  setState: (newState) => set(newState),
+  reset: () => set(matchState),
 }));

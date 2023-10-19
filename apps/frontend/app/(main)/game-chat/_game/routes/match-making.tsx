@@ -22,6 +22,7 @@ import WaintingAnimationData from "lotties/waiting-match.json";
 export default function MatchMaking() {
   const socket = useSocket();
   const { matchId } = useMatchState();
+  const reset = useResetGameState();
   const status = useStatus();
   const p1 = usePlayer1State();
   const p2 = usePlayer2State();
@@ -48,6 +49,12 @@ export default function MatchMaking() {
       await cancel();
     } catch (error) {}
   };
+
+  useEffect(() => {
+    return () => {
+      reset();
+    };
+  }, []);
 
   return (
     <>
