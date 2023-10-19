@@ -35,7 +35,6 @@ export class PrismaService
         try {
           return this[modelKey].deleteMany();
         } catch (error) {
-          console.log({ modelKey });
           return new Promise((res) => {
             res(undefined);
           });

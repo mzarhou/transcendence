@@ -3,7 +3,6 @@ import { useSocket } from "@/context";
 import { ClientGameEvents } from "@transcendence/db";
 import { Gamepad2, Settings } from "lucide-react";
 import { useNavigate } from "react-router";
-import { Link } from "react-router-dom";
 
 export default function PlayButtons() {
   const socket = useSocket();
@@ -11,8 +10,6 @@ export default function PlayButtons() {
 
   const joinMatch = () => {
     socket?.emit(ClientGameEvents.JNRNDMCH);
-    // TODO: emit waiting event from server
-    navigate("/waiting");
   };
 
   return (

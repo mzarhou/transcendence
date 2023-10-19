@@ -4,7 +4,6 @@ import { RedisClient } from '@src/redis/redis.module';
 @Injectable()
 export class PlayersQueueStorage {
   private readonly PlayersQueueKey = 'players-queue';
-  private readonly logger = new Logger(PlayersQueueStorage.name);
 
   constructor(private readonly redisClient: RedisClient) {}
 

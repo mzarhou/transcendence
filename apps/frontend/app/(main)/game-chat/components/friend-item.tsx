@@ -14,6 +14,8 @@ import { BlockUserMenuItem } from "./user-item";
 import { useFriendUreadMessagesCount } from "@/api-hooks/use-unread-messages";
 import { cn } from "@/lib/utils";
 import Link from "next/link";
+import { useIsFriendInGame } from "@/stores/in-game-users-atom";
+import { useCreateGameInvitation } from "@/api-hooks/game/use-create-game-invitation";
 
 type FriendItemProps = {
   friend: User;
@@ -27,8 +29,10 @@ export default function FriendItem({
 }: FriendItemProps) {
   size ??= "default";
 
-  const isFriendConnected = useIsFriendConnected();
+  const inGame = useIsFriendInGame(friend.id);
+  const isConnected = useIsFriendConnected(friend.id);
   const unreadMessagesCount = useFriendUreadMessagesCount(friend.id);
+  const { trigger: sendGameInvitation } = useCreateGameInvitation();
 
   return (
     <div className={cn("relative flex justify-between", className)}>
@@ -47,7 +51,7 @@ export default function FriendItem({
               alt=""
               className="rounded-full"
             />
-            {isFriendConnected(friend.id) && (
+            {isConnected && (
               <div
                 className={cn(
                   "absolute  bottom-1.5 right-0.5 h-4 w-4 rounded-full border-2 border-card bg-green-400",
@@ -67,8 +71,11 @@ export default function FriendItem({
             <p>{friend.name}</p>
             {size === "default" && (
               <>
-                {/* TODO: update game status */}
-                <p className="text-sm text-chat-card-foreground/60">In game</p>
+                {inGame && (
+                  <p className="text-sm text-chat-card-foreground/60">
+                    In game
+                  </p>
+                )}
                 <p className="text-sm text-chat-card-foreground/60">
                   #{friend.rank}
                 </p>
@@ -87,7 +94,16 @@ export default function FriendItem({
             />
           </DropdownMenuTrigger>
           <DropdownMenuContent align="end">
-            <DropdownMenuItem className="cursor-pointer">Play</DropdownMenuItem>
+            <DropdownMenuItem
+              className="cursor-pointer"
+              onClick={() => {
+                try {
+                  sendGameInvitation({ friendId: friend.id });
+                } catch (error) {}
+              }}
+            >
+              Play
+            </DropdownMenuItem>
             <DropdownMenuItem className="cursor-pointer">
               Profile
             </DropdownMenuItem>

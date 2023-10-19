@@ -23,8 +23,18 @@ export const EventsSocketProvider = ({ children }: { children: ReactNode }) => {
   useErrorsEvents(socket);
 
   useEffect(() => {
+    if (!socket.connected) socket.connect();
+
+    socket.on("connect", () => {
+      console.log("Connected to server");
+    });
+
+    socket.on("disconnect", () => {
+      console.log("Disconnected from server");
+    });
+
     return () => {
-      socket.removeAllListeners();
+      socket.disconnect();
     };
   }, []);
 

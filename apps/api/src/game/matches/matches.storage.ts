@@ -2,7 +2,7 @@ import { Match } from '@prisma/client';
 import { Injectable } from '@nestjs/common';
 import { Game } from './match-game.interface';
 import { WebsocketService } from '@src/websocket/websocket.service';
-import { State } from '@transcendence/db';
+import { GameOverData, ServerGameEvents, State } from '@transcendence/db';
 
 @Injectable()
 export class MatchesStorage {
@@ -22,7 +22,6 @@ export class MatchesStorage {
   }
 
   connectPlayer(match: Match, userId: number) {
-    this.removePlayer(userId);
     let game = this.findGame(match.matchId);
     if (!game) {
       game = this.createGame(match);
@@ -41,19 +40,25 @@ export class MatchesStorage {
   }
 
   removePlayer(userId: number) {
-    this.games.forEach((game) => {
-      const user = game.users.find((id) => id === userId);
-      if (user) {
-        game.users = game.users.filter((id) => id !== userId);
-      }
-      if (game.users.length === 0 && game.state !== State.PLAYING) {
-        this.games = this.games.filter(
-          (g) => g.match.matchId !== game.match.matchId,
-        );
-      }
-      if (game.users.length === 1 && game.state === State.PLAYING) {
-        game.state = State.OVER;
-      }
-    });
+    const game = this.games.find((g) => g.users.includes(userId));
+    if (!game || game.state === State.PLAYING) return;
+
+    this.websocketService.addEvent(
+      [game.match.adversaryId, game.match.homeId],
+      ServerGameEvents.GAMEOVER,
+      {
+        winnerId: game.match.winnerId!,
+        match: game.match,
+      } satisfies GameOverData,
+    );
+
+    this.games = this.games.filter(
+      (g) => g.match.matchId !== game.match.matchId,
+    );
+  }
+
+  isUserInGame(userId: number) {
+    const game = this.games.find((g) => g.users.includes(userId));
+    return !!game;
   }
 }
