@@ -30,6 +30,9 @@ export class RankGateway {
   }
 
   onGameOver(match: Match) {
-    return this.service.updateElo(match.matchId);
+    return this.service.updateElo({
+      matchId: match.matchId,
+      winnerId: match.winnerId!,
+    });
   }
 }

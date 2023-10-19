@@ -180,8 +180,14 @@ export class RankService {
     }
   }
 
-  async updateElo(matchId: number) {
-    const match = await this.matches.findOneById(matchId);
+  async updateElo(data: { matchId: number; winnerId: number }) {
+    const { winnerId, matchId } = data;
+
+    const match = await this.prisma.match.update({
+      where: { matchId },
+      data: { winnerId },
+    });
+
     const players = await this.prisma.user.findMany();
     const home = players[match.homeId];
     const adversary = players[match.adversaryId];
