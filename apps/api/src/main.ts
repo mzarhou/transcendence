@@ -5,6 +5,8 @@ import { env } from './+env/server';
 import { DocumentBuilder, SwaggerModule } from '@nestjs/swagger';
 import { patchNestJsSwagger } from 'nestjs-zod';
 
+require('events').EventEmitter.defaultMaxListeners = 15;
+
 async function bootstrap() {
   const app = await NestFactory.create(AppModule);
 

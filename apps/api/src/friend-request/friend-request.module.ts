@@ -5,9 +5,10 @@ import { NotificationsModule } from '@src/notifications/notifications.module';
 import { FriendRequestsRepository } from './repositories/_friend-requests.repository';
 import { FriendRequestsPrismaRepository } from './repositories/friend-requests-prisma.repository';
 import { FriendRequestPolicy } from './friend-request.policy';
+import { UsersModule } from '@src/users/users.module';
 
 @Module({
-  imports: [NotificationsModule],
+  imports: [NotificationsModule, UsersModule],
   controllers: [FriendRequestController],
   providers: [
     FriendRequestPolicy,
