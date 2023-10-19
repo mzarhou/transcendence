@@ -16,7 +16,7 @@ function Cam() {
 
   const handleResize = () => {
     if (ref.current) {
-      if (cam.threeD) {
+      if (!cam.t3D2D) {
         if (window.innerWidth <= 1274) {
           ref.current.position.y = -840;
           ref.current.position.z = 1000;
@@ -25,7 +25,7 @@ function Cam() {
           ref.current.position.z = 270;
         }
         ref.current.rotation.x = Math.PI / 3;
-      } else if (cam.twoD) {
+      } else {
         if (window.innerWidth <= 1274) ref.current.position.z = 900;
         else ref.current.position.z = 545;
         ref.current.position.y = 0;
