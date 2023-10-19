@@ -29,7 +29,7 @@ export default function Layout({ children }: { children: ReactNode }) {
           <div
             className="absolute inset-0 bg-cover"
             style={{
-              backgroundImage: "url(/auth.jpg)",
+              backgroundImage: "url(/login-image.png)",
             }}
           />
         </div>
