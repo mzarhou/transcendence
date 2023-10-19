@@ -65,6 +65,9 @@ export class MatchMakingGateway {
     // if same user
     if (user.sub === adversaryId) return;
 
+    // send user to waiting page
+    this.websocketService.addEvent([user.sub], ServerGameEvents.WAITING, null);
+
     if (adversaryId) {
       //if you found an already user waiting in the queue
       await this.playersQueue.deletePlayerById(adversaryId);
