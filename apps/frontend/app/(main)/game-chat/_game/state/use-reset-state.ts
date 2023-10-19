@@ -7,12 +7,10 @@ export function useResetGameState() {
   const ball = useBallState();
   const player1 = usePlayer1State();
   const player2 = usePlayer2State();
-  const scores = useScoreState();
   const match = useMatchState();
 
   return () => {
     ball.reset();
-    scores.reset();
     player1.reset();
     player2.reset();
     match.reset();

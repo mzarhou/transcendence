@@ -1,6 +1,6 @@
 "use client";
 
-import { Suspense, useEffect } from "react";
+import { Suspense } from "react";
 import { Ball } from "../components/ball";
 import { Canvas } from "@react-three/fiber";
 import { Board } from "../components/board";
@@ -9,18 +9,10 @@ import { Player } from "../components/player";
 import { boardEntity } from "../entity/entity";
 import { usePlayer1State, usePlayer2State } from "../state";
 import { Scores } from "../components/scores";
-import { useResetGameState } from "../state/use-reset-state";
 
 export function SceneGame() {
   const player1 = usePlayer1State();
   const player2 = usePlayer2State();
-  const reset = useResetGameState();
-
-  useEffect(() => {
-    return () => {
-      reset();
-    };
-  }, []);
 
   return (
     <>
