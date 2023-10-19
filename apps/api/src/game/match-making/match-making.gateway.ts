@@ -62,11 +62,11 @@ export class MatchMakingGateway {
     //possible problem if user and adversary are the same
     const adversaryId = await this.playersQueue.getLast();
 
-    // if same user
-    if (user.sub === adversaryId) return;
-
     // send user to waiting page
     this.websocketService.addEvent([user.sub], ServerGameEvents.WAITING, null);
+
+    // if same user
+    if (user.sub === adversaryId) return;
 
     if (adversaryId) {
       //if you found an already user waiting in the queue
