@@ -13,6 +13,7 @@ import { useBlockUser } from "@/api-hooks/use-block-user";
 import { useRouter } from "next/navigation";
 import { cn } from "@/lib/utils";
 import { useIsFriendInGame } from "@/stores/in-game-users-atom";
+import UserRankImage from "@/components/user-rank-image";
 
 type UserItemProps = {
   user: User;
@@ -48,11 +49,9 @@ export default function UserItem({
             }
           )}
         >
-          <img
-            src={user.avatar}
-            alt=""
-            className="h-[72px] min-h-[72px] w-[72px] min-w-[72px] rounded-full"
-          />
+          <div className="h-[72px] w-[72px]">
+            <UserRankImage user={user} />
+          </div>
         </div>
         <div
           onClick={goToUserProfile}

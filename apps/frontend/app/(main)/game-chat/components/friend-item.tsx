@@ -16,19 +16,13 @@ import { cn } from "@/lib/utils";
 import Link from "next/link";
 import { useIsFriendInGame } from "@/stores/in-game-users-atom";
 import { useCreateGameInvitation } from "@/api-hooks/game/use-create-game-invitation";
+import UserRankImage from "@/components/user-rank-image";
 
 type FriendItemProps = {
   friend: User;
   className?: string;
-  size?: "default" | "sm";
 };
-export default function FriendItem({
-  friend,
-  className,
-  size,
-}: FriendItemProps) {
-  size ??= "default";
-
+export default function FriendItem({ friend, className }: FriendItemProps) {
   const inGame = useIsFriendInGame(friend.id);
   const isConnected = useIsFriendConnected(friend.id);
   const unreadMessagesCount = useFriendUreadMessagesCount(friend.id);
@@ -38,60 +32,27 @@ export default function FriendItem({
     <div className={cn("relative flex justify-between", className)}>
       <Link href={`/game-chat/${friend.id}`}>
         <div className="flex space-x-4">
-          <div
-            className={cn(
-              "relative flex aspect-square items-center justify-center rounded-full bg-gray-100/10 text-lg",
-              size === "default" ? "h-[72px]" : "h-[40px]"
-            )}
-          >
-            <img
-              src={friend.avatar}
-              width={size === "default" ? 72 : 40}
-              height={size === "default" ? 72 : 40}
-              alt=""
-              className="rounded-full"
-            />
+          <div className="relative flex aspect-square h-[72px] items-center justify-center rounded-full bg-gray-100/10 text-lg">
+            <UserRankImage user={friend} rankImageWidth={72} />
             {isConnected && (
-              <div
-                className={cn(
-                  "absolute  bottom-1.5 right-0.5 h-4 w-4 rounded-full border-2 border-card bg-green-400",
-                  {
-                    "bottom-0 right-0 h-3 w-3": size === "sm",
-                    "": size === "sm",
-                  }
-                )}
-              ></div>
+              <div className="absolute  bottom-1.5 right-0.5 h-4 w-4 rounded-full border-2 border-card bg-green-400"></div>
             )}
           </div>
-          <div
-            className={cn("mt-0.5", {
-              "flex flex-col justify-center text-lg": size === "sm",
-            })}
-          >
+          <div className={"mt-0.5"}>
             <p>{friend.name}</p>
-            {size === "default" && (
-              <>
-                {inGame && (
-                  <p className="text-sm text-chat-card-foreground/60">
-                    In game
-                  </p>
-                )}
-                <p className="text-sm text-chat-card-foreground/60">
-                  #{friend.rank}
-                </p>
-              </>
+            {inGame && (
+              <p className="text-sm text-chat-card-foreground/60">In game</p>
             )}
+            <p className="text-sm text-chat-card-foreground/60">
+              #{friend.rank}
+            </p>
           </div>
         </div>
       </Link>
-      <div className={cn(size === "sm" && "flex flex-col justify-center")}>
+      <div>
         <DropdownMenu>
           <DropdownMenuTrigger asChild>
-            <MoreVertical
-              className={cn("h-6 w-6 cursor-pointer", {
-                "h-5 w-5": size === "sm",
-              })}
-            />
+            <MoreVertical className="h-6 w-6 cursor-pointer" />
           </DropdownMenuTrigger>
           <DropdownMenuContent align="end">
             <DropdownMenuItem
