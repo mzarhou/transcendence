@@ -2,7 +2,6 @@ import { ChevronLeft } from "lucide-react";
 import MapsCard from "./components/MapsCard";
 import ViewCard from "./components/view-card";
 import { Button } from "@/components/ui/button";
-import BotCard from "./components/bot-card";
 import { Link } from "react-router-dom";
 
 export default function GameSettings() {

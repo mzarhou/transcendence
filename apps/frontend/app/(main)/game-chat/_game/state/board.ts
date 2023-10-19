@@ -1,5 +1,4 @@
 import { BoardType } from "@transcendence/db";
-import { StaticImport } from "next/dist/shared/lib/get-img-props";
 import { create } from "zustand";
 
 export enum COURT {
