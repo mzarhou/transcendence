@@ -105,7 +105,28 @@ export class GamePlayService {
     }
   }
 
-  stopGame() {
+  async stopGame(disconnectedUserId?: number) {
+    if (disconnectedUserId) {
+      const match = this.game.match;
+      this.game.match.winnerId =
+        disconnectedUserId === match.adversaryId
+          ? match.homeId
+          : match.adversaryId;
+    }
+
+    clearInterval(this.interval);
+    Events.off(this.engine, 'beforeUpdate', () => {});
+    Events.off(this.engine, 'collisionStart', () => {});
+    Engine.clear(this.engine);
+
+    this.game.websocketService.addEvent(
+      [this.game.match.adversaryId, this.game.match.homeId],
+      ServerGameEvents.UPDTGAME,
+      this.gmDt satisfies UpdateGameData,
+    );
+
+    await new Promise((res) => setInterval(res, 400));
+
     this.game.websocketService.addEvent(
       [this.game.match.adversaryId, this.game.match.homeId],
       ServerGameEvents.GAMEOVER,
@@ -114,11 +135,6 @@ export class GamePlayService {
         match: this.game.match,
       } satisfies GameOverData,
     );
-
-    clearInterval(this.interval);
-    Events.off(this.engine, 'beforeUpdate', () => {});
-    Events.off(this.engine, 'collisionStart', () => {});
-    Engine.clear(this.engine);
   }
 
   movePlayer(direction: string, client: number, match: Match) {

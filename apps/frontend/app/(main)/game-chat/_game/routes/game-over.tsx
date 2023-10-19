@@ -50,7 +50,7 @@ export function GameOver() {
             WINNER
           </h1>
           <h2 className=" pt-10 font-boogaloo text-xl sm:text-4xl">
-            7 : {Math.min(scores.home, scores.adversary)}
+            {scores.home} : {scores.adversary}
           </h2>
         </div>
         <div className=" flex justify-center space-x-5 pt-10">

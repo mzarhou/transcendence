@@ -39,11 +39,11 @@ export class MatchesStorage {
     }
   }
 
-  removePlayer(userId: number) {
-    const game = this.games.find((g) => g.users.includes(userId));
+  removePlayer(disconnectedUserId: number) {
+    const game = this.games.find((g) => g.users.includes(disconnectedUserId));
     if (!game) return;
 
-    game.gameService.stopGame();
+    game.gameService.stopGame(disconnectedUserId);
     this.games = this.games.filter(
       (g) => g.match.matchId !== game.match.matchId,
     );
