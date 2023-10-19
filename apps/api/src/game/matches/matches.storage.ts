@@ -22,7 +22,6 @@ export class MatchesStorage {
   }
 
   connectPlayer(match: Match, userId: number) {
-    this.removePlayer(userId);
     let game = this.findGame(match.matchId);
     if (!game) {
       game = this.createGame(match);
