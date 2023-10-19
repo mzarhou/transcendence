@@ -8,21 +8,16 @@ import { CamScene } from "../components/camScene";
 import { Player } from "../components/player";
 import { usePlayer1State, usePlayer2State } from "../state";
 import { Scores } from "../components/scores";
-<<<<<<< HEAD
 import { useBoardState } from "../state/board";
-=======
 import { useResetGameState } from "../state/use-reset-state";
->>>>>>> develop
 
 export function SceneGame() {
   const player1 = usePlayer1State();
   const player2 = usePlayer2State();
-<<<<<<< HEAD
   const board = useBoardState();
   useEffect(() => {
     board.setTexture();
   }, []);
-=======
   const reset = useResetGameState();
 
   useEffect(() => {
@@ -31,7 +26,6 @@ export function SceneGame() {
     };
   }, []);
 
->>>>>>> develop
   return (
     <>
       <Canvas>

@@ -6,10 +6,11 @@ import { useEffect } from "react";
 export default function ViewCard() {
   const camState = useCamState();
   useEffect(() => {
-    let bool = localStorage.getItem("cam");
+    const  bool = localStorage.getItem("cam");
+    console.log(camState.t3D2D);
     if (bool == "true") camState.set3D2D(true);
     else camState.set3D2D(false);
-  },[]);
+  });
 
   const toogle3D2D = () => {
     console.log(camState.t3D2D);
