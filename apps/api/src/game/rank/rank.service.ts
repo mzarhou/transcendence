@@ -140,7 +140,7 @@ export class RankService {
         }
         if (
           player.eloRating >= 800 &&
-          player.eloRating < 1250 &&
+          player.eloRating < 1650 &&
           player.division != 'Bronze'
         ) {
           await this.prisma.user.update({
@@ -149,8 +149,8 @@ export class RankService {
           });
         }
         if (
-          player.eloRating >= 1250 &&
-          player.eloRating < 1800 &&
+          player.eloRating >= 1650 &&
+          player.eloRating < 2500 &&
           player.division != 'Gold'
         ) {
           await this.prisma.user.update({
@@ -158,7 +158,7 @@ export class RankService {
             data: { division: 'Gold' },
           });
         }
-        if (player.eloRating >= 1800 && player.division != 'Legend') {
+        if (player.eloRating >= 2500 && player.division != 'Legend') {
           await this.prisma.user.update({
             where: { id: player.id },
             data: { division: 'Legend' },
