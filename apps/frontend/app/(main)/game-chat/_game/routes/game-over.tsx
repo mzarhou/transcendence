@@ -7,6 +7,7 @@ import crown from "/public/images/crown.png";
 import { useMatchState, useScoreState } from "../state";
 import { useGameProfile } from "@/api-hooks/game/use-game-profile";
 import { useEffect } from "react";
+import UserRankImage from "@/components/user-rank-image";
 
 export function GameOver() {
   const socket = useSocket();
@@ -40,13 +41,11 @@ export function GameOver() {
             className=" h-[5%] w-[20%] rounded-full"
           />
           {winner && (
-            <img
-              src={winner.avatar}
-              alt="Winner"
-              className="h-[20%] w-[35%] rounded-full"
-            />
+            <div className="h-[20%] w-[35%] rounded-full">
+              <UserRankImage user={winner} />
+            </div>
           )}
-          <h1 className="font-boogaloo text-2xl text-[#F4E450] sm:text-8xl">
+          <h1 className="mt-4 font-boogaloo text-2xl text-[#F4E450] sm:text-8xl">
             WINNER
           </h1>
           <h2 className=" pt-10 font-boogaloo text-xl sm:text-4xl">
