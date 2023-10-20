@@ -11,14 +11,11 @@ import { Server } from 'socket.io';
 import { Socket } from 'socket.io';
 import { ActiveUserData } from '@src/iam/interface/active-user-data.interface';
 import { WsAuthGuard } from '@src/iam/authentication/guards/ws-auth.guard';
-import { UseGuards } from '@nestjs/common';
+import { Logger, UseGuards } from '@nestjs/common';
 import { MatchesStorage } from './matches.storage';
 import { WebsocketService } from '@src/websocket/websocket.service';
 import { Subscription } from 'rxjs';
-import {
-  CONNECTION_STATUS,
-  NewSocketData,
-} from '@src/websocket/websocket.enum';
+import { CONNECTION_STATUS } from '@src/websocket/websocket.enum';
 import { ServerGameEvents, StartGameData } from '@transcendence/db';
 import { ClientGameEvents } from '@transcendence/db';
 import { PlayMatchData } from '@transcendence/db';
@@ -26,6 +23,7 @@ import { PlayMatchData } from '@transcendence/db';
 @WebSocketGateway()
 export class MatchesGateway {
   private subscription!: Subscription;
+  private readonly logger = new Logger(MatchesGateway.name);
 
   @WebSocketServer()
   server!: Server;
@@ -57,14 +55,22 @@ export class MatchesGateway {
     @ConnectedSocket() client: Socket,
     @MessageBody() { matchId }: PlayMatchData,
   ) {
-    const user: ActiveUserData = client.data.user;
-    const match = await this.matchesService.findOneById(matchId);
-    if (!match) throw new WsException('Match Not Found!');
-    if (match.winnerId !== null) throw new WsException('Match is Over!');
+    try {
+      const user: ActiveUserData = client.data.user;
+      const match = await this.matchesService.safeFindOneById(matchId);
+      if (!match) throw new WsException('Match Not Found!');
+      if (match.winnerId !== null) throw new WsException('Match is Over!');
 
-    this.matchesStorage.connectPlayer(match, user.sub);
-    this.websocketService.addEvent([user.sub], ServerGameEvents.STARTSGM, {
-      match,
-    } satisfies StartGameData);
+      this.matchesStorage.connectPlayer(match, user.sub);
+      this.websocketService.addEvent([user.sub], ServerGameEvents.STARTSGM, {
+        match,
+      } satisfies StartGameData);
+    } catch (error) {
+      if (error instanceof WsException) {
+        throw new WsException(error.message);
+      } else {
+        this.logger.error(error);
+      }
+    }
   }
 }

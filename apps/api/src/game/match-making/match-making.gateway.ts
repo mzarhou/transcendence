@@ -3,12 +3,13 @@ import {
   WebSocketGateway,
   WebSocketServer,
   SubscribeMessage,
+  WsException,
 } from '@nestjs/websockets';
 import { Server, Socket } from 'socket.io';
 import { MatchesService } from '@src/game/matches/matches.service';
 import { ActiveUserData } from '@src/iam/interface/active-user-data.interface';
 import { WsAuthGuard } from '@src/iam/authentication/guards/ws-auth.guard';
-import { UseGuards } from '@nestjs/common';
+import { Logger, UseGuards } from '@nestjs/common';
 import { WebsocketService } from '@src/websocket/websocket.service';
 import { CONNECTION_STATUS } from '@src/websocket/websocket.enum';
 import { Subscription } from 'rxjs';
@@ -20,6 +21,7 @@ import { PlayersQueueStorage } from './players-queue.storage';
 @WebSocketGateway()
 export class MatchMakingGateway {
   private subscription!: Subscription;
+  private readonly logger = new Logger(MatchMakingGateway.name);
 
   @WebSocketServer()
   server!: Server;
@@ -57,32 +59,44 @@ export class MatchMakingGateway {
   @UseGuards(WsAuthGuard)
   @SubscribeMessage(ClientGameEvents.JNRNDMCH)
   async JoinRandomMatch(@ConnectedSocket() client: Socket) {
-    const user: ActiveUserData = client.data.user;
+    try {
+      const user: ActiveUserData = client.data.user;
 
-    //possible problem if user and adversary are the same
-    const adversaryId = await this.playersQueue.getLast();
+      //possible problem if user and adversary are the same
+      const adversaryId = await this.playersQueue.getLast();
 
-    // send user to waiting page
-    this.websocketService.addEvent([user.sub], ServerGameEvents.WAITING, null);
-
-    // if same user
-    if (user.sub === adversaryId) return;
-
-    if (adversaryId) {
-      //if you found an already user waiting in the queue
-      await this.playersQueue.deletePlayerById(adversaryId);
-
-      //create a match between user and adversary => to do
-      const match = await this.matchesService.create(user.sub, adversaryId);
-
-      //emit event to players
+      // send user to waiting page
       this.websocketService.addEvent(
-        [adversaryId, user.sub],
-        ServerGameEvents.MCHFOUND,
-        { match } satisfies MatchFoundData,
+        [user.sub],
+        ServerGameEvents.WAITING,
+        null,
       );
-    } else {
-      await this.playersQueue.addPlayer(user.sub);
+
+      // if same user
+      if (user.sub === adversaryId) return;
+
+      if (adversaryId) {
+        //if you found an already user waiting in the queue
+        await this.playersQueue.deletePlayerById(adversaryId);
+
+        //create a match between user and adversary => to do
+        const match = await this.matchesService.create(user.sub, adversaryId);
+
+        //emit event to players
+        this.websocketService.addEvent(
+          [adversaryId, user.sub],
+          ServerGameEvents.MCHFOUND,
+          { match } satisfies MatchFoundData,
+        );
+      } else {
+        await this.playersQueue.addPlayer(user.sub);
+      }
+    } catch (error) {
+      if (error instanceof WsException) {
+        throw new WsException(error.message);
+      } else {
+        this.logger.error(error);
+      }
     }
   }
 }
