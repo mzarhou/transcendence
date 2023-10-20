@@ -16,21 +16,8 @@ function Cam() {
 
   const handleResize = () => {
     if (ref.current) {
-      if (!cam.t3D2D) {
-        if (window.innerWidth <= 1274) {
-          ref.current.position.y = -840;
-          ref.current.position.z = 1000;
-        } else {
-          ref.current.position.y = -540;
-          ref.current.position.z = 270;
-        }
-        ref.current.rotation.x = Math.PI / 3;
-      } else {
-        if (window.innerWidth <= 1274) ref.current.position.z = 900;
-        else ref.current.position.z = 545;
-        ref.current.position.y = 0;
-        ref.current.rotation.x = 0;
-      }
+      if (window.innerWidth <= 1274) ref.current.position.z = 900;
+      else ref.current.position.z = 545;
     }
   };
   
@@ -53,8 +40,7 @@ function Cam() {
         aspect={window.innerWidth / window.innerHeight}
         up={[0, 0, 1]}
       />
-      {/* <OrbitControls /> */}
-      <Stats />
+      {/* <Stats /> */}
     </>
   );
 }

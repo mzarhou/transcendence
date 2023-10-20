@@ -10,7 +10,7 @@ export default function ViewCard() {
     console.log(camState.t3D2D);
     if (bool == "true") camState.set3D2D(true);
     else camState.set3D2D(false);
-  });
+  },[]);
 
   const toogle3D2D = () => {
     console.log(camState.t3D2D);

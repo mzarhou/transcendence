@@ -14,7 +14,7 @@ export default function GameSettings() {
       </Link>
       <div className="pb-8 pt-20 xl:w-full">
         <MapsCard />
-        <ViewCard />
+        {/* <ViewCard /> */}
       </div>
     </>
   );
