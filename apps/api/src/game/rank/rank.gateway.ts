@@ -1,4 +1,4 @@
-import { WebSocketGateway } from '@nestjs/websockets';
+import { WebSocketGateway, WsException } from '@nestjs/websockets';
 import { WebsocketEvent } from '@src/websocket/weboscket-event.interface';
 import { GameOverData, Match, ServerGameEvents } from '@transcendence/db';
 import { RankService } from './rank.service';
@@ -29,10 +29,15 @@ export class RankGateway {
     });
   }
 
-  onGameOver(match: Match) {
-    return this.service.updateElo({
-      matchId: match.matchId,
-      winnerId: match.winnerId!,
-    });
+  async onGameOver(match: Match) {
+    try {
+      await this.service.updateElo({
+        matchId: match.matchId,
+        winnerId: match.winnerId!,
+      });
+    } catch (e) {
+      throw new WsException('Failed to update rank')
+    }
+
   }
 }
