@@ -8,12 +8,11 @@ import {
   NewSocketData,
 } from '@src/websocket/websocket.enum';
 import { WebsocketService } from '@src/websocket/websocket.service';
-import { StartGameData, User } from '@transcendence/db';
+import { StartGameData } from '@transcendence/db';
 import {
   GameOverData,
   InGameEventData,
   Match,
-  MatchFoundData,
   ServerGameEvents,
 } from '@transcendence/db';
 import { Subscription } from 'rxjs';
