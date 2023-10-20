@@ -6,9 +6,10 @@ import { GroupInvitationsPolicy } from './group-invitations.policy';
 import actions from './actions';
 import { NotificationsModule } from '@src/notifications/notifications.module';
 import { UsersModule } from '@src/users/users.module';
+import { GroupsCommonModule } from '../groups-common/groups-common.module';
 
 @Module({
-  imports: [UsersModule, NotificationsModule],
+  imports: [UsersModule, NotificationsModule, GroupsCommonModule],
   controllers: [GroupInvitationsController],
   providers: [
     ...actions,

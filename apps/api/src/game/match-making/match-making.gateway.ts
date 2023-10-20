@@ -1,57 +1,88 @@
 import {
   ConnectedSocket,
-  OnGatewayDisconnect,
   WebSocketGateway,
   WebSocketServer,
   SubscribeMessage,
-  MessageBody,
 } from '@nestjs/websockets';
 import { Server, Socket } from 'socket.io';
-import { queueArr } from './entities/queue.entity';
 import { MatchesService } from '@src/game/matches/matches.service';
 import { ActiveUserData } from '@src/iam/interface/active-user-data.interface';
 import { WsAuthGuard } from '@src/iam/authentication/guards/ws-auth.guard';
 import { UseGuards } from '@nestjs/common';
-import { PrismaService } from '@src/+prisma/prisma.service';
+import { WebsocketService } from '@src/websocket/websocket.service';
+import { CONNECTION_STATUS } from '@src/websocket/websocket.enum';
+import { Subscription } from 'rxjs';
+import { GameCanceledData, MatchFoundData } from '@transcendence/db';
+import { ClientGameEvents } from '@transcendence/db';
+import { ServerGameEvents } from '@transcendence/db';
+import { PlayersQueueStorage } from './players-queue.storage';
 
 @WebSocketGateway()
-export class MatchMakingGateway implements OnGatewayDisconnect {
+export class MatchMakingGateway {
+  private subscription!: Subscription;
+
   @WebSocketServer()
-  queue: queueArr = new queueArr();
   server!: Server;
 
-  constructor(private matchesService: MatchesService) {}
+  constructor(
+    private matchesService: MatchesService,
+    private readonly websocketService: WebsocketService,
+    private readonly playersQueue: PlayersQueueStorage,
+  ) {}
 
-  handleDisconnect(client: any) {
-    this.queue.deletePlayer(client);
+  onApplicationShutdown(_signal?: string | undefined) {
+    this.subscription.unsubscribe();
+  }
+
+  afterInit(_server: Server) {
+    this.subscription = this.websocketService.getEventSubject$().subscribe({
+      next: async (event) => {
+        if (event.name === CONNECTION_STATUS.DISCONNECTED) {
+          const user = event.data as ActiveUserData;
+          await this.playersQueue.deletePlayerById(user.sub);
+        }
+
+        /**
+         * if user exists in queue should be removed
+         * when game canceled
+         */
+        if (event.name === ServerGameEvents.GAME_CANCELED) {
+          const { canceledById } = event.data as GameCanceledData;
+          await this.playersQueue.deletePlayerById(canceledById);
+        }
+      },
+    });
   }
 
   @UseGuards(WsAuthGuard)
-  @SubscribeMessage('JoinRandomMatch')
+  @SubscribeMessage(ClientGameEvents.JNRNDMCH)
   async JoinRandomMatch(@ConnectedSocket() client: Socket) {
     const user: ActiveUserData = client.data.user;
 
     //possible problem if user and adversary are the same
-    const adversary = this.queue.players.find(
-      (player) => player.id !== user.sub
-    );
-    
-    if (adversary) {
+    const adversaryId = await this.playersQueue.getLast();
+
+    // send user to waiting page
+    this.websocketService.addEvent([user.sub], ServerGameEvents.WAITING, null);
+
+    // if same user
+    if (user.sub === adversaryId) return;
+
+    if (adversaryId) {
       //if you found an already user waiting in the queue
-      this.queue.deletePlayerById(adversary.id);
+      await this.playersQueue.deletePlayerById(adversaryId);
 
       //create a match between user and adversary => to do
-      const match = await this.matchesService.create(user.sub, adversary.id);
+      const match = await this.matchesService.create(user.sub, adversaryId);
 
-      //emit event to client
-      this.server.to(client.id).emit('matchingFound', { id: match.matchId });
-
-      //emit event to adversary
-      this.server
-        .to(adversary.socketId)
-        .emit('matchingFound', { id: match.matchId });
+      //emit event to players
+      this.websocketService.addEvent(
+        [adversaryId, user.sub],
+        ServerGameEvents.MCHFOUND,
+        { match } satisfies MatchFoundData,
+      );
     } else {
-      this.queue.addPlayer(user.sub, client);
+      await this.playersQueue.addPlayer(user.sub);
     }
   }
 }

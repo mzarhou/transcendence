@@ -6,6 +6,7 @@ import { Loader2 } from "lucide-react";
 import { useProvide2faCode } from "@/api-hooks/2fa/use-provide-2fa-code";
 import Auth2fa from "../Auth2fa";
 import { NavBar } from "@/components/navbar";
+import { Input } from "@/components/ui/input";
 
 export default function () {
   const { trigger, isMutating } = useProvide2faCode();
@@ -32,9 +33,9 @@ export default function () {
           </div>
           <div className="mt-8 flex flex-col">
             <span>Verification Code</span>
-            <input
+            <Input
               name="code"
-              className="mt-2 rounded-sm border px-4 py-2 text-xl"
+              className="mt-2 rounded-sm border bg-transparent px-4 py-6 text-xl"
               placeholder="123456"
             />
           </div>
