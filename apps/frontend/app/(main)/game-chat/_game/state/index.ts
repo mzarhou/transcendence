@@ -5,4 +5,3 @@ export * from "./match";
 export * from "./scores";
 export * from "./board";
 export * from "./zoom";
-export * from "./cam";

@@ -66,7 +66,7 @@ export const useSetGameEvents = () => {
     if (!socket) return;
     if (socket.hasListeners(ServerGameEvents.STARTSGM)) return;
 
-    socket.on(ServerGameEvents.WAITING, (data: StartGameData) => {
+    socket.on(ServerGameEvents.WAITING, (_data: null) => {
       navigate("/waiting", { replace: true });
     });
 
