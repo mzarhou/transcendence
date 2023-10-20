@@ -14,15 +14,12 @@ import { useSocket, useUser } from "@/context";
 import { useCancelGame } from "@/api-hooks/game/user-cancel-game";
 import { useGameProfile } from "@/api-hooks/game/use-game-profile";
 import UserRankImage from "@/components/user-rank-image";
-import { useEffect } from "react";
-import { useResetGameState } from "../state/use-reset-state";
 import Lottie from "react-lottie";
 import WaintingAnimationData from "lotties/waiting-match.json";
 
 export default function MatchMaking() {
   const socket = useSocket();
   const { matchId } = useMatchState();
-  const reset = useResetGameState();
   const status = useStatus();
   const p1 = usePlayer1State();
   const p2 = usePlayer2State();
@@ -30,12 +27,6 @@ export default function MatchMaking() {
 
   const { data: user1Profile } = useGameProfile(p1.id);
   const { data: user2Profile } = useGameProfile(p2.id);
-
-  const resetGameState = useResetGameState();
-  useEffect(() => {
-    resetGameState();
-  }, []);
-
   const { trigger: cancel } = useCancelGame(matchId);
 
   const startGame = () => {
@@ -49,12 +40,6 @@ export default function MatchMaking() {
       await cancel();
     } catch (error) {}
   };
-
-  useEffect(() => {
-    return () => {
-      reset();
-    };
-  }, []);
 
   return (
     <>

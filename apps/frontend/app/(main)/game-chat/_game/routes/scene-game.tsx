@@ -9,7 +9,7 @@ import { Player } from "../components/player";
 import { usePlayer1State, usePlayer2State } from "../state";
 import { Scores } from "../components/scores";
 import { useBoardState } from "../state/board";
-import { useResetGameState } from "../state/use-reset-state";
+import { CountDown } from "../components/count-down";
 
 export function SceneGame() {
   const player1 = usePlayer1State();
@@ -18,13 +18,7 @@ export function SceneGame() {
   useEffect(() => {
     board.setTexture();
   }, []);
-  const reset = useResetGameState();
-
-  useEffect(() => {
-    return () => {
-      reset();
-    };
-  }, []);
+  
 
   return (
     <>
@@ -32,6 +26,7 @@ export function SceneGame() {
         <Suspense>
           <CamScene />
           <Scores />
+          <CountDown />
           <Ball />
           <Player {...player2} />
           <Player {...player1} />

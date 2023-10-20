@@ -48,7 +48,25 @@ export class GamePlayService {
     World.add(this.engine.world, [this.ball, this.pl1, this.pl2]);
   }
 
-  startgame(match: Match) {
+  countDown() {
+    updateBallPosition(this.ball, this.game);
+    updatePlayerPosition(this.pl1, this.pl2, this.game);
+    return new Promise((resolve) => {
+      this.sendGameUpdateEvent();
+      const interval = setInterval(() => {
+        this.gmDt.countDown -= 1;
+        this.sendGameUpdateEvent();
+        if (this.gmDt.countDown <= 0) {
+          clearInterval(interval);
+          resolve(null);
+        }
+      }, 1000);
+    });
+  }
+
+  async startgame(match: Match) {
+    await this.countDown();
+    await this.sleep(500);
     Events.on(this.engine, 'collisionStart', (event) => {
       event.pairs.forEach((collision) => {
         const ball = collision.bodyA as Body;
@@ -93,11 +111,7 @@ export class GamePlayService {
   private gameUpdate() {
     Engine.update(this.engine, this.frameRate);
     if (this.game.state === State.PLAYING) {
-      this.game.websocketService.addEvent(
-        [this.game.match.adversaryId, this.game.match.homeId],
-        ServerGameEvents.UPDTGAME,
-        this.gmDt satisfies UpdateGameData,
-      );
+      this.sendGameUpdateEvent();
     }
 
     if (this.game.state === State.OVER) {
@@ -105,7 +119,24 @@ export class GamePlayService {
     }
   }
 
-  stopGame() {
+  async stopGame(disconnectedUserId?: number) {
+    if (disconnectedUserId) {
+      const match = this.game.match;
+      this.game.match.winnerId =
+        disconnectedUserId === match.adversaryId
+          ? match.homeId
+          : match.adversaryId;
+    }
+
+    clearInterval(this.interval);
+    Events.off(this.engine, 'beforeUpdate', () => {});
+    Events.off(this.engine, 'collisionStart', () => {});
+    Engine.clear(this.engine);
+
+    this.sendGameUpdateEvent();
+
+    await this.sleep(400);
+
     this.game.websocketService.addEvent(
       [this.game.match.adversaryId, this.game.match.homeId],
       ServerGameEvents.GAMEOVER,
@@ -114,17 +145,20 @@ export class GamePlayService {
         match: this.game.match,
       } satisfies GameOverData,
     );
-
-    clearInterval(this.interval);
-    Events.off(this.engine, 'beforeUpdate', () => {});
-    Events.off(this.engine, 'collisionStart', () => {});
-    Engine.clear(this.engine);
   }
 
   movePlayer(direction: string, client: number, match: Match) {
     if (client == match.homeId) this.processDataplayer(this.pl1, direction);
     if (client == match.adversaryId)
       this.processDataplayer(this.pl2, direction);
+  }
+
+  private sendGameUpdateEvent() {
+    this.game.websocketService.addEvent(
+      [this.game.match.adversaryId, this.game.match.homeId],
+      ServerGameEvents.UPDTGAME,
+      this.gmDt satisfies UpdateGameData,
+    );
   }
 
   private processDataplayer(player: Matter.Body, direction: string) {
@@ -152,7 +186,7 @@ export class GamePlayService {
     }
   }
 
-  applyCollisionEffect(gmDt: GameData, op: string) {
+  private applyCollisionEffect(gmDt: GameData, op: string) {
     if (op == 'adversary') gmDt.scores.adversary += 1;
     if (op == 'home') gmDt.scores.home += 1;
     Matter.Body.setPosition(this.ball, {
@@ -160,9 +194,18 @@ export class GamePlayService {
       y: this.gmDt.bdDt.size[1] / 2,
     });
   }
-  checkWinners(adversary: number, home: number, match: Match): number | null {
+
+  private checkWinners(
+    adversary: number,
+    home: number,
+    match: Match,
+  ): number | null {
     if (adversary > home && adversary >= 7) return match.adversaryId;
     if (adversary < home && home >= 7) return match.homeId;
     return null;
+  }
+
+  private sleep(ms: number) {
+    return new Promise((resolve) => setTimeout(resolve, ms));
   }
 }

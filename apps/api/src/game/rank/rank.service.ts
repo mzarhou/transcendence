@@ -180,11 +180,25 @@ export class RankService {
     }
   }
 
-  async updateElo(matchId: number) {
-    const match = await this.matches.findOneById(matchId);
-    const players = await this.prisma.user.findMany();
-    const home = players[match.homeId];
-    const adversary = players[match.adversaryId];
+  async updateElo(data: { matchId: number; winnerId: number }) {
+    const { winnerId, matchId } = data;
+
+    const match = await this.prisma.match.update({
+      where: { matchId },
+      data: { winnerId },
+    });
+
+    const players = await this.prisma.user.findMany({
+      where: {
+        OR: [{ id: match.homeId }, { id: match.adversaryId }],
+      },
+    });
+
+    const home = players.find((u) => u.id === match.homeId);
+    const adversary = players.find((u) => u.id === match.adversaryId);
+    if (!home || !adversary) {
+      throw new Error('Invalid home or adversary');
+    }
 
     let s1 = 0,
       s2 = 0,

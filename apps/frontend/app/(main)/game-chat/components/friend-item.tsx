@@ -66,7 +66,7 @@ export default function FriendItem({ friend, className }: FriendItemProps) {
               Play
             </DropdownMenuItem>
             <DropdownMenuItem className="cursor-pointer">
-              Profile
+              <Link href={`/game-chat/profile/${friend.id}`}>Profile</Link>
             </DropdownMenuItem>
             <BlockUserMenuItem userId={friend.id} />
             <UnfriendDropdownMenuItem friendId={friend.id} />

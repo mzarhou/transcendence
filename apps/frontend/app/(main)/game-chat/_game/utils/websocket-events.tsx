@@ -16,6 +16,8 @@ import {
 import { useToast } from "@/components/ui/use-toast";
 import { ToastAction } from "@radix-ui/react-toast";
 import { useAcceptGameInvitation } from "@/api-hooks/game/use-accept-game-invitation";
+import { useResetGameState } from "../state/use-reset-state";
+import { useCountDownState } from "../state/count-down";
 
 export function usePlayerPosition(direction: string): boolean {
   const [arrowDirection, setArrowDirection] = useState(false);
@@ -57,16 +59,14 @@ export const useSetGameEvents = () => {
   const setAdversary = useScoreState((s) => s.setAdversary);
   const navigate = useNavigate();
   const location = useLocation();
+  const resetGameState = useResetGameState();
+  const setCountDown = useCountDownState((state) => state.setCount);
 
   useEffect(() => {
     if (!socket) return;
     if (socket.hasListeners(ServerGameEvents.STARTSGM)) return;
 
     socket.on(ServerGameEvents.WAITING, (data: StartGameData) => {
-      setMatch(data.match);
-      setStatus(STATUS.UPDGAME);
-      setP1Id(data.match.homeId);
-      setP2Id(data.match.adversaryId);
       navigate("/waiting", { replace: true });
     });
 
@@ -82,6 +82,8 @@ export const useSetGameEvents = () => {
       if (location.pathname !== "/playing") {
         navigate("/playing", { replace: true });
       }
+
+      setCountDown(data.countDown);
       setMatch(data.match);
       setP1Id(data.match.homeId);
       setP2Id(data.match.adversaryId);
@@ -105,8 +107,9 @@ export const useSetGameEvents = () => {
     });
 
     socket.on(ServerGameEvents.GAMEOVER, (data: GameOverData) => {
+      resetGameState();
+      setMatch(data.match);
       setStatus(STATUS.GAMOVER);
-      setMatch({ winnerId: data.winnerId });
       navigate("/gameover");
     });
     return () => {
@@ -125,6 +128,7 @@ export const useMatchFoundEvent = () => {
   const navigate = useNavigate();
   const setP1Id = usePlayer1State((state) => state.setId);
   const setP2Id = usePlayer2State((state) => state.setId);
+  const resetGameState = useResetGameState();
 
   useEffect(() => {
     if (!socket) return;
@@ -137,6 +141,7 @@ export const useMatchFoundEvent = () => {
       navigate("/waiting", { replace: true });
     });
     socket.on(ServerGameEvents.GAME_CANCELED, (_data: null) => {
+      resetGameState();
       navigate("/", { replace: true });
     });
   }, [socket]);
@@ -167,7 +172,6 @@ function AcceptGameInvitationBtn({ invitationId }: { invitationId: string }) {
   const { trigger, isMutating } = useAcceptGameInvitation(invitationId);
 
   const acceptGameInvitation = () => {
-    // TODO: send game invitation
     try {
       trigger();
     } catch (error) {}
