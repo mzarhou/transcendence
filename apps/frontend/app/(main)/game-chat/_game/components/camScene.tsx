@@ -28,18 +28,7 @@ function Cam() {
 
       window.addEventListener("resize", handleResize);
       return () => window.removeEventListener("resize", handleResize);
-    }
-
-    // if (threeD){
-    // ref.current.position.x = 0;
-    // ref.current.position.y = -540;
-    // ref.current.position.z = 270;
-    // ref.current.rotation.x = 1.108;
-    // ref.current.rotation.y = 0;
-    // ref.current.rotation.z = 0;
-    // }
-
-    // return () => clearTimeout(to);
+    } 
   }, [ref, p2.id, user?.id, ref.current?.zoom, ref.current?.fov]);
 
   return (

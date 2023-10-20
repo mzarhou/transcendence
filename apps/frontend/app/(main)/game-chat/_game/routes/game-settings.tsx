@@ -1,8 +1,6 @@
 import { ChevronLeft } from "lucide-react";
-import MapsCard from "./components/maps-card";
-import ViewCard from "./components/view-card";
+import MapsCard from "./components/MapsCard";
 import { Button } from "@/components/ui/button";
-import BotCard from "./components/bot-card";
 import { Link } from "react-router-dom";
 
 export default function GameSettings() {
@@ -15,8 +13,6 @@ export default function GameSettings() {
       </Link>
       <div className="pb-8 pt-20 xl:w-full">
         <MapsCard />
-        <ViewCard />
-        <BotCard />
       </div>
     </>
   );

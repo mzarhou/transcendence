@@ -9,7 +9,7 @@ import { Bodies } from 'matter-js';
 
 export const ballOptions = {
   mass: 0.2,
-  force: { x: 0.002, y: 0.004 },
+  force: { x: 0.003, y: 0.002 },
   density: 0.001,
   friction: 0,
   restitution: 1,
@@ -42,12 +42,12 @@ export class GameData {
   };
   home: PlayerType = {
     posi: [this.bdDt.size[0] / 2, 70, 15],
-    size: [100, 10, 30],
+    size: [150, 10, 30],
     txtu: 'red',
   };
   adversary: PlayerType = {
     posi: [this.bdDt.size[0] / 2, this.bdDt.size[1] - 70, 15],
-    size: [100, 10, 30],
+    size: [150, 10, 30],
     txtu: 'blue',
   };
 }
