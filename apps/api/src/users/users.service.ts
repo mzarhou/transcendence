@@ -39,4 +39,15 @@ export class UsersService {
   async findOne(userId: number) {
     return this.usersRepository.findOneOrThrow(userId);
   }
+
+  async isUserBlocked(user1Id: number, user2Id: number) {
+    if (user1Id === user2Id) return false;
+    const { blockedUsers, blockingUsers } =
+      await this.usersRepository.findOneOrThrow(user1Id, {
+        includeBlockedUsers: true,
+        includeBlockingUsers: true,
+      });
+    const ids = [...blockedUsers, ...blockingUsers].map((u) => u.id);
+    return ids.includes(user2Id);
+  }
 }

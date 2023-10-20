@@ -7,7 +7,6 @@ import { MuteUserType } from "@transcendence/db";
 
 export const useMuteGroupUser = (groupId: string) => {
   const { toast } = useToast();
-  const { mutate } = useSWRConfig();
 
   return useSWRMutation(
     `/groups/${groupId}/mute`,
@@ -21,7 +20,6 @@ export const useMuteGroupUser = (groupId: string) => {
       },
       onSuccess: () => {
         toast({ description: "User muted succefully" });
-        // TODO: refetch muted users
       },
     }
   );

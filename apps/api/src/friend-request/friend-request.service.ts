@@ -1,4 +1,8 @@
-import { BadRequestException, Injectable } from '@nestjs/common';
+import {
+  BadRequestException,
+  ForbiddenException,
+  Injectable,
+} from '@nestjs/common';
 import { CreateFriendRequestDto } from './dto/create-friend-request.dto';
 import { ActiveUserData } from '@src/iam/interface/active-user-data.interface';
 import { NotificationsService } from '@src/notifications/notifications.service';
@@ -11,11 +15,14 @@ import { FRIEND_REQUEST_ACCEPTED_EVENT } from '@transcendence/db';
 import { FriendRequestsRepository } from './repositories/_friend-requests.repository';
 import { FriendRequestPolicy } from './friend-request.policy';
 import { WebsocketService } from '@src/websocket/websocket.service';
+import { UsersRepository } from '@src/users/repositories/users.repository';
+import { UsersService } from '@src/users/users.service';
 
 @Injectable()
 export class FriendRequestService {
   constructor(
     private readonly friendRequestsRepository: FriendRequestsRepository,
+    private readonly usersService: UsersService,
     private readonly friendRequestsPolicy: FriendRequestPolicy,
     private readonly notificationsService: NotificationsService,
     private readonly websocketService: WebsocketService,
@@ -26,6 +33,9 @@ export class FriendRequestService {
     createFriendRequestDto: CreateFriendRequestDto,
   ) {
     const { targetUserId } = createFriendRequestDto;
+    if (await this.usersService.isUserBlocked(user.sub, targetUserId)) {
+      throw new ForbiddenException("You can't send this friend request");
+    }
     this.friendRequestsPolicy.canCreate(user, targetUserId);
 
     const receivedFriendRequests = await this.findRecieved(user);

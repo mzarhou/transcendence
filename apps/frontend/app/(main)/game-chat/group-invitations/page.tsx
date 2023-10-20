@@ -19,7 +19,10 @@ export default function GroupInvitationsPage() {
         {invitationsCount ? (
           <div className="mt-5 flex-grow space-y-8 overflow-y-scroll pb-4">
             {data!.map((invitation) => (
-              <GroupInvitationItem invitation={invitation} />
+              <GroupInvitationItem
+                key={invitation.id}
+                invitation={invitation}
+              />
             ))}
           </div>
         ) : (

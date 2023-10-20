@@ -13,6 +13,7 @@ export type { User };
 export type CurrentUser = Prettify<
   User & {
     isTfaCodeProvided: boolean;
+    isFirstSignIn: boolean;
   }
 >;
 
