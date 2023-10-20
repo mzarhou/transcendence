@@ -2,17 +2,15 @@
 
 import { PerspectiveCamera } from "@react-three/drei";
 import { Stats } from "@react-three/drei";
-import { useEffect, useRef } from "react";
+import { useEffect, useLayoutEffect, useRef } from "react";
 import { PointLight } from "three";
 import { useUser } from "@/context/user-context";
 import { usePlayer2State } from "../state/player";
-import { useCamState } from "../state";
 
 function Cam() {
   const { user } = useUser();
   const p2 = usePlayer2State();
   const ref = useRef<THREE.PerspectiveCamera>(null);
-  const cam = useCamState();
 
   const handleResize = () => {
     if (ref.current) {
@@ -20,12 +18,17 @@ function Cam() {
       else ref.current.position.z = 545;
     }
   };
-  
+
   useEffect(() => {
     if (ref.current && user?.id == p2.id && ref.current?.rotation.z != Math.PI)
       ref.current?.rotateZ(Math.PI);
-    window.addEventListener("resize", handleResize);
-    return () => window.removeEventListener("resize", handleResize);
+    if (ref.current) {
+      if (window.innerWidth <= 1274) ref.current.position.z = 900;
+      else ref.current.position.z = 545;
+
+      window.addEventListener("resize", handleResize);
+      return () => window.removeEventListener("resize", handleResize);
+    } 
   }, [ref, p2.id, user?.id, ref.current?.zoom, ref.current?.fov]);
 
   return (
@@ -40,7 +43,8 @@ function Cam() {
         aspect={window.innerWidth / window.innerHeight}
         up={[0, 0, 1]}
       />
-      {/* <Stats /> */}
+      {/* <OrbitControls /> */}
+      <Stats />
     </>
   );
 }
