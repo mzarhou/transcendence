@@ -9,6 +9,7 @@ import { Player } from "../components/player";
 import { boardEntity } from "../entity/entity";
 import { usePlayer1State, usePlayer2State } from "../state";
 import { Scores } from "../components/scores";
+import { CountDown } from "../components/count-down";
 
 export function SceneGame() {
   const player1 = usePlayer1State();
@@ -20,6 +21,7 @@ export function SceneGame() {
         <Suspense>
           <CamScene />
           <Scores />
+          <CountDown />
           <Ball />
           <Player {...player2} />
           <Player {...player1} />

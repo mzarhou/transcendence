@@ -24,6 +24,8 @@ export const staticOption = {
 export class GameData {
   constructor(public match: Match) {}
 
+  countDown = 4;
+
   scores: ScoreType = {
     home: 0,
     adversary: 0,

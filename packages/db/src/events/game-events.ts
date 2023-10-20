@@ -58,6 +58,7 @@ export interface GameOverData {
 }
 
 export interface UpdateGameData {
+  countDown: number;
   scores: ScoreType;
   bdDt: BoardType;
   bl: BallType;
