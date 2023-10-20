@@ -14,13 +14,13 @@ export interface PlayerState extends ExtendedPlayerType {
 const player2State: ExtendedPlayerType = {
   id: 0,
   posi: [0, 330, 15],
-  size: [100, 10, 30],
+  size: [150, 10, 30],
   txtu: "blue",
 };
 const player1State: ExtendedPlayerType = {
   id: 0,
   posi: [0, -330, 15],
-  size: [100, 10, 30],
+  size: [150, 10, 30],
   txtu: "red",
 };
 
