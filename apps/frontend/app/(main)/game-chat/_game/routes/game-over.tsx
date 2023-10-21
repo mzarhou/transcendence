@@ -6,19 +6,21 @@ import Image from "next/image";
 import crown from "/public/images/crown.png";
 import { useMatchState, useScoreState } from "../state";
 import { useGameProfile } from "@/api-hooks/game/use-game-profile";
-import { useEffect } from "react";
+import { useEffect, useState } from "react";
 import UserRankImage from "@/components/user-rank-image";
 
 export function GameOver() {
   const socket = useSocket();
   const navigate = useNavigate();
   const match = useMatchState();
+  const [winnerId, setWinnerId] = useState(match.winnerId ?? 0)
   const scores = useScoreState();
-  const { data: winner } = useGameProfile(match.winnerId!);
+  const { data: winner } = useGameProfile(winnerId);
 
   useEffect(() => {
+    setWinnerId(match.winnerId ?? 0)
+    match.reset();
     return () => {
-      match.reset();
       scores.reset();
     };
   }, []);
