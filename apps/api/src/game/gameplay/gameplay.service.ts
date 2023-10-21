@@ -19,6 +19,7 @@ export class GamePlayService {
   private game: Game;
   readonly frameRate = 1000 / 30;
   interval!: NodeJS.Timeout;
+  countDownInterval!: NodeJS.Timeout;
 
   constructor(game: Game) {
     this.gmDt = game.gameData;
@@ -53,11 +54,11 @@ export class GamePlayService {
     updatePlayerPosition(this.pl1, this.pl2, this.game);
     return new Promise((resolve) => {
       this.sendGameUpdateEvent();
-      const interval = setInterval(() => {
+      this.countDownInterval = setInterval(() => {
         this.gmDt.countDown -= 1;
         this.sendGameUpdateEvent();
         if (this.gmDt.countDown <= 0) {
-          clearInterval(interval);
+          clearInterval(this.countDownInterval);
           resolve(null);
         }
       }, 1000);
@@ -129,6 +130,7 @@ export class GamePlayService {
     }
 
     clearInterval(this.interval);
+    clearInterval(this.countDownInterval);
     Events.off(this.engine, 'beforeUpdate', () => {});
     Events.off(this.engine, 'collisionStart', () => {});
     Engine.clear(this.engine);
