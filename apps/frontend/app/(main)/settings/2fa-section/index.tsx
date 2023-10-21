@@ -17,7 +17,7 @@ export default function TfaSection() {
       </div>
       <div className="flex flex-col">
         <hr className="my-4 mt-0 w-full border-t border-gray-100" />
-        <div className="flex items-center justify-between">
+        <div className="mt-2 flex flex-col space-y-4 md:mt-0 md:flex-row md:items-center md:justify-between md:space-y-0">
           <div className="flex items-center space-x-3">
             <div
               className="icon-container icon-md text-gray-500"

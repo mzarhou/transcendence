@@ -1,11 +1,6 @@
-import Image from "next/image";
 import { Button } from "@/components/ui/button";
-import profile_dark from "public/images/profile-dark.png";
-import settings_dark from "public/images/settings-dark.png";
-import profile from "public/images/profile.png";
-import settings from "public/images/settings.png";
 import { useTheme } from "next-themes";
-import { Gamepad2, User2 } from "lucide-react";
+import { Gamepad2 } from "lucide-react";
 import { Link } from "react-router-dom";
 
 export default function ProfileSettings() {

@@ -55,13 +55,13 @@ export function GameOver() {
         <div className=" flex justify-center space-x-5 pt-10">
           <Button
             onClick={retryAction}
-            className="my-1 h-9 border-2 border-border bg-transparent text-lg xl:h-[106px] xl:w-[220px] xl:text-2xl"
+            className="my-1 h-9 border-2 border-border bg-transparent text-lg text-foreground hover:text-white xl:h-[106px] xl:w-[220px] xl:text-2xl"
           >
             PLAY AGAIN
           </Button>
           <Button
             onClick={homeAction}
-            className="my-1 h-9 border-2 border-border bg-transparent text-lg xl:h-[106px] xl:w-[220px] xl:text-2xl"
+            className="my-1 h-9 border-2 border-border bg-transparent text-lg text-foreground hover:text-white xl:h-[106px] xl:w-[220px] xl:text-2xl"
           >
             RETURN
           </Button>

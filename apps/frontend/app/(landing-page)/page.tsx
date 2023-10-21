@@ -1,8 +1,6 @@
 "use client";
 
 import Image from "next/image";
-import landingpageimg from "/public/images/landing-page-image.png";
-import darkimg from "public/images/darkimg-lp.png";
 import ababouel from "/public/images/ababouel.jpeg";
 import mzarhou from "/public/images/mzarhou.jpeg";
 import fechcha from "/public/images/fech-cha.jpeg";
@@ -11,15 +9,12 @@ import github from "/public/images/github.png";
 import linkedin from "/public/images/linkedin.png";
 import twitter from "/public/images/twitter.png";
 import { NavBar } from "@/components/navbar";
-import { useTheme } from "next-themes";
 import Link from "next/link";
 import { buttonVariants } from "@/components/ui/button";
 import Guest from "../Guest";
 import arcade from "/public/images/arcade-pong.gif";
 
 export default function Home() {
-  const { theme } = useTheme();
-
   return (
     <Guest>
       <div className="px-5 md:px-8 ">
@@ -40,7 +35,7 @@ export default function Home() {
             </Link>
           </div>
           <Image
-            src={theme === "dark" ? arcade : landingpageimg}
+            src={arcade}
             alt="landing page image"
             className="w-[50%] lg:block"
           />

@@ -74,9 +74,11 @@ export default function MatchMaking() {
           </div>
         )}
       </div>
-      <Button onClick={startGame} className="mx-auto mt-4 block">
-        Start Game
-      </Button>
+      {user2Profile && (
+        <Button onClick={startGame} className="mx-auto my-4 block">
+          Start Game
+        </Button>
+      )}
     </>
   );
 }

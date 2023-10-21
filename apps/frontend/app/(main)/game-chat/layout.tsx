@@ -25,7 +25,7 @@ export default function GameLayout({ children }: Props) {
 
   const chatPopup = (
     <>
-      <div className="flex h-full w-full flex-col rounded-md bg-card text-card-foreground md:shadow-sm">
+      <div className="flex h-full w-full flex-col rounded-md bg-card/60 text-card-foreground dark:bg-card/30 md:shadow-sm">
         {children}
       </div>
     </>
@@ -33,7 +33,13 @@ export default function GameLayout({ children }: Props) {
 
   return (
     <div className="h-full space-y-10">
-      <Dialog open={open} onOpenChange={(open) => setOpen(open)}>
+      <Dialog
+        open={open}
+        onOpenChange={(open) => {
+          console.log("open popup...");
+          setOpen(open);
+        }}
+      >
         <DialogTrigger asChild>
           <Button variant="outline" className="md:hidden">
             <MessagesSquare />
@@ -46,10 +52,10 @@ export default function GameLayout({ children }: Props) {
         </DialogContent>
       </Dialog>
       <div className="h-full space-x-4 md:flex">
-        <div className="h-[calc(100vh-220px)] flex-grow overflow-y-auto rounded-md border text-card-foreground/40 md:h-[calc(100vh-160px)]">
+        <div className="h-[calc(100vh-220px)] flex-grow overflow-y-auto rounded-md border border-border/40 bg-card/60 text-card-foreground/40 dark:bg-card/30 md:h-[calc(100vh-160px)]">
           <GameRouter />
         </div>
-        <div className="relative hidden h-full w-full overflow-y-hidden md:block md:max-w-sm">
+        <div className="relative hidden h-full w-full overflow-y-hidden rounded-md border border-border/40 md:block md:max-w-sm">
           {chatPopup}
         </div>
       </div>

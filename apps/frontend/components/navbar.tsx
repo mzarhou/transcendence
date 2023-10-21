@@ -1,13 +1,13 @@
 "use client";
 
 import { useUser } from "@/context/user-context";
-import { Loader2, LucideChevronDown, Mail } from "lucide-react";
+import { Loader2, Mail } from "lucide-react";
 import Link from "next/link";
 import Auth from "./Auth";
 import Guest from "./Guest";
 import { Button, buttonVariants } from "./ui/button";
 import { Popover, PopoverContent, PopoverTrigger } from "./ui/popover";
-import { useEffect, useState } from "react";
+import { useState } from "react";
 import { ModeToggle } from "./mode-toggle";
 import NotificationsPopup from "./notifications-popup";
 import { NoticationsBadge } from "./ui/notifications-badge";
@@ -28,7 +28,7 @@ export function NavBar() {
           <MessagesIcon />
           <NotificationsPopup />
         </Auth>
-        <ModeToggle className="mx-1" />
+        <ModeToggle className="mx-1 rounded-full" />
         <Auth>
           <NavUserPopup />
         </Auth>
@@ -82,21 +82,14 @@ function NavUserPopup() {
           <span
             className="inline-block overflow-hidden rounded-full"
             style={{
-              minWidth: "24px",
-              minHeight: "24px",
-              height: "24px",
-              width: "24px",
+              minWidth: "40px",
+              minHeight: "40px",
+              height: "40px",
+              width: "40px",
             }}
           >
-            {/* <div
-              className="h-full w-full rounded-full bg-cover bg-center bg-no-repeat"
-              style={{ backgroundImage: `url("${user?.avatar}")` }}
-            ></div> */}
             <UserRankImage user={user} className="" />
           </span>
-          <div className="icon-container icon-md ml-2">
-            <LucideChevronDown className="h-full w-full" />
-          </div>
         </Button>
       </PopoverTrigger>
       <PopoverContent align="end" className="mr-3 max-w-xs rounded-xl p-4">

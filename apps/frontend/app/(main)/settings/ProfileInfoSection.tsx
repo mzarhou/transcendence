@@ -17,8 +17,7 @@ import { UpdateUserType, updateUserSchema } from "@transcendence/db";
 import { useForm } from "react-hook-form";
 import ConfirmDialog from "@/components/confirm-dialog";
 import { useState } from "react";
-import { Pencil, UploadCloud, X } from "lucide-react";
-import { api } from "@/lib/api";
+import { UploadCloud, X } from "lucide-react";
 import { useUploadProfileImage } from "@/api-hooks/use-upload-profile-image";
 
 export default function ProfileInfo() {
@@ -97,7 +96,8 @@ function UpdateImage() {
       trigger={
         <div className="relative cursor-pointer">
           <img src={user?.avatar} className="h-24 w-24 rounded-full" />
-          <UploadCloud className="absolute left-[50%] right-0 top-[50%] -ml-[12px] -mt-[4px]" />
+          <div className="absolute inset-0 z-10 rounded-full bg-slate-900/50"></div>
+          <UploadCloud className="absolute left-[50%] right-0 top-[50%] z-50 -ml-[12px] -mt-[4px] text-white" />
         </div>
       }
     >

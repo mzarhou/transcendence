@@ -26,7 +26,7 @@ export default function MapsCard() {
           {images.map((image) => (
             <div
               key={image.id}
-              className={cn("border-gray border", {
+              className={cn("border-gray rounded-md border", {
                 "border-[6px] border-blue-500": board.txtu === image.src,
               })}
             >
