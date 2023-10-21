@@ -51,24 +51,24 @@ export class RankService {
     } satisfies GameProfile;
   }
 
-  async getProvRank() {
+  async getProvElo() {
     return this.prisma.user.findMany({
       where: {
         rankBoard: 'Provisional',
       },
       orderBy: {
-        rank: 'asc',
+        eloRating: 'desc',
       },
     });
   }
 
-  async getEstaRank() {
+  async getEstaElo() {
     return this.prisma.user.findMany({
       where: {
         rankBoard: 'Established',
       },
       orderBy: {
-        rank: 'asc',
+        eloRating: 'desc',
       },
     });
   }
@@ -103,41 +103,44 @@ export class RankService {
   }
 
   async updateRank(): Promise<void> {
-    const players = await this.prisma.user.findMany({
-      orderBy: {
-        eloRating: 'desc',
-      },
-    });
+    const estaPlayers = await this.getEstaElo();
+    const provPlayers = await this.getProvElo();
 
     let newRank = 1;
 
-    for (const player of players) {
-      await this.prisma.user.update({
-        where: { id: player.id },
-        data: { rank: newRank },
-      });
-      newRank++;
+    if (estaPlayers.length !== 0) {
+      for (const player of estaPlayers) {
+        await this.prisma.user.update({
+          where: { id: player.id },
+          data: { rank: newRank },
+        });
+        newRank++;
+      }
+    }
+
+    if (provPlayers.length !== 0) {
+      for (const player of provPlayers) {
+        await this.prisma.user.update({
+          where: { id: player.id },
+          data: { rank: newRank },
+        });
+        newRank++;
+      }
     }
   }
 
-  async updateRankBoard(): Promise<void> {
-    const players = await this.prisma.user.findMany({
+  async updateRankBoard() {
+    return this.prisma.user.updateMany({
       where: {
         rankBoard: 'Provisional',
         numOfGames: {
           gt: 20,
         },
       },
+      data: {
+        rankBoard: 'Established',
+      },
     });
-
-    for (const player of players) {
-      await this.prisma.user.update({
-        where: { id: player.id },
-        data: {
-          rankBoard: 'Established',
-        },
-      });
-    }
   }
 
   async updateDivision(): Promise<void> {
@@ -152,7 +155,7 @@ export class RankService {
         }
         if (
           player.eloRating >= 800 &&
-          player.eloRating < 1250 &&
+          player.eloRating < 1650 &&
           player.division != 'Bronze'
         ) {
           await this.prisma.user.update({
@@ -161,8 +164,8 @@ export class RankService {
           });
         }
         if (
-          player.eloRating >= 1250 &&
-          player.eloRating < 1800 &&
+          player.eloRating >= 1650 &&
+          player.eloRating < 2500 &&
           player.division != 'Gold'
         ) {
           await this.prisma.user.update({
@@ -170,7 +173,7 @@ export class RankService {
             data: { division: 'Gold' },
           });
         }
-        if (player.eloRating >= 1800 && player.division != 'Legend') {
+        if (player.eloRating >= 2500 && player.division != 'Legend') {
           await this.prisma.user.update({
             where: { id: player.id },
             data: { division: 'Legend' },
@@ -205,8 +208,8 @@ export class RankService {
       newR1 = 0,
       newR2 = 0;
 
-    this.incrementNumOfGames(home.id);
-    this.incrementNumOfGames(adversary.id);
+    await this.incrementNumOfGames(home.id);
+    await this.incrementNumOfGames(adversary.id);
 
     if (
       home.rankBoard == 'Provisional' &&
@@ -295,10 +298,10 @@ export class RankService {
             1 /
               (1 + Math.pow(10, (adversary.eloRating - home.eloRating) / 400)));
     }
-    this.newElo(newR1, home.id);
-    this.newElo(newR2, adversary.id);
-    this.updateRank();
-    this.updateRankBoard();
-    this.updateDivision();
+    await this.newElo(newR1, home.id);
+    await this.newElo(newR2, adversary.id);
+    await this.updateRankBoard();
+    await this.updateDivision();
+    await this.updateRank();
   }
 }
