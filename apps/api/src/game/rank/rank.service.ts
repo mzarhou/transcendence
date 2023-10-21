@@ -1,6 +1,10 @@
-import { Injectable } from '@nestjs/common';
+import { ForbiddenException, Injectable } from '@nestjs/common';
 import { PrismaService } from '@src/+prisma/prisma.service';
+import { ChatService } from '@src/chat/chat.service';
 import { MatchesService } from '@src/game/matches/matches.service';
+import { ActiveUserData } from '@src/iam/interface/active-user-data.interface';
+import { UsersService } from '@src/users/users.service';
+import { GameProfile } from '@transcendence/db';
 
 @Injectable()
 export class RankService {
@@ -8,38 +12,43 @@ export class RankService {
   constructor(
     private prisma: PrismaService,
     private matches: MatchesService,
+    private readonly usersService: UsersService,
+    private readonly chatService: ChatService,
   ) {}
 
-  async getAllRank() {
-    return this.prisma.user.findMany();
-  }
+  async getGameProfile(currentUser: ActiveUserData, userId: number) {
+    if (await this.usersService.isUserBlocked(currentUser.sub, userId)) {
+      throw new ForbiddenException("You can't send this friend request");
+    }
 
-  async getNumOfMatchesPlayed(id: number): Promise<any> {
-    const player = await this.prisma.user.findUnique({
-      where: { id },
-    });
-    return player?.numOfGames;
-  }
-
-  async getEloScore(id: number): Promise<any> {
-    const player = await this.prisma.user.findUnique({
-      where: { id },
-    });
-    return player?.eloRating;
-  }
-
-  async getNumOfWins(id: number): Promise<any> {
-    const player = await this.prisma.user.findUnique({
-      where: { id },
-      include: {
-        matches3: {
-          where: {
-            winnerId: id,
+    const { numOfGames, eloRating, ...user } =
+      await this.prisma.user.findUniqueOrThrow({
+        where: { id: userId },
+        include: {
+          matches3: {
+            where: {
+              winnerId: userId,
+            },
           },
         },
-      },
-    });
-    return player?.matches3.length;
+      });
+
+    const nbWins = user.matches3.length;
+    const isFriend = await this.chatService.isFriendOf(currentUser, userId);
+
+    return {
+      id: user.id,
+      name: user.name,
+      avatar: user.avatar,
+      division: user.division,
+      eloRating,
+      rank: user.rank,
+      rankBoard: user.rankBoard,
+      numOfGames,
+      nbWins,
+      nbLoses: numOfGames - nbWins,
+      isFriend,
+    } satisfies GameProfile;
   }
 
   async getProvElo() {
@@ -69,7 +78,10 @@ export class RankService {
       where: { id: userId },
     });
 
-    if (!player) return;
+    if (!player) {
+      return;
+    }
+
     await this.prisma.user.update({
       where: { id: userId },
       data: {
@@ -79,7 +91,10 @@ export class RankService {
   }
 
   async newElo(newElo: number, userId: number) {
-    return this.prisma.user.update({
+    const player = await this.prisma.user.findUnique({
+      where: { id: userId },
+    });
+    const uptPlayer = await this.prisma.user.update({
       where: { id: userId },
       data: {
         eloRating: newElo,
@@ -168,27 +183,33 @@ export class RankService {
     }
   }
 
-  async updateElo(matchId: number) {
-    const match = await this.matches.findOneById(matchId);
-    const home = await this.prisma.user.findUnique({
+  async updateElo(data: { matchId: number; winnerId: number }) {
+    const { winnerId, matchId } = data;
+
+    const match = await this.prisma.match.update({
+      where: { matchId },
+      data: { winnerId },
+    });
+
+    const players = await this.prisma.user.findMany({
       where: {
-        id: match.homeId,
+        OR: [{ id: match.homeId }, { id: match.adversaryId }],
       },
     });
 
-    const adversary = await this.prisma.user.findUnique({
-      where: {
-        id: match.adversaryId,
-      },
-    });
-    if (!home || !adversary) return;
+    const home = players.find((u) => u.id === match.homeId);
+    const adversary = players.find((u) => u.id === match.adversaryId);
+    if (!home || !adversary) {
+      throw new Error('Invalid home or adversary');
+    }
+
     let s1 = 0,
       s2 = 0,
       newR1 = 0,
       newR2 = 0;
 
-    await this.incrementNumOfGames(match.homeId);
-    await this.incrementNumOfGames(match.adversaryId);
+    await this.incrementNumOfGames(home.id);
+    await this.incrementNumOfGames(adversary.id);
 
     if (
       home.rankBoard == 'Provisional' &&
@@ -277,7 +298,6 @@ export class RankService {
             1 /
               (1 + Math.pow(10, (adversary.eloRating - home.eloRating) / 400)));
     }
-
     await this.newElo(newR1, home.id);
     await this.newElo(newR2, adversary.id);
     await this.updateRankBoard();
