@@ -13,8 +13,16 @@ import Link from "next/link";
 import { buttonVariants } from "@/components/ui/button";
 import Guest from "../Guest";
 import arcade from "/public/images/arcade-pong.gif";
+import light_arcade from "public/images/light_arcade-pong.gif";
+import { useTheme } from "next-themes";
 
 export default function Home() {
+  const { theme } = useTheme();
+
+  if (!theme) {
+    return <></>;
+  }
+
   return (
     <Guest>
       <div className="px-5 md:px-8 ">
@@ -35,7 +43,7 @@ export default function Home() {
             </Link>
           </div>
           <Image
-            src={arcade}
+            src={theme === "dark" ? arcade : light_arcade}
             alt="landing page image"
             className="w-[50%] lg:block"
           />

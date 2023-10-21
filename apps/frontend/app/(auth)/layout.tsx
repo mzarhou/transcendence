@@ -6,11 +6,13 @@ import { usePathname, useSearchParams } from "next/navigation";
 import { ReactNode, useEffect } from "react";
 import Guest from "../Guest";
 import Image from "next/image";
+import { useTheme } from "next-themes";
 
 export default function Layout({ children }: { children: ReactNode }) {
   const error = useSearchParams().get("error");
   const { toast } = useToast();
   const pathname = usePathname();
+  const { theme } = useTheme();
 
   useEffect(() => {
     if (error && error.length) {
@@ -22,6 +24,10 @@ export default function Layout({ children }: { children: ReactNode }) {
     }
   }, []);
 
+  if (!theme) {
+    return <></>;
+  }
+
   return (
     <Guest>
       <div className="container relative grid h-screen flex-col items-center justify-center py-10 lg:max-w-none lg:grid-cols-2 lg:px-0 lg:py-0">
@@ -29,7 +35,10 @@ export default function Layout({ children }: { children: ReactNode }) {
           <div
             className="absolute inset-0 bg-cover"
             style={{
-              backgroundImage: "url(/login-image.png)",
+              backgroundImage:
+                theme === "dark"
+                  ? "url(/login-image.png)"
+                  : "url(/light_login-image.png)",
             }}
           />
         </div>
