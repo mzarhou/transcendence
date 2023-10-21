@@ -15,10 +15,10 @@ export function SceneGame() {
   const player1 = usePlayer1State();
   const player2 = usePlayer2State();
   const board = useBoardState();
+
   useEffect(() => {
     board.setTexture();
   }, []);
-  
 
   return (
     <>

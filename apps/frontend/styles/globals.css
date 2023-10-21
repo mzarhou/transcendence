@@ -110,15 +110,4 @@
   .brr {
     border: 1px solid red;
   }
-
-  .image-button {
-    width: 100px; /* Set your image dimensions */
-    height: 133px;
-    transition: transform 0.2s; /* Add a smooth transition effect */
-  }
-  
-  /* Hover effect */
-  .image-button:hover {
-    transform: scale(1.1); /* Increase the size of the image on hover */
-  }
 }
