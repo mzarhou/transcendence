@@ -20,6 +20,7 @@ export default function useMessagesEvents(socket: Socket) {
     if (!user) return;
     socket.on("connect", () => {
       if (socket.hasListeners(MESSAGE_EVENT)) return;
+      console.log("setup messages events");
       socket.on(MESSAGE_EVENT, (data: MessageType) => onMessage(data));
       socket.on(MESSAGE_READ_EVENT, (data: MessageType) => {
         const friendId = getFriendIdFromMessage(user.id, data);

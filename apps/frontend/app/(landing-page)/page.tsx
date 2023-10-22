@@ -12,8 +12,7 @@ import { NavBar } from "@/components/navbar";
 import Link from "next/link";
 import { buttonVariants } from "@/components/ui/button";
 import Guest from "../Guest";
-import GameHomeLottie from "lotties/game-home-lottie.json";
-import Lottie from "react-lottie";
+import PongAnimation from "@/components/pong-animation";
 
 export default function Home() {
   const team = [
@@ -40,7 +39,7 @@ export default function Home() {
       <div className="px-5 md:px-8 ">
         <NavBar />
       </div>
-      <main className="container mx-auto px-6 pb-24">
+      <main className="mx-auto mt-20 px-6 pb-24">
         <div className="flex flex-col items-center  justify-between space-y-8 lg:flex-row ">
           <div className="space-y-8 text-center text-foreground lg:inline-block lg:w-[43%] lg:text-left">
             <h1 className="text-[clamp(2rem,4vw,4rem)] font-semibold leading-tight">
@@ -54,19 +53,9 @@ export default function Home() {
               Get Started
             </Link>
           </div>
-          <Lottie
-            style={{
-              padding: 0,
-              width: "60%",
-            }}
-            options={{
-              animationData: GameHomeLottie,
-              loop: true,
-              autoplay: true,
-            }}
-          />
+          <PongAnimation />
         </div>
-        <div className="mt-56">
+        <div className="mt-40">
           <h1 className="font-jockey text-center text-4xl font-semibold text-foreground md:text-6xl">
             TEAM
           </h1>

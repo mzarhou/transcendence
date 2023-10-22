@@ -30,6 +30,8 @@ export default function useFriendsEvents(socket: Socket) {
   useEffect(() => {
     socket.on("connect", () => {
       if (socket.hasListeners(FRIEND_CONNECTED)) return;
+      console.log("setup friends events");
+
       socket.on(FRIEND_CONNECTED, async (data: FriendConnectedData) => {
         onFriendConnected(data);
         mutate(friendsKey);

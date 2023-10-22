@@ -20,14 +20,14 @@ export default async function RootLayout({
       <html lang="en" suppressHydrationWarning>
         <head />
         <body
-          className={`${boogaloo.variable} ${inter.variable} bg-primayr/10 mx-auto max-w-[2000px] font-sans`}
+          className={`${boogaloo.variable} ${inter.variable} bg-primayr/10 bg-primayr/10 !mx-auto max-w-[1600px] !overflow-auto !px-0 font-sans`}
         >
-          <EventsSocketProvider>
-            <ThemeProvider attribute="class" defaultTheme="system" enableSystem>
-              <UserProvider>{children}</UserProvider>
-              <Toaster />
-            </ThemeProvider>
-          </EventsSocketProvider>
+          <ThemeProvider attribute="class" defaultTheme="system" enableSystem>
+            <UserProvider>
+              <EventsSocketProvider>{children}</EventsSocketProvider>
+            </UserProvider>
+            <Toaster />
+          </ThemeProvider>
         </body>
       </html>
     </>

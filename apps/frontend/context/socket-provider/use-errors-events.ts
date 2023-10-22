@@ -2,7 +2,6 @@ import { useCallback, useEffect } from "react";
 import { Socket } from "socket.io-client";
 import { ERROR_EVENT, WsErrorData } from "@transcendence/db";
 import { useToast } from "@/components/ui/use-toast";
-import { api } from "@/lib/api";
 import { useUser } from "../user-context";
 
 export default function useErrorsEvents(socket: Socket) {
@@ -19,7 +18,7 @@ const useOnError = () => {
   const { user } = useUser();
 
   const onError = useCallback(
-    async (socket: Socket, data: WsErrorData) => {
+    async (_socket: Socket, data: WsErrorData) => {
       if (!user) return;
       if (data.statusCode !== 401) {
         toast({
@@ -28,13 +27,6 @@ const useOnError = () => {
         });
         return;
       }
-      try {
-        // try to refresh tokens
-        await api.post("/authentication/refresh-tokens");
-        setTimeout(() => {
-          socket.connect();
-        }, 200);
-      } catch (error) {}
     },
     [user]
   );
