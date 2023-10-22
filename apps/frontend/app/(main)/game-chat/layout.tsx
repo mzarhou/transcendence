@@ -55,7 +55,7 @@ export default function GameLayout({ children }: Props) {
         <div className="h-[calc(100vh-220px)] flex-grow overflow-y-auto rounded-md border border-border/40 bg-card/60 text-card-foreground/40 dark:bg-card/30 md:h-[calc(100vh-160px)]">
           <GameRouter />
         </div>
-        <div className="relative hidden h-full w-full overflow-y-hidden rounded-md border border-border/40 md:block md:max-w-sm">
+        <div className="relative hidden h-full w-full overflow-y-hidden rounded-md border border-border/40 md:block md:min-w-[300px] md:max-w-md">
           {chatPopup}
         </div>
       </div>
