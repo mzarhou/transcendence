@@ -22,12 +22,12 @@ export default async function RootLayout({
         <body
           className={`${boogaloo.variable} ${inter.variable} bg-primayr/10 mx-auto max-w-[2000px] font-sans`}
         >
-          <ThemeProvider attribute="class" defaultTheme="system" enableSystem>
-            <UserProvider>
-              <EventsSocketProvider>{children}</EventsSocketProvider>
-            </UserProvider>
-            <Toaster />
-          </ThemeProvider>
+          <EventsSocketProvider>
+            <ThemeProvider attribute="class" defaultTheme="system" enableSystem>
+              <UserProvider>{children}</UserProvider>
+              <Toaster />
+            </ThemeProvider>
+          </EventsSocketProvider>
         </body>
       </html>
     </>
