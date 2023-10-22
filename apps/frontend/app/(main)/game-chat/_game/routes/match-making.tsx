@@ -44,7 +44,7 @@ export default function MatchMaking() {
   return (
     <>
       <Button
-        className="absolute left-10 mt-5 bg-transparent"
+        className="absolute left-8 top-0 mt-5 border border-border bg-transparent text-foreground hover:text-white"
         onClick={cancelGame}
       >
         <X />
