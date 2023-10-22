@@ -20,7 +20,7 @@ export default async function RootLayout({
       <html lang="en" suppressHydrationWarning>
         <head />
         <body
-          className={`${boogaloo.variable} ${inter.variable} bg-primayr/10 !mx-auto max-w-[2000px] !px-0 font-sans`}
+          className={`${boogaloo.variable} ${inter.variable} bg-primayr/10 bg-primayr/10 !mx-auto max-w-[1600px] !overflow-auto !px-0 font-sans`}
         >
           <ThemeProvider attribute="class" defaultTheme="system" enableSystem>
             <UserProvider>
