@@ -31,7 +31,7 @@ export function useGroupEvents(socket: Socket) {
   useEffect(() => {
     socket.on("connect", () => {
       if (socket.hasListeners(GROUP_DELETED_NOTIFICATION)) return;
-
+      console.log("setup groups events");
       [
         GROUP_DELETED_NOTIFICATION,
         ADD_ADMIN_NOTIFICATION,

@@ -7,15 +7,19 @@ import useFriendsEvents from "./use-friend-events";
 import { useGroupEvents } from "./use-groups-events";
 import useMessagesEvents from "./use-messages-events";
 import useErrorsEvents from "./use-errors-events";
+import { useUser } from "../user-context";
 
 const socket = io(env.NEXT_PUBLIC_API_URL, {
   withCredentials: true,
+  autoConnect: false,
 });
 
 const EventsSocketContext = createContext<Socket | null>(null);
 export const useSocket = () => useContext(EventsSocketContext);
 
 export const EventsSocketProvider = ({ children }: { children: ReactNode }) => {
+  const { user } = useUser();
+
   // set events
   useFriendsEvents(socket);
   useGroupEvents(socket);
@@ -23,8 +27,14 @@ export const EventsSocketProvider = ({ children }: { children: ReactNode }) => {
   useErrorsEvents(socket);
 
   useEffect(() => {
-    if (!socket.connected) socket.connect();
+    if (user) {
+      socket.connect();
+    } else {
+      socket.disconnect();
+    }
+  }, [user]);
 
+  useEffect(() => {
     socket.on("connect", () => {
       console.log("Connected to server");
     });
