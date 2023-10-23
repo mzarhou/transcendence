@@ -1,3 +1,4 @@
+import { usePostFriendRequest } from "@/api-hooks/friend-requests/use-post-friend-request";
 import { useCreateGameInvitation } from "@/api-hooks/game/use-create-game-invitation";
 import { useGameProfile } from "@/api-hooks/game/use-game-profile";
 import FullLoader from "@/components/ui/full-loader";
@@ -55,10 +56,16 @@ function PlayButton({ profile }: { profile: GameProfile }) {
 }
 
 function AddFriendButton({ profile }: { profile: GameProfile }) {
-  // Todo
-  const addFriend = () => {};
+  const { isMutating, trigger } = usePostFriendRequest();
+
   return (
-    <LoaderButton onClick={addFriend} isLoading={false} className="space-x-2">
+    <LoaderButton
+      onClick={() => {
+        trigger({ targetUserId: profile.id });
+      }}
+      isLoading={isMutating}
+      className="space-x-2"
+    >
       <UserPlus size={20} />
       <span>Add Friend</span>
     </LoaderButton>

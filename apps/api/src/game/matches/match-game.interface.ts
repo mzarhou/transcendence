@@ -11,7 +11,6 @@ export class Game {
   gameService!: GamePlayService;
   match: Match;
 
-  // TODO: refactor use match only
   constructor(
     public readonly websocketService: WebsocketService,
     match: Match,
