@@ -1,0 +1,35 @@
+# Pin specific version
+# We use alpine for reduced image size
+FROM node:18-alpine3.18
+
+# set NODE_ENV
+# ENV NODE_ENV production
+
+# Workdir
+WORKDIR /user/src/app
+
+# Copy files required to install dependencies (caching)
+COPY package*.json ./
+COPY yarn.lock ./
+COPY start-api.sh ./
+
+COPY apps/api/package*.json ./apps/api/
+COPY packages/db/package*.json ./packages/db/
+
+RUN yarn install
+
+# use non-root user
+# use --chown on COPY command to set file permissions
+# USER node
+
+# Copy remaining files
+COPY ./apps/api/ ./apps/api/
+COPY ./packages/db/ ./packages/db/
+
+# Build the app
+RUN yarn api:build
+
+# Expected Port
+EXPOSE 3000
+
+CMD [ "./start-api.sh" ]

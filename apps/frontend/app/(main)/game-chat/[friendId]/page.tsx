@@ -3,7 +3,12 @@
 import { cn } from "@/lib/utils";
 import { FormEventHandler, useEffect, useRef } from "react";
 import FullPlaceHolder from "@/components/ui/full-placeholder";
-import { MESSAGE_EVENT, SendMessageType, MessageType } from "@transcendence/db";
+import {
+  MESSAGE_EVENT,
+  SendMessageType,
+  MessageType,
+  User,
+} from "@transcendence/db";
 import {
   IntersectionObserverProvider,
   useIntersectionObserver,
@@ -26,8 +31,13 @@ export default function ChatPage({
   params: { friendId: string };
 }) {
   const { data: friend } = useFriend(friendId.toString());
+
   if (!friend) return <></>;
 
+  return <ChatPageContent friend={friend} />;
+}
+
+function ChatPageContent({ friend }: { friend: User }) {
   const messagesIntersectionCallback = useMessageIntersectionCallback(
     friend.id
   );

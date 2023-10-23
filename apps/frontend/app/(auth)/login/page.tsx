@@ -4,7 +4,7 @@ import Link from "next/link";
 import { UserLoginForm } from "./user-login-form";
 import { ModeToggle } from "@/components/mode-toggle";
 
-export default function () {
+export default function LoginPage() {
   return (
     <>
       <div className="absolute right-4 top-4 flex items-center md:right-8 md:top-8">
