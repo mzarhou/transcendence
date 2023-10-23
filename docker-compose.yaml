@@ -41,6 +41,9 @@ services:
 
   redis:
     image: redis:7.2-alpine3.18
+    env_file:
+      - apps/api/.env
+    command: /bin/sh -c "redis-server --requirepass $$REDISPASSWORD"
     ports:
       - "6379:6379"
     restart: always
