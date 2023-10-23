@@ -158,7 +158,9 @@ export class GroupsService {
       return group.users.filter((u) => u.role === 'ADMIN');
     }
     if (filter === 'members') {
-      return group.users.filter((u) => u.role === 'MEMBER');
+      return group.users.filter(
+        (u) => u.role === 'MEMBER' || u.role === 'ADMIN',
+      );
     }
     return group.users;
   }

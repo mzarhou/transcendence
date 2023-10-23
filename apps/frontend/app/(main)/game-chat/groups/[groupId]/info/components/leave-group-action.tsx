@@ -63,15 +63,15 @@ export function LeaveGroupAction({
       }
     >
       {({ close }) => (
-        <div className="flex flex-col space-y-8 max-h-[90vh]">
+        <div className="flex max-h-[90vh] flex-col space-y-8">
           <p>Are you sure you want to leave group ?</p>
           {isOwnerLeaving && (
-            <div className="space-y-4 flex-grow flex flex-col overflow-y-auto">
+            <div className="flex flex-grow flex-col space-y-4 overflow-y-auto">
               <div className="py-1">
                 <label className="text-md">Choose new owner</label>
               </div>
               {newOwner && (
-                <div className="p-4 bg-primary rounded-lg px-6 space-x-2 flex justify-between">
+                <div className="flex justify-between space-x-2 rounded-lg bg-primary p-4 px-6">
                   <div className="flex space-x-2">
                     <Image
                       src={newOwner.avatar}
@@ -89,26 +89,28 @@ export function LeaveGroupAction({
               <RadioGroup
                 defaultValue={newOwnerId ?? undefined}
                 onValueChange={(v) => setNewOwnerId(v)}
-                className="flex-grow ml-2 space-y-0.5 overflow-y-auto"
+                className="ml-2 flex-grow space-y-0.5 overflow-y-auto"
               >
-                {memebers?.map((m) => (
-                  <label
-                    key={m.id}
-                    className="flex space-x-4 items-center bg-white/5 px-4 py-2 rounded-lg cursor-pointer"
-                  >
-                    <RadioGroupItem value={m.id + ""} />
-                    <div className="flex space-x-2">
-                      <Image
-                        src={m.avatar}
-                        width={40}
-                        height={40}
-                        alt=""
-                        className="rounded-full"
-                      />
-                      <span className="mt-0.5">~{m.name}</span>
-                    </div>
-                  </label>
-                ))}
+                {memebers
+                  ?.filter((m) => m.id !== user.id)
+                  .map((m) => (
+                    <label
+                      key={m.id}
+                      className="flex cursor-pointer items-center space-x-4 rounded-lg bg-white/5 px-4 py-2"
+                    >
+                      <RadioGroupItem value={m.id + ""} />
+                      <div className="flex space-x-2">
+                        <Image
+                          src={m.avatar}
+                          width={40}
+                          height={40}
+                          alt=""
+                          className="rounded-full"
+                        />
+                        <span className="mt-0.5">~{m.name}</span>
+                      </div>
+                    </label>
+                  ))}
               </RadioGroup>
             </div>
           )}
