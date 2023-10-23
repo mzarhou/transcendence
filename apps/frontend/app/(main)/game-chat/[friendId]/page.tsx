@@ -3,7 +3,12 @@
 import { cn } from "@/lib/utils";
 import { FormEventHandler, useEffect, useRef } from "react";
 import FullPlaceHolder from "@/components/ui/full-placeholder";
-import { MESSAGE_EVENT, SendMessageType, MessageType } from "@transcendence/db";
+import {
+  MESSAGE_EVENT,
+  SendMessageType,
+  MessageType,
+  User,
+} from "@transcendence/db";
 import {
   IntersectionObserverProvider,
   useIntersectionObserver,
@@ -14,7 +19,7 @@ import {
 } from "./hooks/use-message-intersection-callback";
 import { Check, CheckCheck } from "lucide-react";
 import { useUser } from "@/context/user-context";
-import { useSocket } from "@/context/events-socket-context";
+import { useSocket } from "@/context";
 import { useMessages } from "@/api-hooks/use-messages";
 import { NEW_MESSAGES_LINE_ID, useScroll } from "./hooks/use-scroll";
 import GoBackBtn from "../components/chat-go-back";
@@ -26,8 +31,13 @@ export default function ChatPage({
   params: { friendId: string };
 }) {
   const { data: friend } = useFriend(friendId.toString());
+
   if (!friend) return <></>;
 
+  return <ChatPageContent friend={friend} />;
+}
+
+function ChatPageContent({ friend }: { friend: User }) {
   const messagesIntersectionCallback = useMessageIntersectionCallback(
     friend.id
   );

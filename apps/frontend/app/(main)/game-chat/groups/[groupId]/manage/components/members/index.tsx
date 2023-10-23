@@ -91,7 +91,6 @@ function Actions({ targetUser, group }: ActionsProps) {
         <KickUser user={targetUser} groupId={group.id} />
         <BanUser user={targetUser} groupId={group.id} />
         <MuteUser user={targetUser} groupId={group.id} />
-        {/* TODO: add mute action */}
       </DropdownMenuContent>
     </DropdownMenu>
   );

@@ -1,7 +1,7 @@
 "use client";
 
 import { useUser } from "@/context/user-context";
-import { Loader2, LucideChevronDown, Mail } from "lucide-react";
+import { Loader2, Mail } from "lucide-react";
 import Link from "next/link";
 import Auth from "./Auth";
 import Guest from "./Guest";
@@ -13,6 +13,7 @@ import NotificationsPopup from "./notifications-popup";
 import { NoticationsBadge } from "./ui/notifications-badge";
 import { useUnreadMessages } from "@/api-hooks/use-unread-messages";
 import { useSignOut } from "@/api-hooks/auth/use-signout";
+import UserRankImage from "./user-rank-image";
 
 export function NavBar() {
   return (
@@ -27,7 +28,7 @@ export function NavBar() {
           <MessagesIcon />
           <NotificationsPopup />
         </Auth>
-        <ModeToggle className="mx-1" />
+        <ModeToggle className="mx-1 rounded-full" />
         <Auth>
           <NavUserPopup />
         </Auth>
@@ -81,27 +82,22 @@ function NavUserPopup() {
           <span
             className="inline-block overflow-hidden rounded-full"
             style={{
-              minWidth: "24px",
-              minHeight: "24px",
-              height: "24px",
-              width: "24px",
+              minWidth: "40px",
+              minHeight: "40px",
+              height: "40px",
+              width: "40px",
             }}
           >
-            <div
-              className="h-full w-full rounded-full bg-cover bg-center bg-no-repeat"
-              style={{ backgroundImage: `url("${user?.avatar}")` }}
-            ></div>
+            <UserRankImage user={user} className="" />
           </span>
-          <div className="icon-container icon-md ml-2">
-            <LucideChevronDown className="h-full w-full" />
-          </div>
         </Button>
       </PopoverTrigger>
       <PopoverContent align="end" className="mr-3 max-w-xs rounded-xl p-4">
-        <Link href="/profile/general" onClick={closePoppup}>
+        <Link href="/settings" onClick={closePoppup}>
           <div className="mt-8 flex flex-col items-center justify-center">
-            <img src={user?.avatar} className="h-20 w-20 rounded-full" />
-            <div className="mt-1 font-semibold">{user?.name}</div>
+            {<UserRankImage user={user} className="h-20 w-20" />}
+            <div className="mt-4 font-semibold">{user?.name}</div>
+            <p title="Your rank">#{user?.rank}</p>
           </div>
         </Link>
         <div className="px-2">

@@ -1,29 +1,60 @@
 version: '3'
 services:
+  frontend:
+    build:
+      dockerfile: Dockerfile.frontend
+      context: ./
+    ports:
+      - 3000:3000
+    env_file:
+      - apps/frontend/.env.local
+      - packages/db/.env
+    depends_on:
+      - backend
+
+  backend:
+    build:
+      dockerfile: Dockerfile.api
+      context: ./
+    ports:
+      - 8080:8080
+    env_file:
+      - apps/api/.env
+      - packages/db/.env
+    depends_on:
+      - db
+      - redis
+    networks:
+      - trans
+
   db:
-    image: postgres
+    image: postgres:16.0-alpine3.18
     restart: always
     ports:
       - 5432:5432
-    environment:
-      POSTGRES_PASSWORD: password123
+    env_file:
+      - packages/db/.env
     volumes:
       - db-data:/var/lib/postgresql/data
-  testdb:
-    image: postgres
-    restart: always
-    ports:
-      - 5434:5432
-    environment:
-      POSTGRES_PASSWORD: password123
+    networks:
+      - trans
+
   redis:
-    image: redis
+    image: redis:7.2-alpine3.18
+    env_file:
+      - apps/api/.env
+    command: /bin/sh -c "redis-server --requirepass $$REDISPASSWORD"
     ports:
       - "6379:6379"
     restart: always
     volumes:
       - redis-data:/data
+    networks:
+      - trans
 
 volumes:
   db-data:
   redis-data:
+
+networks:
+  trans:

@@ -1,5 +1,11 @@
 /** @type {import('next').NextConfig} */
 const nextConfig = {
+  reactStrictMode: false,
+
+  images: {
+    domains: ["cdn.intra.42.fr"],
+  },
+
   transpilePackages: ["@transcendence/db"],
   webpack: (config, { buildId, dev, isServer, defaultLoaders, webpack }) => {
     config.externals.push({

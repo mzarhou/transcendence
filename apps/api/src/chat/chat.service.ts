@@ -28,7 +28,7 @@ export class ChatService {
     return isFriends;
   }
 
-  async findFriends(activeUser: ActiveUserData) {
+  async findFriends(activeUser: Pick<ActiveUserData, 'sub'>) {
     const currentUser = await this.usersRepository.findOneOrThrow(
       activeUser.sub,
       {

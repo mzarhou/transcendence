@@ -30,3 +30,15 @@ yarn api:dev
 # run frontend
 yarn frontend:dev
 ```
+
+## Docker
+- change redis host in ./apps/api/.env
+```diff
+-   REDISHOST="localhost"
++   REDISHOST="redis"
+```
+- change db host in ./packages/db/.env
+```diff
+-   DATABASE_URL="postgresql://postgres:$POSTGRES_PASSWORD@localhost:5432/postgres"
++   DATABASE_URL="postgresql://postgres:$POSTGRES_PASSWORD@db:5432/postgres"
+```

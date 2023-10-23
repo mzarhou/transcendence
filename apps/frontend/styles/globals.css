@@ -1,0 +1,123 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+
+@layer base {
+  :root {
+
+    --background: 210 40% 96%;
+    --foreground: 222.2 84% 4.9%;
+    --card: 210 40% 96%;
+    --card-foreground: 222.2 84% 4.9%;
+    --popover: 210 40% 96%;
+    --popover-foreground: 222.2 84% 4.9%;
+    --primary: 222.2 47.4% 11.2%;
+    --primary-foreground: 210 40% 98%;
+    --secondary: 210 40% 96.1%;
+    --secondary-foreground: 222.2 47.4% 11.2%;
+    --muted: 210 40% 96.1%;
+    --muted-foreground: 215.4 16.3% 46.9%;
+    --accent: 210 40% 96.1%;
+    --accent-foreground: 222.2 47.4% 11.2%;
+    --destructive: 0 84.2% 60.2%;
+    --destructive-foreground: 210 40% 98%;
+    --border: 214.3 31.8% 91.4%;
+    --input: 214.3 31.8% 91.4%;
+    --ring: 222.2 84% 4.9%;
+    --radius: 0.5rem;
+
+    --border: 214.3 31.8% 80.4%;
+
+    --input: 214.3 31.8% 91.4%;
+    --ring: 221.2 83.2% 53.3%;
+    --radius: 0.5rem;
+
+    --chat-card: 213 27% 94%;
+    --chat-card-foreground: 210 70% 25%;
+
+    --input-placeholder: 215 16% 47%;
+
+    --warning: 43 91% 75%;
+    --warning-foreground: 43 92% 30%;
+
+    --drop-shadow: 221.2 50.2% 80.3%;
+  }
+
+  .dark {
+    --background: 220 80% 12%;
+    --foreground: 210 40% 98%;
+
+    --muted: 220 50% 23%;
+    --muted-foreground: 220 32% 55%;
+
+    --popover: 221 81% 12%;
+    --popover-foreground: 220 80% 98%;
+
+    --card: 221 81% 14%;
+    --card-foreground: 210 40% 95%;
+
+    --border: 217 33% 30%;
+    --input: 221 30% 30%;
+
+    --primary: 200 80% 35%;
+    --primary-foreground: 198 77% 95%;
+
+    --secondary: 221 80% 20%;
+    --secondary-foreground: 219 77% 95%;
+
+    --accent: 221 80% 20%;
+    --accent-foreground: 219 77% 95%;
+
+    /* --accent: 264 60% 23%;
+    --accent-foreground: 270 69% 95%; */
+
+    --destructive: 0 80% 30%;
+    --destructive-foreground: 0 80% 90%;
+
+    /* --ring: 217 33% 18%; */
+    --ring: 221 50% 20%;
+
+    --chat-card: 221 81% 20%;
+    --chat-card-foreground: 209 40% 72%;
+
+    --input-placeholder: 221 20% 70%;
+
+    --warning: 43 80% 50%;
+    --warning-foreground: 42 80% 90%;
+
+    --drop-shadow: 221 82% 80%;
+  }
+}
+
+@layer base {
+  * {
+    @apply border-border;
+  }
+
+  body {
+    @apply bg-background text-foreground min-h-screen;
+  }
+
+  body::before {
+    content: "";
+    background-image: url("data:image/svg+xml,%3Csvg width='64' height='64' viewBox='0 0 64 64' xmlns='http://www.w3.org/2000/svg'%3E%3Cpath d='M8 16c4.418 0 8-3.582 8-8s-3.582-8-8-8-8 3.582-8 8 3.582 8 8 8zm0-2c3.314 0 6-2.686 6-6s-2.686-6-6-6-6 2.686-6 6 2.686 6 6 6zm33.414-6l5.95-5.95L45.95.636 40 6.586 34.05.636 32.636 2.05 38.586 8l-5.95 5.95 1.414 1.414L40 9.414l5.95 5.95 1.414-1.414L41.414 8zM40 48c4.418 0 8-3.582 8-8s-3.582-8-8-8-8 3.582-8 8 3.582 8 8 8zm0-2c3.314 0 6-2.686 6-6s-2.686-6-6-6-6 2.686-6 6 2.686 6 6 6zM9.414 40l5.95-5.95-1.414-1.414L8 38.586l-5.95-5.95L.636 34.05 6.586 40l-5.95 5.95 1.414 1.414L8 41.414l5.95 5.95 1.414-1.414L9.414 40z' fill='%23005df2' fill-opacity='0.4' fill-rule='evenodd'/%3E%3C/svg%3E");
+    position: fixed;
+    top: 0px;
+    right: 0px;
+    bottom: 0px;
+    left: 0px;
+    opacity: 0.2;
+    z-index: -10000;
+  }
+
+
+  html, body {
+    @apply h-full;
+  }
+
+  /* for debugging */
+  .brr {
+    border: 1px solid red;
+  }
+}

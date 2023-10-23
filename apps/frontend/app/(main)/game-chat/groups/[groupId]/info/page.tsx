@@ -50,7 +50,7 @@ function GroupInfoBody({ groupId }: GroupInfoBodyProps) {
           {group.status}
         </p>
       </div>
-      <div className="mt-4 flex justify-center space-x-8">
+      <div className="mt-4 flex justify-center gap-4">
         {group.role === "ADMIN" && (
           <>
             <InviteUserAction group={group} />

@@ -8,7 +8,7 @@ import Auth2fa from "../Auth2fa";
 import { NavBar } from "@/components/navbar";
 import { Input } from "@/components/ui/input";
 
-export default function () {
+export default function TwoFaPage() {
   const { trigger, isMutating } = useProvide2faCode();
 
   const submit: FormEventHandler<HTMLFormElement> = async (event) => {

@@ -9,6 +9,7 @@ import { GroupChatController } from './group-chat/group-chat.controller';
 import { GroupInvitationsModule } from './group-invitations/group-invitations.module';
 import { GroupManagementModule } from './group-management/group-management.module';
 import { GroupsCommonModule } from './groups-common/groups-common.module';
+import { UsersModule } from '@src/users/users.module';
 
 @Module({
   imports: [
@@ -17,6 +18,7 @@ import { GroupsCommonModule } from './groups-common/groups-common.module';
     GroupInvitationsModule,
     GroupManagementModule,
     GroupsCommonModule,
+    UsersModule,
   ],
   controllers: [GroupsController, GroupChatController],
   providers: [GroupsService, GroupsGateway, GroupChatService],

@@ -110,7 +110,7 @@ export class GroupsPolicy extends BaseGroupsPolicy {
       groupId: group.id,
     });
     if (isMuted) {
-      throw new ForbiddenException('You ara muted');
+      throw new ForbiddenException('You are muted');
     }
     return true;
   }

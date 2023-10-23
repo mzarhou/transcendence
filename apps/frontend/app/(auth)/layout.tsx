@@ -5,7 +5,7 @@ import Link from "next/link";
 import { usePathname, useSearchParams } from "next/navigation";
 import { ReactNode, useEffect } from "react";
 import Guest from "../Guest";
-import Image from "next/image";
+import PongAnimation from "@/components/pong-animation";
 
 export default function Layout({ children }: { children: ReactNode }) {
   const error = useSearchParams().get("error");
@@ -24,16 +24,14 @@ export default function Layout({ children }: { children: ReactNode }) {
 
   return (
     <Guest>
-      <div className="container relative grid h-screen flex-col items-center justify-center py-10 lg:max-w-none lg:grid-cols-2 lg:px-0 lg:py-0">
-        <div className="relative hidden h-full flex-col border-gray-50/5 bg-background p-20 text-foreground dark:border-r lg:flex">
-          <div
-            className="absolute inset-0 bg-cover"
-            style={{
-              backgroundImage: "url(/auth.jpg)",
-            }}
-          />
+      <div className="relative grid h-screen flex-col items-center justify-center px-4 py-10 lg:max-w-none lg:grid-cols-2 lg:px-0 lg:py-0">
+        <Link href="/" className="absolute left-4 top-0 md:left-8 md:top-4">
+          <img src="/logo.png" className="h-20" />
+        </Link>
+        <div className="hidden lg:block">
+          <PongAnimation />
         </div>
-        <div className="p-8">
+        <div className=" mx-auto rounded-xl border border-border bg-card/80 p-8 py-24 sm:max-w-[600px]">
           {children}
           <div className="mx-auto mt-6 sm:w-[350px]">
             <p className="mt-6 px-8 text-center text-sm text-muted-foreground">
