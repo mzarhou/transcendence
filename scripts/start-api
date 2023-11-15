@@ -1,2 +1,4 @@
+#!/usr/bin/env sh
+
 yarn db:push
 yarn api:start

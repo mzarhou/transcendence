@@ -1,0 +1,5 @@
+#!/usr/bin/env sh
+
+cp ./packages/db/.env.example ./packages/db/.env
+cp ./apps/api/.env.example ./apps/api/.env
+cp ./apps/frontend/.env.example ./apps/frontend/.env.local

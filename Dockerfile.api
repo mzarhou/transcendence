@@ -11,7 +11,7 @@ WORKDIR /user/src/app
 # Copy files required to install dependencies (caching)
 COPY package*.json ./
 COPY yarn.lock ./
-COPY start-api.sh ./
+COPY ./scripts/start-api ./
 
 COPY apps/api/package*.json ./apps/api/
 COPY packages/db/package*.json ./packages/db/
@@ -32,4 +32,4 @@ RUN yarn api:build
 # Expected Port
 EXPOSE 3000
 
-CMD [ "./start-api.sh" ]
+CMD [ "./start-api" ]
